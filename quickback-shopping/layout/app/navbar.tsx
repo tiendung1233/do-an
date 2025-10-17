@@ -1,0 +1,454 @@
+/* eslint-disable @next/next/no-img-element */
+import { Fragment, HTMLAttributes, useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogBackdrop,
+  DialogPanel,
+  Popover,
+  PopoverButton,
+  PopoverGroup,
+  PopoverPanel,
+  Tab,
+  TabGroup,
+  TabList,
+  TabPanel,
+  TabPanels,
+} from "@headlessui/react";
+import {
+  Bars3Icon,
+  ShoppingBagIcon,
+  UserIcon,
+  XMarkIcon,
+  MagnifyingGlassIcon,
+  HomeIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
+import BaseModal from "@/components/modals/base-modal";
+import { logout } from "@/ultils/func/api";
+import { useRouter } from "next/navigation";
+import AutoCompleteSearch from "@/components/search/autocomplete-search";
+import { CATEGORIES, NAVIGATION_LIST } from "@/ultils/constant/constant";
+import { useCart } from "@/context/cartContext";
+
+interface IProps {
+  isAuthenticated: boolean | null;
+}
+
+export default function NavBar({ isAuthenticated }: IProps) {
+  const router = useRouter();
+  const { cart, total, fetchCart } = useCart();
+  const [showSearch, setShowSearch] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+  const handleConfirm = async () => {
+    await logout();
+    setIsModalOpen(false);
+  };
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart(1);
+    }
+  }, [isAuthenticated, fetchCart]);
+
+  return (
+    <div
+      style={{ maxWidth: "1024px" }}
+      className="bg-white dark:bg-gray-800 fixed z-[99999] top-0 w-full"
+    >
+      {/* Mobile menu */}
+      <Dialog
+        open={open}
+        onClose={setOpen}
+        className="relative z-[999999] lg:hidden"
+      >
+        <DialogBackdrop
+          transition
+          className="fixed inset-0 bg-black bg-opacity-25 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+        />
+
+        <div className="fixed inset-0 z-40 flex">
+          <DialogPanel
+            transition
+            className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-[closed]:-translate-x-full"
+          >
+            <div className="flex px-4 pb-2 pt-5">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="relative -m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
+              >
+                <span className="absolute -inset-0.5" />
+                <span className="sr-only">Close menu</span>
+                <XMarkIcon aria-hidden="true" className="h-6 w-6" />
+              </button>
+            </div>
+
+            {/* Links */}
+            <TabGroup className="mt-2 z-1">
+              <div className="border-b border-gray-200">
+                <TabList className="-mb-px flex space-x-8 px-4">
+                  {NAVIGATION_LIST.categories.map((category) => (
+                    <Tab
+                      key={category.name}
+                      className="flex-1 whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-base font-medium text-gray-900 data-[selected]:border-indigo-600 data-[selected]:text-indigo-600"
+                    >
+                      {category.name}
+                    </Tab>
+                  ))}
+                </TabList>
+              </div>
+              <TabPanels as={Fragment}>
+                {NAVIGATION_LIST.categories.map((category) => (
+                  <TabPanel
+                    key={category.name}
+                    className="space-y-10 px-4 pb-8 pt-10"
+                  >
+                    <div className="grid grid-cols-2 gap-x-4">
+                      {category.featured.map((item) => (
+                        <div key={item.name} className="group relative text-sm">
+                          <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-100 group-hover:opacity-75">
+                            <img
+                              alt={item.imageAlt || "alt"}
+                              src={item.imageSrc}
+                              className="object-cover object-center"
+                            />
+                          </div>
+                          <a
+                            href={item.href}
+                            className="mt-6 block font-medium text-gray-900"
+                          >
+                            <span
+                              aria-hidden="true"
+                              className="absolute inset-0 z-10"
+                            />
+                            {item.name}
+                          </a>
+                          <p aria-hidden="true" className="mt-1">
+                            Mua ngay
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                    {category.sections.map((section) => (
+                      <div key={section.name}>
+                        <p
+                          id={`${category.id}-${section.id}-heading-mobile`}
+                          className="font-medium text-gray-900"
+                        >
+                          {section.name}
+                        </p>
+                        <ul
+                          role="list"
+                          aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
+                          className="mt-6 flex flex-col space-y-6"
+                        >
+                          {section.items.map((item) => (
+                            <li key={item.name} className="flow-root">
+                              <a
+                                href={item.href}
+                                className="-m-2 block p-2 text-gray-500"
+                              >
+                                {item.name}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </TabPanel>
+                ))}
+              </TabPanels>
+            </TabGroup>
+
+            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
+              {NAVIGATION_LIST.pages.map((page) => {
+                if (page.name !== "Trang chủ") {
+                  return (
+                    <div key={page.name} className="flow-root">
+                      <a
+                        href={page.href}
+                        className="-m-2 block p-2 font-medium text-gray-900"
+                      >
+                        {page.name}
+                      </a>
+                    </div>
+                  );
+                }
+              })}
+            </div>
+
+            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
+              {isAuthenticated ? (
+                <div
+                  onClick={() => {
+                    handleOpenModal();
+                    setOpen(false);
+                  }}
+                  className="cursor-pointer font-medium text-gray-700 hover:text-gray-800"
+                >
+                  Đăng xuất
+                </div>
+              ) : (
+                <>
+                  <div className="flow-root">
+                    <Link
+                      href="/login"
+                      className="-m-2 block p-2 font-medium text-gray-900"
+                    >
+                      Đăng nhập
+                    </Link>
+                  </div>
+                  <div className="flow-root">
+                    <Link
+                      href="/register"
+                      className="-m-2 block p-2 font-medium text-gray-900"
+                    >
+                      Đăng ký
+                    </Link>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      <header className="relative bg-transparent">
+        <div className="w-full py-2 flex items-center text-center justify-center bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
+          Hoàn tiền không giới hạn với QuickBack Shopping
+        </div>
+
+        <nav
+          aria-label="Top"
+          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+        >
+          <div className="py-3">
+            <div className="flex h-16 items-center justify-between rounded-xl bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 shadow-md backdrop-blur supports-[backdrop-filter]:backdrop-blur px-3 sm:px-4">
+              <button
+                type="button"
+                onClick={() => router.push("/")}
+                className="relative rounded-md bg-white p-2 text-gray-400 lg:hidden"
+              >
+                <HomeIcon aria-hidden="true" className="h-6 w-6" />
+              </button>{" "}
+              <button
+                type="button"
+                onClick={() => setOpen(!open)}
+                className="relative rounded-md bg-white p-2 text-gray-400 lg:hidden"
+              >
+                <span className="absolute -inset-0.5" />
+                <span className="sr-only">Mở</span>
+                <Bars3Icon aria-hidden="true" className="h-6 w-6" />
+              </button>
+              <Link href="/" className="hidden lg:flex items-center gap-2 group">
+                <img src="/logo_img.png" alt="QuickBack" className="h-8 w-8 rounded-md shadow-sm" />
+                <span className="text-base font-semibold text-gray-800 dark:text-gray-100 group-hover:text-primary-600 transition-colors">QuickBack</span>
+              </Link>
+              {/* Flyout menus */}
+              <PopoverGroup className="lg:ml-8 lg:self-stretch lg:block hidden ml-5">
+                <div className="flex h-full space-x-8">
+                  {NAVIGATION_LIST.pages.map((page) => (
+                    <Link
+                      key={page.name}
+                      href={page.href}
+                      className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-primary-600 transition-colors"
+                    >
+                      {page.name}
+                    </Link>
+                  ))}
+                  {NAVIGATION_LIST.categories.map((category, index) => (
+                    <Popover key={category.name} className="flex">
+                      <div className="relative flex">
+                        <PopoverButton className="relative z-10 -mb-px flex items-center border-b-2 border-transparent pt-px text-sm font-medium text-gray-700 transition-colors duration-200 ease-out hover:text-gray-900 hover:border-primary-600">
+                          {category.name}
+                        </PopoverButton>
+                      </div>
+
+                      <PopoverPanel
+                        transition
+                        className="absolute inset-x-0 top-full text-sm text-gray-500 transition data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                      >
+                        <div className="absolute inset-0 top-1/2 bg-white shadow" />
+
+                        <div className="relative bg-white">
+                          <div className="mx-auto max-w-7xl px-8">
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
+                              <div className="col-start-2 grid grid-cols-2 gap-x-8">
+                                {category.featured.map((item) => (
+                                  <div
+                                    key={item.name}
+                                    className="group relative text-base sm:text-sm"
+                                  >
+                                    <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-100 group-hover:opacity-75">
+                                      <img
+                                        alt={item.imageAlt}
+                                        src={item.imageSrc}
+                                        className="object-cover object-center"
+                                      />
+                                    </div>
+                                    <a
+                                      href={item.href}
+                                      className="mt-6 block font-medium text-gray-900"
+                                    >
+                                      <span
+                                        aria-hidden="true"
+                                        className="absolute inset-0 z-10"
+                                      />
+                                      {item.name}
+                                    </a>
+                                    <p aria-hidden="true" className="mt-1">
+                                      Mua ngay
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                              <div className="row-start-1 grid grid-cols-3 gap-x-8 gap-y-10 text-sm">
+                                {category.sections.map((section) => (
+                                  <div key={section.name}>
+                                    <p
+                                      id={`${section.name}-heading`}
+                                      className="font-medium text-gray-900"
+                                    >
+                                      {section.name}
+                                    </p>
+                                    <ul
+                                      role="list"
+                                      aria-labelledby={`${section.name}-heading`}
+                                      className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                    >
+                                      {section.items.map((item) => (
+                                        <li key={item.name} className="flex">
+                                          <a
+                                            href={item.href}
+                                            className="hover:text-gray-800"
+                                          >
+                                            {item.name}
+                                          </a>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </PopoverPanel>
+                    </Popover>
+                  ))}
+                </div>
+              </PopoverGroup>
+              <div className="ml-auto flex items-center">
+                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
+                  {isAuthenticated ? (
+                    <div
+                      onClick={handleOpenModal}
+                      className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900"
+                    >
+                      Đăng xuất
+                    </div>
+                  ) : (
+                    <>
+                      <Link
+                        href="/login"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-primary-600 transition-colors"
+                      >
+                        {isAuthenticated === null ? "" : "Đăng nhập"}
+                      </Link>
+                      <span
+                        aria-hidden="true"
+                        className="h-6 w-px bg-gray-200"
+                      />
+                      <Link
+                        href="/register"
+                        className="text-sm font-medium text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-primary-600 transition-colors"
+                      >
+                        {isAuthenticated === null ? "" : "Đăng ký"}
+                      </Link>
+                    </>
+                  )}
+                </div>
+
+                {/* Search */}
+                <div className="ml-4 flow-root lg:ml-6 cursor-pointer">
+                  <div
+                    className="group -m-2 flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+                    onClick={() => setShowSearch(!showSearch)}
+                  >
+                    <MagnifyingGlassIcon
+                      aria-hidden="true"
+                      className="h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-300 dark:group-hover:text-gray-100"
+                    />
+                  </div>
+                </div>
+                {/* User */}
+                <div className="ml-4 flow-root lg:ml-6">
+                  <Link
+                    href={`${isAuthenticated ? "/profile" : "/login"}`}
+                    className="group -m-2 flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <UserIcon
+                      aria-hidden="true"
+                      className="h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-300 dark:group-hover:text-gray-100"
+                    />
+                  </Link>
+                </div>
+                {/* Cart */}
+                <div className="ml-4 flow-root lg:ml-6 cursor-pointer">
+                  <div
+                    onClick={() => {
+                      router.push(`/history/${cart?.[0]?.userId}?activeId=cart`);
+                    }}
+                    className="group -m-2 flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors relative"
+                  >
+                    <ShoppingBagIcon
+                      aria-hidden="true"
+                      className="h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-300 dark:group-hover:text-gray-100"
+                    />
+                    <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-900">
+                      {total}
+                    </span>
+                    <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] h-4 min-w-4 px-1">
+                      {total}
+                    </span>
+                    <span className="sr-only">items in cart, view bag</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {isModalOpen ? (
+              <BaseModal
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                title="Đăng xuất"
+                onConfirm={handleConfirm}
+              >
+                <p>Bạn có chắc chắn muốn đăng xuất</p>
+              </BaseModal>
+            ) : null}
+          </div>
+        </nav>
+      </header>
+      <div
+        className={`${
+          showSearch ? "nav-enter" : "nav-exit h-0 hidden"
+        } bg-transparent`}
+      >
+        <AutoCompleteSearch
+          categories={CATEGORIES}
+          styles={
+            {
+              top: 0,
+              width: "auto",
+            } as HTMLAttributes<HTMLDivElement>
+          }
+        />
+      </div>
+    </div>
+  );
+}
