@@ -7,6 +7,7 @@ interface LoginCredentials {
 
 interface RegisterCredentials extends LoginCredentials {
   name: string;
+  phoneNumber: string;
   accountBank?: string;
 }
 

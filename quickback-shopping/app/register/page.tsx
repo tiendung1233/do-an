@@ -18,6 +18,7 @@ const RegisterPage = () => {
   const [password, setPassword] = useState("");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isChecked, setIsChecked] = useState<boolean>(false);
@@ -25,6 +26,12 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
 
   const handleRegis = async () => {
+    const trimmedPhoneNumber = phoneNumber.trim();
+    if (!trimmedPhoneNumber) {
+      setError("Vui lòng nhập số điện thoại.");
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError("Mật khẩu xác nhận không khớp.");
       return;
@@ -34,7 +41,12 @@ const RegisterPage = () => {
     setError(null);
 
     try {
-      const response = await register({ email, password, name });
+      const response = await register({
+        email,
+        password,
+        name,
+        phoneNumber: trimmedPhoneNumber,
+      });
       if (response) {
         router.push("/verify-account");
       }
@@ -96,6 +108,16 @@ const RegisterPage = () => {
                 label="Tên"
                 value={name}
                 onChange={(el) => setName(el.target.value)}
+              />
+              <InputSection
+                type="tel"
+                name="phoneNumber"
+                id="phoneNumber"
+                placeholder="0901234567"
+                required={true}
+                label="Số điện thoại"
+                value={phoneNumber}
+                onChange={(el) => setPhoneNumber(el.target.value)}
               />
               <InputSection
                 type="password"
