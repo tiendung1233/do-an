@@ -29,7 +29,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="text-center p-4 container">
+    <div className="text-center p-4  ">
       <h2 className="my-2 text-xl">Cập nhật mật khẩu mới</h2>
       <div className="max-w-[400px] mx-auto">
         <InputSection

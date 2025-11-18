@@ -153,9 +153,9 @@ export default function ProductListPage() {
 
   return (
     <Suspense fallback={loading}>
-      <div className="container">
+      <div className=" ">
         <NavBar isAuthenticated={isAuthenticated} />
-        <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[100px]">
+        <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[30px]">
           <div className="mx-auto mt-[20px]">
             <Slider slides={slides} loop={true} autoPlay={true} />
           </div>
@@ -170,41 +170,37 @@ export default function ProductListPage() {
 
           <div className="flex overflow-x-auto custom-scrollbar pb-[5px] mb-[20px]">
             <button
-              className={`flex-shrink-0 py-2 px-4 ${
-                sort === "newest"
-                  ? "bg-primary-600 text-white"
-                  : "bg-gray-200 text-black"
-              } rounded`}
+              className={`flex-shrink-0 py-2 px-4 ${sort === "newest"
+                ? "bg-primary-600 text-white"
+                : "bg-gray-200 text-black"
+                } rounded`}
               onClick={() => handleSortChange("newest")}
             >
               Mới nhất
             </button>
             <button
-              className={`flex-shrink-0 py-2 px-4 ${
-                sort === "sales"
-                  ? "bg-primary-600 text-white"
-                  : "bg-gray-200 text-black"
-              } rounded`}
+              className={`flex-shrink-0 py-2 px-4 ${sort === "sales"
+                ? "bg-primary-600 text-white"
+                : "bg-gray-200 text-black"
+                } rounded`}
               onClick={() => handleSortChange("sales")}
             >
               Bán chạy
             </button>
             <button
-              className={`flex-shrink-0 py-2 px-4 ${
-                sort === "price-asc"
-                  ? "bg-primary-600 text-white"
-                  : "bg-gray-200 text-black"
-              } rounded`}
+              className={`flex-shrink-0 py-2 px-4 ${sort === "price-asc"
+                ? "bg-primary-600 text-white"
+                : "bg-gray-200 text-black"
+                } rounded`}
               onClick={() => handleSortChange("price-asc")}
             >
               Giá rẻ nhất
             </button>
             <button
-              className={`flex-shrink-0 py-2 px-4 ${
-                sort === "price-desc"
-                  ? "bg-primary-600 text-white"
-                  : "bg-gray-200 text-black"
-              } rounded`}
+              className={`flex-shrink-0 py-2 px-4 ${sort === "price-desc"
+                ? "bg-primary-600 text-white"
+                : "bg-gray-200 text-black"
+                } rounded`}
               onClick={() => handleSortChange("price-desc")}
             >
               Giá cao nhất

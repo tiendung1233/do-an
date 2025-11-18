@@ -202,10 +202,10 @@ const UserDetailInfo = () => {
   }
 
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated.isAuthenticated} />
       {formData?.email ? (
-        <div className="container mx-auto p-4 px-6 mt-[120px] h-full min-h-screen">
+        <div className="  mx-auto p-4 px-6 mt-[120px] h-full min-h-screen">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Profile Card */}
             <div className="w-full md:w-1/3 bg-white rounded-lg shadow p-4">
@@ -239,9 +239,8 @@ const UserDetailInfo = () => {
                   </button>
                   <button
                     onClick={handleSave}
-                    className={`text-sm text-green-600 ${
-                      isEditing ? "block" : "hidden"
-                    }`}
+                    className={`text-sm text-green-600 ${isEditing ? "block" : "hidden"
+                      }`}
                   >
                     Lưu
                   </button>
@@ -394,8 +393,8 @@ const UserDetailInfo = () => {
               onClose={() => setIsOpenModalWithDraw(false)}
               title={
                 !formData.bankAccount ||
-                !formData.bankName ||
-                Number(formData.coinsEarned) < 50000
+                  !formData.bankName ||
+                  Number(formData.coinsEarned) < 50000
                   ? "Thất bại"
                   : "Xác nhận rút tiền"
               }
@@ -403,8 +402,8 @@ const UserDetailInfo = () => {
             >
               <div>
                 {!formData.bankAccount ||
-                !formData.bankName ||
-                Number(formData.coinsEarned) < 50000 ? (
+                  !formData.bankName ||
+                  Number(formData.coinsEarned) < 50000 ? (
                   <p>Bạn không đủ điều kiện hoặc thiếu thông tin rút tiền</p>
                 ) : (
                   <>

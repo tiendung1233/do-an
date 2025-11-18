@@ -16,7 +16,7 @@ const CashbackCard: React.FC<CashbackCardProps> = ({
 }) => {
   return (
     <>
-      <div className="max-w-[1024px] w-full p-6 bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl shadow-md text-white">
+      <div className="  w-full p-6 bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl shadow-md text-white">
         <div className="flex justify-between items-center mb-4 gap-[20px]">
           <div className="flex items-center space-x-2">
             <svg

@@ -206,9 +206,9 @@ export default function PolicyPgae() {
   };
 
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated} />
-      <div className="bg-black-100 dark:bg-black-800 py-8 mt-[100px] px-4 h-full min-h-screen">
+      <div className="bg-black-100 dark:bg-black-800 py-8 mt-[30px] px-4 h-full min-h-screen">
         <h2 className="mt-[20px] text-center">
           Điều khoản và chính sách bảo mật
         </h2>

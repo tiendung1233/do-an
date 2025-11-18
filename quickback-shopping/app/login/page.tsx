@@ -112,7 +112,7 @@ const LoginPage = () => {
 
   return (
     <section
-      className={`container bg-blue-200 dark:bg-gray-900 h-full min-h-screen py-5 ${isAnimating ? "page-exit-active" : "page-enter-active"
+      className={`  bg-blue-200 dark:bg-gray-900 h-full min-h-screen py-5 ${isAnimating ? "page-exit-active" : "page-enter-active"
         }`}
     >
       {isModalOpen && (

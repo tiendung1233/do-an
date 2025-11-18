@@ -13,7 +13,7 @@ export default function LandingPage() {
   const { isAuthenticated } = useAuth(false);
 
   return (
-    <div className="container bg-white">
+    <div className="  bg-white">
       <NavBar isAuthenticated={isAuthenticated} />
 
       <main className="isolate">

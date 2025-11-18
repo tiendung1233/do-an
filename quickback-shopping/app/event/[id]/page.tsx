@@ -52,20 +52,19 @@ export default function EventPage() {
   }, [isAuthenticated]);
 
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated} />
       <div className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[120px]">
         <CashbackCard
           totalCashback={profile?.total?.toString()!}
           availableBalance={profile?.money?.toString()!}
-          onWithdraw={() => {}}
+          onWithdraw={() => { }}
           userId={profile?._id!}
         />
         <div className="mt-4 w-full">
           <HelpCard
-            title={`Số tiền từ sự kiện trồng cây: ${
-              profile?.moneyByEvent.tree || 0
-            }đ`}
+            title={`Số tiền từ sự kiện trồng cây: ${profile?.moneyByEvent.tree || 0
+              }đ`}
             imgContent={
               <svg
                 className="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
@@ -83,9 +82,8 @@ export default function EventPage() {
         </div>
         <div className="mt-4 w-full">
           <HelpCard
-            title={`Số tiền từ sự kiện vòng quay: ${
-              profile?.moneyByEvent.wheel || 0
-            }đ`}
+            title={`Số tiền từ sự kiện vòng quay: ${profile?.moneyByEvent.wheel || 0
+              }đ`}
             imgContent={
               <svg
                 xmlns="http://www.w3.org/2000/svg"

@@ -56,9 +56,9 @@ export default function ProductPage() {
           <p className="text-center">Đang tải, chờ xíu nhé ...</p>
         </div>
       ) : (
-        <div className="container">
+        <div className=" ">
           <NavBar isAuthenticated={isAuthenticated} />
-          <div className="bg-gray-100 dark:bg-gray-800 py-8 mt-[100px] h-full min-h-screen p-4">
+          <div className="bg-gray-100 dark:bg-gray-800 py-8 mt-[30px] h-full min-h-screen p-4">
             <div className="max-w-full mx-auto px-4 md:px-2 sm:px-6 lg:px-8">
               <div className="flex flex-col md:flex-row -mx-4">
                 <div className="md:flex-1 px-2 sm:px-0">

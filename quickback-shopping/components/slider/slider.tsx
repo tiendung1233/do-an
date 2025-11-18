@@ -23,7 +23,7 @@ const Slider: React.FC<SliderProps> = ({
   spaceBetween = 50,
 }) => {
   return (
-    <div className="slider-container">
+    <div className="slider- ">
       <Swiper
         style={{ zIndex: 1, borderRadius: "8px" }}
         modules={[Navigation, Pagination, Scrollbar, A11y]}

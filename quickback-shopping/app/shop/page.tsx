@@ -117,9 +117,9 @@ export default function ShopPage() {
   ];
 
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated} />
-      <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[100px]">
+      <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[30px]">
         <div className="mx-auto mt[20px]">
           <Slider slides={slides} loop={true} autoPlay={true} />
         </div>
@@ -150,8 +150,8 @@ export default function ShopPage() {
 
         {/* Shop Grid */}
         <h2 className="text-xl font-bold text-black sm:text-normal md:text-2xl mt-8">
-            Danh sách cửa hàng
-          </h2>
+          Danh sách cửa hàng
+        </h2>
         <div className="flex flex-wrap justify-around sm:justify-left gap-2 sm:gap-4">
           {!loading && shop?.length ? (
             shop?.map((item, i) => (

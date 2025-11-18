@@ -73,9 +73,9 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated} />
-      <div className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[100px]">
+      <div className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[30px]">
         <h1 className="text-xl font-medium text-black sm:text-xl md:text-2xl text-center mt-4">
           Hỗ trợ
         </h1>

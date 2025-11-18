@@ -51,7 +51,7 @@ export default function EventPage() {
   }
 
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated} />
       <div className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-y-scroll mt-[120px]">
         {renderedLayout}

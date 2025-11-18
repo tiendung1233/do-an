@@ -21,6 +21,8 @@ import {
   XMarkIcon,
   MagnifyingGlassIcon,
   HomeIcon,
+  SparklesIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import BaseModal from "@/components/modals/base-modal";
@@ -55,10 +57,7 @@ export default function NavBar({ isAuthenticated }: IProps) {
   }, [isAuthenticated, fetchCart]);
 
   return (
-    <div
-      style={{ maxWidth: "1024px" }}
-      className="bg-white dark:bg-gray-800 fixed z-[99999] top-0 w-full"
-    >
+    <div className="sticky top-0 z-[99999] w-full bg-white/95 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-800 backdrop-blur-xl shadow-sm">
       {/* Mobile menu */}
       <Dialog
         open={open}
@@ -218,81 +217,131 @@ export default function NavBar({ isAuthenticated }: IProps) {
       </Dialog>
 
       <header className="relative bg-transparent">
-        <div className="w-full py-2 flex items-center text-center justify-center bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
-          Hoàn tiền không giới hạn với QuickBack Shopping
+        <div className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white">
+          <div className="mx-auto flex items-center justify-between gap-4 px-4 py-2 text-sm font-medium sm:px-6 lg:px-8">
+            <div className="flex items-center gap-2 text-white/90">
+              <SparklesIcon className="h-5 w-5" aria-hidden="true" />
+              <p className="text-left">
+                <span className="hidden sm:inline">
+                  Hoàn tiền không giới hạn & ưu đãi độc quyền mỗi tuần
+                </span>
+                <span className="sm:hidden">Ưu đãi hấp dẫn tại QuickBack</span>
+              </p>
+            </div>
+            <Link
+              href="/collections/highlight"
+              className="flex items-center gap-1 rounded-full border border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white transition hover:border-white hover:bg-white/10"
+            >
+              Khám phá ngay
+              <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
         </div>
 
         <nav
           aria-label="Top"
-          className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8"
+          className="mx-auto px-4 sm:px-6 lg:px-8"
         >
-          <div className="py-3">
-            <div className="flex h-16 items-center justify-between rounded-xl bg-white/80 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 shadow-md backdrop-blur supports-[backdrop-filter]:backdrop-blur px-3 sm:px-4">
-              <button
-                type="button"
-                onClick={() => router.push("/")}
-                className="relative rounded-md bg-white p-2 text-gray-400 lg:hidden"
-              >
-                <HomeIcon aria-hidden="true" className="h-6 w-6" />
-              </button>{" "}
-              <button
-                type="button"
-                onClick={() => setOpen(!open)}
-                className="relative rounded-md bg-white p-2 text-gray-400 lg:hidden"
-              >
-                <span className="absolute -inset-0.5" />
-                <span className="sr-only">Mở</span>
-                <Bars3Icon aria-hidden="true" className="h-6 w-6" />
-              </button>
-              <Link href="/" className="hidden lg:flex items-center gap-2 group">
-                <img src="/logo_img.png" alt="QuickBack" className="h-8 w-8 rounded-md shadow-sm" />
-                <span className="text-base font-semibold text-gray-800 dark:text-gray-100 group-hover:text-primary-600 transition-colors">QuickBack</span>
-              </Link>
-              {/* Flyout menus */}
-              <PopoverGroup className="lg:ml-8 lg:self-stretch lg:block hidden ml-5">
-                <div className="flex h-full space-x-8">
+          <div className="py-4">
+            <div className="space-y-3 rounded-2xl border border-gray-200/70 bg-white/90 px-3 py-4 shadow-xl shadow-gray-900/5 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/60 sm:px-6">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 lg:hidden">
+                    <button
+                      type="button"
+                      onClick={() => router.push("/")}
+                      className="rounded-xl border border-gray-200 bg-white p-2 text-gray-500 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                    >
+                      <span className="sr-only">Trang chủ</span>
+                      <HomeIcon aria-hidden="true" className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOpen(!open)}
+                      className="rounded-xl border border-gray-200 bg-white p-2 text-gray-500 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                    >
+                      <span className="sr-only">Mở menu</span>
+                      <Bars3Icon aria-hidden="true" className="h-5 w-5" />
+                    </button>
+                  </div>
+                  <Link
+                    href="/"
+                    className="group flex items-center gap-3 rounded-full bg-white/80 px-2 py-1 transition hover:bg-white dark:bg-gray-900/70"
+                  >
+                    <div className="rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-1 shadow-lg shadow-primary-500/30">
+                      <img
+                        src="/logo_img.png"
+                        alt="QuickBack"
+                        className="h-9 w-9 rounded-xl border border-white/40 object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-base font-semibold text-gray-900 transition group-hover:text-primary-600 dark:text-gray-100">
+                        QuickBack
+                      </p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
+                        shopping studio
+                      </p>
+                    </div>
+                  </Link>
+                </div>
+                <div className="hidden items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 lg:flex">
+                  <span className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
+                    Trải nghiệm mới
+                  </span>
+                  <span className="hidden xl:flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-primary-500/60" />
+                    Hỗ trợ 24/7
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                {/* Flyout menus */}
+                <PopoverGroup className="hidden flex-1 items-center gap-6 lg:flex">
                   {NAVIGATION_LIST.pages.map((page) => (
                     <Link
                       key={page.name}
                       href={page.href}
-                      className="flex items-center text-sm font-medium text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-primary-600 transition-colors"
+                      className="text-sm font-medium text-gray-600 transition hover:text-gray-900 hover:underline hover:underline-offset-8 dark:text-gray-300"
                     >
                       {page.name}
                     </Link>
                   ))}
-                  {NAVIGATION_LIST.categories.map((category, index) => (
-                    <Popover key={category.name} className="flex">
+                  {NAVIGATION_LIST.categories.map((category) => (
+                    <Popover key={category.name} className="relative flex">
                       <div className="relative flex">
-                        <PopoverButton className="relative z-10 -mb-px flex items-center border-b-2 border-transparent pt-px text-sm font-medium text-gray-700 transition-colors duration-200 ease-out hover:text-gray-900 hover:border-primary-600">
+                        <PopoverButton className="relative z-10 -mb-px flex items-center gap-1 border-b-2 border-transparent pb-2 text-sm font-medium text-gray-700 transition hover:border-primary-500 hover:text-primary-600 dark:text-gray-200">
                           {category.name}
                         </PopoverButton>
                       </div>
 
                       <PopoverPanel
                         transition
-                        className="absolute inset-x-0 top-full text-sm text-gray-500 transition data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                        className="absolute inset-x-0 top-full text-sm text-gray-600 transition data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
                       >
-                        <div className="absolute inset-0 top-1/2 bg-white shadow" />
+                        <div className="absolute inset-0 top-1/2 bg-white shadow-lg shadow-gray-900/5 dark:bg-gray-900" />
 
-                        <div className="relative bg-white">
-                          <div className="mx-auto max-w-7xl px-8">
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-10 py-16">
-                              <div className="col-start-2 grid grid-cols-2 gap-x-8">
+                        <div className="relative bg-white dark:bg-gray-900">
+                          <div className="mx-auto px-8">
+                            <div className="grid grid-cols-2 gap-x-10 gap-y-12 py-14">
+                              <div className="col-start-2 grid grid-cols-2 gap-8">
                                 {category.featured.map((item) => (
                                   <div
                                     key={item.name}
                                     className="group relative text-base sm:text-sm"
                                   >
-                                    <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-100 group-hover:opacity-75">
+                                    <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-2xl bg-gray-100 shadow-inner ring-1 ring-inset ring-gray-200 transition group-hover:scale-[1.01] group-hover:ring-primary-200">
                                       <img
-                                        alt={item.imageAlt}
+                                        alt={item.imageAlt || item.name}
                                         src={item.imageSrc}
                                         className="object-cover object-center"
                                       />
                                     </div>
                                     <a
                                       href={item.href}
-                                      className="mt-6 block font-medium text-gray-900"
+                                      className="mt-6 block font-semibold text-gray-900 transition group-hover:text-primary-600 dark:text-gray-100"
                                     >
                                       <span
                                         aria-hidden="true"
@@ -300,7 +349,10 @@ export default function NavBar({ isAuthenticated }: IProps) {
                                       />
                                       {item.name}
                                     </a>
-                                    <p aria-hidden="true" className="mt-1">
+                                    <p
+                                      aria-hidden="true"
+                                      className="mt-1 text-xs uppercase tracking-[0.3em] text-gray-400"
+                                    >
                                       Mua ngay
                                     </p>
                                   </div>
@@ -311,20 +363,20 @@ export default function NavBar({ isAuthenticated }: IProps) {
                                   <div key={section.name}>
                                     <p
                                       id={`${section.name}-heading`}
-                                      className="font-medium text-gray-900"
+                                      className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400"
                                     >
                                       {section.name}
                                     </p>
                                     <ul
                                       role="list"
                                       aria-labelledby={`${section.name}-heading`}
-                                      className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
+                                      className="mt-5 space-y-4"
                                     >
                                       {section.items.map((item) => (
                                         <li key={item.name} className="flex">
                                           <a
                                             href={item.href}
-                                            className="hover:text-gray-800"
+                                            className="text-gray-700 transition hover:text-primary-600 dark:text-gray-300"
                                           >
                                             {item.name}
                                           </a>
@@ -340,83 +392,82 @@ export default function NavBar({ isAuthenticated }: IProps) {
                       </PopoverPanel>
                     </Popover>
                   ))}
-                </div>
-              </PopoverGroup>
-              <div className="ml-auto flex items-center">
-                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end lg:space-x-6">
-                  {isAuthenticated ? (
-                    <div
-                      onClick={handleOpenModal}
-                      className="cursor-pointer text-sm font-medium text-gray-700 hover:text-gray-900"
-                    >
-                      Đăng xuất
-                    </div>
-                  ) : (
-                    <>
-                      <Link
-                        href="/login"
-                        className="text-sm font-medium text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-primary-600 transition-colors"
-                      >
-                        {isAuthenticated === null ? "" : "Đăng nhập"}
-                      </Link>
-                      <span
-                        aria-hidden="true"
-                        className="h-6 w-px bg-gray-200"
-                      />
-                      <Link
-                        href="/register"
-                        className="text-sm font-medium text-gray-700 hover:text-gray-900 border-b-2 border-transparent hover:border-primary-600 transition-colors"
-                      >
-                        {isAuthenticated === null ? "" : "Đăng ký"}
-                      </Link>
-                    </>
-                  )}
-                </div>
+                </PopoverGroup>
 
-                {/* Search */}
-                <div className="ml-4 flow-root lg:ml-6 cursor-pointer">
-                  <div
-                    className="group -m-2 flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+                <div className="flex flex-1 items-center justify-end gap-3">
+                  <div className="hidden items-center gap-4 text-sm font-medium lg:flex">
+                    {isAuthenticated ? (
+                      <button
+                        type="button"
+                        onClick={handleOpenModal}
+                        className="text-gray-600 transition hover:text-primary-600 dark:text-gray-300"
+                      >
+                        Đăng xuất
+                      </button>
+                    ) : (
+                      <>
+                        <Link
+                          href="/login"
+                          className="text-gray-600 transition hover:text-primary-600 dark:text-gray-300"
+                        >
+                          {isAuthenticated === null ? "" : "Đăng nhập"}
+                        </Link>
+                        <span
+                          aria-hidden="true"
+                          className="h-4 w-px bg-gray-200 dark:bg-gray-700"
+                        />
+                        <Link
+                          href="/register"
+                          className="text-gray-600 transition hover:text-primary-600 dark:text-gray-300"
+                        >
+                          {isAuthenticated === null ? "" : "Đăng ký"}
+                        </Link>
+                      </>
+                    )}
+                  </div>
+
+                  <button
+                    type="button"
                     onClick={() => setShowSearch(!showSearch)}
+                    className="flex items-center gap-2 rounded-full border border-gray-200/80 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                   >
                     <MagnifyingGlassIcon
                       aria-hidden="true"
-                      className="h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-300 dark:group-hover:text-gray-100"
+                      className="h-5 w-5 text-gray-400"
                     />
-                  </div>
-                </div>
-                {/* User */}
-                <div className="ml-4 flow-root lg:ml-6">
+                    <span className="hidden md:inline">Tìm kiếm</span>
+                  </button>
+
                   <Link
                     href={`${isAuthenticated ? "/profile" : "/login"}`}
-                    className="group -m-2 flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors"
+                    className="group flex items-center gap-2 rounded-full border border-gray-200/80 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
                   >
                     <UserIcon
                       aria-hidden="true"
-                      className="h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-300 dark:group-hover:text-gray-100"
+                      className="h-5 w-5 text-gray-400 transition group-hover:text-primary-500"
                     />
+                    <span className="hidden md:inline">
+                      {isAuthenticated ? "Tài khoản" : "Đăng nhập"}
+                    </span>
                   </Link>
-                </div>
-                {/* Cart */}
-                <div className="ml-4 flow-root lg:ml-6 cursor-pointer">
-                  <div
+
+                  <button
+                    type="button"
                     onClick={() => {
                       router.push(`/history/${cart?.[0]?.userId}?activeId=cart`);
                     }}
-                    className="group -m-2 flex items-center p-2 rounded-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 transition-colors relative"
+                    className="group relative flex items-center gap-2 rounded-full bg-primary-600/90 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary-600/30 transition hover:bg-primary-600"
                   >
                     <ShoppingBagIcon
                       aria-hidden="true"
-                      className="h-6 w-6 flex-shrink-0 text-gray-500 group-hover:text-gray-700 dark:text-gray-300 dark:group-hover:text-gray-100"
+                      className="h-5 w-5 text-white"
                     />
-                    <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                      {total}
-                    </span>
-                    <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] h-4 min-w-4 px-1">
+                    <span className="hidden sm:inline">Giỏ hàng</span>
+                    <span className="rounded-full bg-white/20 px-2 text-xs font-bold tracking-wider">
                       {total}
                     </span>
                     <span className="sr-only">items in cart, view bag</span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -435,9 +486,8 @@ export default function NavBar({ isAuthenticated }: IProps) {
         </nav>
       </header>
       <div
-        className={`${
-          showSearch ? "nav-enter" : "nav-exit h-0 hidden"
-        } bg-transparent`}
+        className={`${showSearch ? "nav-enter" : "nav-exit h-0 hidden"
+          } bg-transparent`}
       >
         <AutoCompleteSearch
           categories={CATEGORIES}

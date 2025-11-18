@@ -55,7 +55,7 @@ const App = () => {
   }
 
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated.isAuthenticated} />
       {profile ? (
         <div className="mt-[120px] h-full min-h-screen lg:overflow-hidden bg-gray-100 flex flex-col justify-start items-center p-5 pt-0">

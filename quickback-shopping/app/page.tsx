@@ -43,9 +43,9 @@ export default function Home() {
     </div>,
   ];
   return (
-    <div className="container">
+    <div className=" ">
       <NavBar isAuthenticated={isAuthenticated} />
-      <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[100px]">
+      <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[30px]">
         <div className="mt-[10px]">
           <Hero />
         </div>
@@ -58,7 +58,7 @@ export default function Home() {
         </h2>
         <Gallery />
         <Link href={"/shop"} className="pt-4 block max-w-[400px] mx-auto">
-          <BasicButton text="Xem thêm" variant="basic"/>
+          <BasicButton text="Xem thêm" variant="basic" />
         </Link>
 
         <h2 className="text-xl font-bold text-black sm:text-xl md:text-2xl mt-[20px] md:mt-[40px] text-center py-4">
