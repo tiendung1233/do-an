@@ -312,7 +312,7 @@ export default function NavBar({ isAuthenticated }: IProps) {
                   {NAVIGATION_LIST.categories.map((category) => (
                     <Popover key={category.name} className="relative flex">
                       <div className="relative flex">
-                        <PopoverButton className="relative z-10 -mb-px flex items-center gap-1 border-b-2 border-transparent pb-2 text-sm font-medium text-gray-700 transition hover:border-primary-500 hover:text-primary-600 dark:text-gray-200">
+                        <PopoverButton className="relative z-10 -mb-px flex items-center gap-1 border-b-2 border-transparent  text-sm font-medium text-gray-700 transition hover:border-primary-500 hover:text-primary-600 dark:text-gray-200">
                           {category.name}
                         </PopoverButton>
                       </div>
