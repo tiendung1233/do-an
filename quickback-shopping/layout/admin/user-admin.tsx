@@ -10,6 +10,15 @@ import {
 } from "@/ultils/api/profile";
 import Cookies from "js-cookie";
 import { useEffect, useState, useRef } from "react";
+import {
+  UserPlusIcon,
+  PencilSquareIcon,
+  TrashIcon,
+  XMarkIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+  UsersIcon,
+} from "@heroicons/react/24/outline";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -27,6 +36,20 @@ const defaultData = {
   image: "",
   inviteCode: [],
   money: 0,
+};
+
+const fieldLabels: { [key: string]: string } = {
+  name: "Họ tên",
+  email: "Email",
+  accountBank: "Số tài khoản",
+  bankName: "Ngân hàng",
+  total: "Tổng tiền",
+  phoneNumber: "Số điện thoại",
+  address: "Địa chỉ",
+  city: "Thành phố",
+  image: "Ảnh đại diện",
+  inviteCode: "Mã giới thiệu",
+  money: "Số dư",
 };
 
 export default function UserAdmin() {
@@ -92,18 +115,18 @@ export default function UserAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.name) {
-      alert("Thiếu trường");
+      addToast("Vui lòng điền đầy đủ thông tin bắt buộc", "error");
       return;
     }
     if (editingUser) {
       const res = await updateUser(token!, editingUser._id, formData);
       if (res?.message?.includes("success")) {
-        addToast("Thành công", "success");
+        addToast("Cập nhật người dùng thành công", "success");
       }
     } else {
       const res = await addUser(token!, formData);
       if (res?.message?.includes("success")) {
-        addToast("Thành công", "success");
+        addToast("Thêm người dùng thành công", "success");
       }
     }
     fetchUser();
@@ -114,7 +137,7 @@ export default function UserAdmin() {
   const handleDelete = async (id: string) => {
     const res = await deleteUser(token!, id);
     if (res?.message?.includes("success")) {
-      addToast("Thành công", "success");
+      addToast("Xóa người dùng thành công", "success");
     }
     fetchUser();
   };
@@ -141,74 +164,123 @@ export default function UserAdmin() {
     });
   };
 
-  return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      <h1 className="text-xl font-semibold mb-4">User Administration</h1>
-      <form onSubmit={handleSubmit} className="mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Object.keys(formData)?.map((key) => (
-            <div className="text-left" key={key}>
-              <label
-                htmlFor={key}
-                className="block text-sm font-medium text-gray-700"
-              >
-                {key.charAt(0).toUpperCase() + key.slice(1)}
-              </label>
-              <InputSection
-                id={key}
-                type={key === "isVerified" ? "checkbox" : "text"}
-                value={formData[key] || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, [key]: e.target.value })
-                }
-                styleInput={
-                  { width: key === "isVerified" ? "auto" : "100%" } as any
-                }
-              />
-            </div>
-          ))}
-        </div>
-        <button
-          type="submit"
-          className="mt-4 bg-indigo-600 text-white py-2 px-4 rounded-md"
-        >
-          {editingUser ? "Sửa người dùng" : "Thêm người dùng"}
-        </button>
-        {editingUser && (
-          <button
-            onClick={() => {
-              setEditingUser(null);
-              setFormData(defaultData);
-            }}
-            type="button"
-            className="mt-4 ml-3 bg-red-600 text-white py-2 px-4 rounded-md"
-          >
-            Hủy
-          </button>
-        )}
-      </form>
+  const formatMoney = (amount: number) => {
+    return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
+  };
 
+  return (
+    <div className="space-y-6">
+      {/* Form Section */}
+      <div className="rounded-2xl bg-white/60 dark:bg-secondary-800/60 backdrop-blur-xl border border-secondary-200/50 dark:border-secondary-700/50 p-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary-500 shadow-primary-sm">
+            <UserPlusIcon className="size-5 text-white" />
+          </div>
+          <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
+            {editingUser ? "Chỉnh sửa người dùng" : "Thêm người dùng mới"}
+          </h2>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Object.keys(formData)?.map((key) => (
+              <div className="text-left" key={key}>
+                <label
+                  htmlFor={key}
+                  className="block text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1.5"
+                >
+                  {fieldLabels[key] || key.charAt(0).toUpperCase() + key.slice(1)}
+                </label>
+                <InputSection
+                  id={key}
+                  type={key === "isVerified" ? "checkbox" : "text"}
+                  value={formData[key] || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, [key]: e.target.value })
+                  }
+                  styleInput={
+                    { width: key === "isVerified" ? "auto" : "100%" } as any
+                  }
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="flex gap-3 mt-6">
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium shadow-primary-sm hover:shadow-primary transition-all"
+            >
+              {editingUser ? (
+                <>
+                  <PencilSquareIcon className="size-5" />
+                  Cập nhật
+                </>
+              ) : (
+                <>
+                  <UserPlusIcon className="size-5" />
+                  Thêm mới
+                </>
+              )}
+            </button>
+            {editingUser && (
+              <button
+                onClick={() => {
+                  setEditingUser(null);
+                  setFormData(defaultData);
+                }}
+                type="button"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 font-medium hover:bg-secondary-200 dark:hover:bg-secondary-600 transition-colors"
+              >
+                <XMarkIcon className="size-5" />
+                Hủy
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <h2 className="text-lg font-semibold mb-4">
-              {modalAction === "delete" ? "Xác nhận xóa" : "Xác nhận sửa"}
-            </h2>
-            <p>
+        <div className="fixed inset-0 flex items-center justify-center bg-secondary-900/60 backdrop-blur-sm z-50">
+          <div className="bg-white dark:bg-secondary-800 rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 border border-secondary-200/50 dark:border-secondary-700/50">
+            <div className="flex items-center gap-3 mb-4">
+              <div
+                className={`flex size-10 items-center justify-center rounded-xl ${
+                  modalAction === "delete"
+                    ? "bg-error-500"
+                    : "bg-primary-500"
+                }`}
+              >
+                {modalAction === "delete" ? (
+                  <TrashIcon className="size-5 text-white" />
+                ) : (
+                  <PencilSquareIcon className="size-5 text-white" />
+                )}
+              </div>
+              <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                {modalAction === "delete" ? "Xác nhận xóa" : "Xác nhận sửa"}
+              </h2>
+            </div>
+            <p className="text-secondary-600 dark:text-secondary-400 mb-6">
               {modalAction === "delete"
-                ? "Bạn có chắc chắn muốn xóa người dùng này không?"
-                : "Bạn có chắc chắn muốn chỉnh sửa người dùng này không?"}
+                ? "Bạn có chắc chắn muốn xóa người dùng này không? Hành động này không thể hoàn tác."
+                : "Bạn có chắc chắn muốn chỉnh sửa thông tin người dùng này không?"}
             </p>
-            <div className="flex justify-end mt-4">
+            <div className="flex justify-end gap-3">
               <button
                 onClick={closeModal}
-                className="bg-gray-200 text-gray-700 py-2 px-4 rounded-lg mr-2"
+                className="px-4 py-2.5 rounded-xl bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 font-medium hover:bg-secondary-200 dark:hover:bg-secondary-600 transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={handleModalConfirm}
-                className="bg-red-600 text-white py-2 px-4 rounded-lg"
+                className={`px-4 py-2.5 rounded-xl font-medium text-white transition-colors ${
+                  modalAction === "delete"
+                    ? "bg-error-500 hover:bg-error-600"
+                    : "bg-primary-500 hover:bg-primary-600"
+                }`}
               >
                 Xác nhận
               </button>
@@ -217,142 +289,148 @@ export default function UserAdmin() {
         </div>
       )}
 
-      <div className="overflow-scroll bg-white shadow sm:rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[250px]"
-              >
-                ID
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Tên
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Email
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[100px]"
-              >
-                Ảnh
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Tổng số tiền đã rút
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Số tiền
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Ngân hàng
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Tài khoản ngân hàng
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Tiền kiếm từ sự kiện
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Số điện thoại
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Xác thực tài khoản
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-              >
-                Actions
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {people &&
-              people?.length &&
-              people?.map((person) => (
-                <tr key={person._id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{person._id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{person.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {person.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <img src={person.image || "/img_no_img.jpg"} alt="" />
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {person.total + "Đ"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {person.money + "Đ"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {person.bankName}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {person.accountBank}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap min-w-[120px]">
-                    {person.moneyByEvent.tree + person.moneyByEvent.wheel + "Đ"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    {person.phoneNumber}
-                  </td>
-                  <td
-                    className={`px-6 py-4 whitespace-nowrap ${
-                      person.isVerified ? "text-green-700" : "text-red-700"
-                    }`}
+      {/* Table Section */}
+      <div className="rounded-2xl bg-white/60 dark:bg-secondary-800/60 backdrop-blur-xl border border-secondary-200/50 dark:border-secondary-700/50 overflow-hidden">
+        <div className="flex items-center gap-3 p-6 border-b border-secondary-200/50 dark:border-secondary-700/50">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-success-500 shadow-lg">
+            <UsersIcon className="size-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-secondary-900 dark:text-white">
+              Danh sách người dùng
+            </h2>
+            <p className="text-sm text-secondary-500">
+              Tổng cộng {people?.length || 0} người dùng
+            </p>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-full">
+            <thead>
+              <tr className="bg-secondary-50/50 dark:bg-secondary-900/50">
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider min-w-[200px]">
+                  ID
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Tên
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Email
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider min-w-[80px]">
+                  Ảnh
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Đã rút
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Số dư
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Ngân hàng
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  STK
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Sự kiện
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  SĐT
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Xác thực
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-secondary-500 uppercase tracking-wider">
+                  Thao tác
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-secondary-100 dark:divide-secondary-700/50">
+              {people &&
+                people?.length > 0 &&
+                people?.map((person) => (
+                  <tr
+                    key={person._id}
+                    className="hover:bg-secondary-50/50 dark:hover:bg-secondary-700/30 transition-colors"
                   >
-                    {person.isVerified ? "Đã xác thực" : "Chưa xác thực"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(person)}
-                      className="text-indigo-600 hover:text-indigo-900 mr-4"
-                    >
-                      Sửa
-                    </button>
-                    {person?.role < 2 && (
-                      <button
-                        onClick={() => openModal("delete", person._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Xóa
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-          </tbody>
-        </table>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-500 font-mono">
+                      {person._id?.slice(-8)}...
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="font-medium text-secondary-900 dark:text-white">
+                        {person.name}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
+                      {person.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img
+                        src={person.image || "/img_no_img.jpg"}
+                        alt=""
+                        className="w-10 h-10 rounded-xl object-cover"
+                      />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-secondary-900 dark:text-white">
+                      {formatMoney(person.total)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-success-600 dark:text-success-400">
+                      {formatMoney(person.money)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
+                      {person.bankName || "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
+                      {person.accountBank || "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-warning-600 dark:text-warning-400">
+                      {formatMoney(
+                        person.moneyByEvent?.tree + person.moneyByEvent?.wheel || 0
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
+                      {person.phoneNumber || "-"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {person.isVerified ? (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-success-50 dark:bg-success-900/20 text-success-700 dark:text-success-400 text-xs font-medium">
+                          <CheckCircleIcon className="size-4" />
+                          Đã xác thực
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-error-50 dark:bg-error-900/20 text-error-700 dark:text-error-400 text-xs font-medium">
+                          <XCircleIcon className="size-4" />
+                          Chưa xác thực
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleEdit(person)}
+                          className="p-2 rounded-lg text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors"
+                          title="Sửa"
+                        >
+                          <PencilSquareIcon className="size-5" />
+                        </button>
+                        {person?.role < 2 && (
+                          <button
+                            onClick={() => openModal("delete", person._id)}
+                            className="p-2 rounded-lg text-error-600 hover:bg-error-50 dark:hover:bg-error-900/20 transition-colors"
+                            title="Xóa"
+                          >
+                            <TrashIcon className="size-5" />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
