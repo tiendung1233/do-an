@@ -204,7 +204,7 @@ export const valuesOur = [
 
 export const teamOur = [
   {
-    name: "Dermot Trần",
+    name: "Nguyễn Tiến Dũng",
     role: "Co-Founder / CTO",
     imageUrl:
       "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80",
@@ -223,7 +223,7 @@ export const blogPostsOur = [
     date: "Nov 30, 2024",
     datetime: "30-11-2024",
     author: {
-      name: "Dermot Trần",
+      name: "Nguyễn Tiến Dũng",
       imageUrl:
         "https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     },

@@ -73,30 +73,31 @@ export default function SupportPage() {
   ];
 
   return (
-    <div className=" ">
+    <div className="bg-secondary-50 dark:bg-secondary-900 text-secondary-900 dark:text-white min-h-screen flex flex-col">
       <NavBar isAuthenticated={isAuthenticated} />
-      <div className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[30px]">
-        <h1 className="text-xl font-medium text-black sm:text-xl md:text-2xl text-center mt-4">
-          Hỗ trợ
-        </h1>
-        <div className="py-5 px-2">
-          <h2 className="text-normal font-medium text-black sm:text-xl px-1 sm:text-center my-2">
-            Các vấn đề thường gặp
-          </h2>
-          <Accordion items={accordionItems} />
-        </div>
-        <div className="py-5 px-2">
-          <h2 className="text-normal font-medium text-black sm:text-xl px-1 sm:text-center my-2">
-            Tư vấn và hỗ trợ trực tiếp
-          </h2>
-          <div className="flex flex-wrap gap-[10px]">
-            <InfoCard message={"Thông tin cá nhân"} link="/profile" />
-            <InfoCard message={"Liên hệ trực tiếp"} link="/" />
+      <main className="flex-1 py-8 mt-[60px] px-4 sm:px-8 lg:px-16">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-2xl sm:text-3xl font-bold text-center mb-8">
+            Hỗ trợ
+          </h1>
+          <div className="py-5">
+            <h2 className="text-lg sm:text-xl font-semibold text-center mb-4">
+              Các vấn đề thường gặp
+            </h2>
+            <Accordion items={accordionItems} />
+          </div>
+          <div className="py-5">
+            <h2 className="text-lg sm:text-xl font-semibold text-center mb-4">
+              Tư vấn và hỗ trợ trực tiếp
+            </h2>
+            <div className="flex flex-wrap gap-4 justify-center">
+              <InfoCard message={"Thông tin cá nhân"} link="/profile" />
+              <InfoCard message={"Liên hệ trực tiếp"} link="/" />
+            </div>
           </div>
         </div>
-
-        <Footer />
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }

@@ -55,11 +55,11 @@ const App = () => {
   }
 
   return (
-    <div className=" ">
+    <div className="bg-secondary-50 dark:bg-secondary-900 text-secondary-900 dark:text-white min-h-screen flex flex-col">
       <NavBar isAuthenticated={isAuthenticated.isAuthenticated} />
       {profile ? (
-        <div className="mt-[120px] h-full min-h-screen lg:overflow-hidden bg-gray-100 flex flex-col justify-start items-center p-5 pt-0">
-          <br />
+        <main className="flex-1 mt-[80px] px-4 sm:px-8 lg:px-16 py-6">
+          <div className="max-w-4xl mx-auto space-y-4">
           <CashbackCard
             totalCashback={`${profile?.total}đ`}
             availableBalance={`${profile?.money}đ`}
@@ -193,14 +193,17 @@ const App = () => {
           >
             <p>Bạn có chắc chắn muốn đăng xuất</p>
           </BaseModal>
-          <p className="text-gray-500 dark:text-gray-400 bottom-0 pt-2 relative">
+          <p className="text-secondary-500 dark:text-secondary-400 text-center pt-4">
             Cảm ơn quý khách đã sử dụng dịch vụ
           </p>
-          <Footer />
-        </div>
+          </div>
+        </main>
       ) : (
-        <Spinner />
+        <div className="flex-1 flex items-center justify-center">
+          <Spinner />
+        </div>
       )}
+      <Footer />
     </div>
   );
 };

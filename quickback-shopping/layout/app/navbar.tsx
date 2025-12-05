@@ -23,6 +23,7 @@ import {
   HomeIcon,
   SparklesIcon,
   ChevronRightIcon,
+  ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import BaseModal from "@/components/modals/base-modal";
@@ -42,6 +43,7 @@ export default function NavBar({ isAuthenticated }: IProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [open, setOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
@@ -56,8 +58,26 @@ export default function NavBar({ isAuthenticated }: IProps) {
     }
   }, [isAuthenticated, fetchCart]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   return (
-    <div className="sticky top-0 z-[99999] w-full bg-white/95 dark:bg-gray-900/80 border-b border-gray-100 dark:border-gray-800 backdrop-blur-xl shadow-sm">
+    <div
+      className={`
+        sticky top-0 z-[99999] w-full
+        transition-all duration-500 ease-out
+        ${
+          scrolled
+            ? "bg-white/80 dark:bg-secondary-900/80 backdrop-blur-2xl shadow-glass border-b border-secondary-200/50 dark:border-secondary-700/50"
+            : "bg-transparent"
+        }
+      `}
+    >
       {/* Mobile menu */}
       <Dialog
         open={open}
@@ -66,34 +86,56 @@ export default function NavBar({ isAuthenticated }: IProps) {
       >
         <DialogBackdrop
           transition
-          className="fixed inset-0 bg-black bg-opacity-25 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
+          className="fixed inset-0 bg-secondary-900/60 backdrop-blur-sm transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
         />
 
         <div className="fixed inset-0 z-40 flex">
           <DialogPanel
             transition
-            className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-[closed]:-translate-x-full"
+            className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white/95 dark:bg-secondary-900/95 backdrop-blur-2xl pb-12 shadow-glass-xl transition duration-300 ease-in-out data-[closed]:-translate-x-full"
           >
-            <div className="flex px-4 pb-2 pt-5">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-secondary-200/50 dark:border-secondary-700/50">
+              <Link href="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
+                <div className="relative">
+                  <div className="absolute inset-0 bg-primary-500/20 rounded-2xl blur-xl" />
+                  <div className="relative rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-1.5 shadow-primary-sm">
+                    <img
+                      src="/logo_img.png"
+                      alt="QuickBack"
+                      className="h-8 w-8 rounded-xl object-cover"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <p className="text-base font-bold text-secondary-900 dark:text-white">
+                    QuickBack
+                  </p>
+                  <p className="text-2xs uppercase tracking-[0.2em] text-secondary-400">
+                    shopping studio
+                  </p>
+                </div>
+              </Link>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="relative -m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
+                className="rounded-xl p-2 text-secondary-400 hover:text-secondary-600 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors"
               >
-                <span className="absolute -inset-0.5" />
-                <span className="sr-only">Close menu</span>
-                <XMarkIcon aria-hidden="true" className="h-6 w-6" />
+                <XMarkIcon className="h-6 w-6" />
               </button>
             </div>
 
-            {/* Links */}
-            <TabGroup className="mt-2 z-1">
-              <div className="border-b border-gray-200">
-                <TabList className="-mb-px flex space-x-8 px-4">
+            {/* Mobile Navigation Tabs */}
+            <TabGroup className="mt-4">
+              <div className="px-4">
+                <TabList className="flex gap-2 p-1 rounded-2xl bg-secondary-100/80 dark:bg-secondary-800/80">
                   {NAVIGATION_LIST.categories.map((category) => (
                     <Tab
                       key={category.name}
-                      className="flex-1 whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-base font-medium text-gray-900 data-[selected]:border-indigo-600 data-[selected]:text-indigo-600"
+                      className="flex-1 rounded-xl py-2.5 text-sm font-semibold text-secondary-600
+                        transition-all duration-200
+                        data-[selected]:bg-white data-[selected]:text-primary-600 data-[selected]:shadow-card-sm
+                        dark:text-secondary-400 dark:data-[selected]:bg-secondary-700 dark:data-[selected]:text-primary-400"
                     >
                       {category.name}
                     </Tab>
@@ -104,55 +146,50 @@ export default function NavBar({ isAuthenticated }: IProps) {
                 {NAVIGATION_LIST.categories.map((category) => (
                   <TabPanel
                     key={category.name}
-                    className="space-y-10 px-4 pb-8 pt-10"
+                    className="space-y-6 px-4 pt-6 pb-8"
                   >
-                    <div className="grid grid-cols-2 gap-x-4">
+                    {/* Featured Items */}
+                    <div className="grid grid-cols-2 gap-3">
                       {category.featured.map((item) => (
-                        <div key={item.name} className="group relative text-sm">
-                          <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-lg bg-gray-100 group-hover:opacity-75">
-                            <img
-                              alt={item.imageAlt || "alt"}
-                              src={item.imageSrc}
-                              className="object-cover object-center"
-                            />
+                        <Link
+                          key={item.name}
+                          href={item.href}
+                          onClick={() => setOpen(false)}
+                          className="group relative rounded-2xl overflow-hidden bg-secondary-100 dark:bg-secondary-800 aspect-square"
+                        >
+                          <img
+                            alt={item.imageAlt || "alt"}
+                            src={item.imageSrc}
+                            className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-secondary-900/80 via-transparent to-transparent" />
+                          <div className="absolute bottom-0 left-0 right-0 p-3">
+                            <p className="font-semibold text-white text-sm">
+                              {item.name}
+                            </p>
+                            <p className="text-xs text-white/70 mt-0.5">Mua ngay</p>
                           </div>
-                          <a
-                            href={item.href}
-                            className="mt-6 block font-medium text-gray-900"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="absolute inset-0 z-10"
-                            />
-                            {item.name}
-                          </a>
-                          <p aria-hidden="true" className="mt-1">
-                            Mua ngay
-                          </p>
-                        </div>
+                        </Link>
                       ))}
                     </div>
+
+                    {/* Category Sections */}
                     {category.sections.map((section) => (
                       <div key={section.name}>
-                        <p
-                          id={`${category.id}-${section.id}-heading-mobile`}
-                          className="font-medium text-gray-900"
-                        >
+                        <p className="text-xs font-bold uppercase tracking-[0.15em] text-secondary-400 mb-3">
                           {section.name}
                         </p>
-                        <ul
-                          role="list"
-                          aria-labelledby={`${category.id}-${section.id}-heading-mobile`}
-                          className="mt-6 flex flex-col space-y-6"
-                        >
+                        <ul className="space-y-1">
                           {section.items.map((item) => (
-                            <li key={item.name} className="flow-root">
-                              <a
+                            <li key={item.name}>
+                              <Link
                                 href={item.href}
-                                className="-m-2 block p-2 text-gray-500"
+                                onClick={() => setOpen(false)}
+                                className="flex items-center justify-between py-2.5 px-3 rounded-xl text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors"
                               >
-                                {item.name}
-                              </a>
+                                <span className="text-sm font-medium">{item.name}</span>
+                                <ChevronRightIcon className="h-4 w-4 text-secondary-400" />
+                              </Link>
                             </li>
                           ))}
                         </ul>
@@ -163,64 +200,71 @@ export default function NavBar({ isAuthenticated }: IProps) {
               </TabPanels>
             </TabGroup>
 
-            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              {NAVIGATION_LIST.pages.map((page) => {
-                if (page.name !== "Trang chủ") {
-                  return (
-                    <div key={page.name} className="flow-root">
-                      <a
+            {/* Pages Links */}
+            <div className="mt-auto border-t border-secondary-200/50 dark:border-secondary-700/50 px-4 py-4">
+              <div className="space-y-1">
+                {NAVIGATION_LIST.pages.map((page) => {
+                  if (page.name !== "Trang chủ") {
+                    return (
+                      <Link
+                        key={page.name}
                         href={page.href}
-                        className="-m-2 block p-2 font-medium text-gray-900"
+                        onClick={() => setOpen(false)}
+                        className="flex items-center gap-3 py-3 px-3 rounded-xl text-secondary-700 dark:text-secondary-300 hover:bg-secondary-100 dark:hover:bg-secondary-800 transition-colors"
                       >
-                        {page.name}
-                      </a>
-                    </div>
-                  );
-                }
-              })}
+                        <span className="font-medium">{page.name}</span>
+                      </Link>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
             </div>
 
-            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
+            {/* Auth Section */}
+            <div className="border-t border-secondary-200/50 dark:border-secondary-700/50 px-4 py-4">
               {isAuthenticated ? (
-                <div
+                <button
                   onClick={() => {
                     handleOpenModal();
                     setOpen(false);
                   }}
-                  className="cursor-pointer font-medium text-gray-700 hover:text-gray-800"
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-error-50 text-error-600 font-semibold hover:bg-error-100 transition-colors dark:bg-error-900/30 dark:text-error-400"
                 >
                   Đăng xuất
-                </div>
+                </button>
               ) : (
-                <>
-                  <div className="flow-root">
-                    <Link
-                      href="/login"
-                      className="-m-2 block p-2 font-medium text-gray-900"
-                    >
-                      Đăng nhập
-                    </Link>
-                  </div>
-                  <div className="flow-root">
-                    <Link
-                      href="/register"
-                      className="-m-2 block p-2 font-medium text-gray-900"
-                    >
-                      Đăng ký
-                    </Link>
-                  </div>
-                </>
+                <div className="space-y-2">
+                  <Link
+                    href="/login"
+                    onClick={() => setOpen(false)}
+                    className="block w-full py-3 px-4 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white text-center font-semibold shadow-primary-sm hover:shadow-primary transition-shadow"
+                  >
+                    Đăng nhập
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setOpen(false)}
+                    className="block w-full py-3 px-4 rounded-xl bg-secondary-100 text-secondary-700 text-center font-semibold hover:bg-secondary-200 transition-colors dark:bg-secondary-800 dark:text-secondary-300"
+                  >
+                    Đăng ký
+                  </Link>
+                </div>
               )}
             </div>
           </DialogPanel>
         </div>
       </Dialog>
 
-      <header className="relative bg-transparent">
-        <div className="w-full bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 text-white">
-          <div className="mx-auto flex items-center justify-between gap-4 px-4 py-2 text-sm font-medium sm:px-6 lg:px-8">
-            <div className="flex items-center gap-2 text-white/90">
-              <SparklesIcon className="h-5 w-5" aria-hidden="true" />
+      <header className="relative">
+        {/* Top Banner */}
+        <div className="w-full bg-gradient-to-r from-primary-600 via-primary-500 to-accent-500 text-white overflow-hidden">
+          <div className="relative mx-auto flex items-center justify-between gap-4 px-4 py-2.5 text-sm font-medium sm:px-6 lg:px-8">
+            {/* Animated background */}
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48cGF0dGVybiBpZD0iYSIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiBwYXR0ZXJuVHJhbnNmb3JtPSJyb3RhdGUoNDUpIj48cGF0aCBkPSJNLTEwIDMwaDYwdjJoLTYweiIgZmlsbD0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIvPjwvcGF0dGVybj48L2RlZnM+PHJlY3QgZmlsbD0idXJsKCNhKSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIvPjwvc3ZnPg==')] opacity-50" />
+
+            <div className="relative flex items-center gap-2 text-white/90">
+              <SparklesIcon className="h-5 w-5 animate-pulse" aria-hidden="true" />
               <p className="text-left">
                 <span className="hidden sm:inline">
                   Hoàn tiền không giới hạn & ưu đãi độc quyền mỗi tuần
@@ -230,162 +274,173 @@ export default function NavBar({ isAuthenticated }: IProps) {
             </div>
             <Link
               href="/collections/highlight"
-              className="flex items-center gap-1 rounded-full border border-white/40 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-white transition hover:border-white hover:bg-white/10"
+              className="relative group flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-white border border-white/20 transition-all hover:bg-white/20 hover:border-white/40"
             >
-              Khám phá ngay
-              <ChevronRightIcon className="h-4 w-4" aria-hidden="true" />
+              Khám phá
+              <ArrowRightIcon className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
         </div>
 
-        <nav
-          aria-label="Top"
-          className="mx-auto px-4 sm:px-6 lg:px-8"
-        >
-          <div className="py-4">
-            <div className="space-y-3 rounded-2xl border border-gray-200/70 bg-white/90 px-3 py-4 shadow-xl shadow-gray-900/5 backdrop-blur-xl dark:border-gray-700/60 dark:bg-gray-900/60 sm:px-6">
-              <div className="flex items-center justify-between gap-3">
+        {/* Main Navigation */}
+        <nav aria-label="Top" className="mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-3 lg:py-4">
+            <div
+              className={`
+                rounded-2xl lg:rounded-3xl
+                transition-all duration-500
+                ${
+                  scrolled
+                    ? "bg-white/60 dark:bg-secondary-900/60 backdrop-blur-xl border border-secondary-200/30 dark:border-secondary-700/30 shadow-glass"
+                    : "bg-white/90 dark:bg-secondary-900/90 backdrop-blur-xl border border-secondary-200/50 dark:border-secondary-700/50 shadow-card-lg"
+                }
+                px-4 py-3 sm:px-6
+              `}
+            >
+              {/* Top Row - Logo & Status */}
+              <div className="flex items-center justify-between gap-4">
+                {/* Mobile Controls + Logo */}
                 <div className="flex items-center gap-3">
+                  {/* Mobile Menu Toggle */}
                   <div className="flex items-center gap-2 lg:hidden">
                     <button
                       type="button"
                       onClick={() => router.push("/")}
-                      className="rounded-xl border border-gray-200 bg-white p-2 text-gray-500 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                      className="rounded-xl p-2.5 text-secondary-500 bg-secondary-100/80 hover:bg-secondary-200 transition-colors dark:bg-secondary-800 dark:hover:bg-secondary-700 dark:text-secondary-400"
                     >
-                      <span className="sr-only">Trang chủ</span>
                       <HomeIcon aria-hidden="true" className="h-5 w-5" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setOpen(!open)}
-                      className="rounded-xl border border-gray-200 bg-white p-2 text-gray-500 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                      className="rounded-xl p-2.5 text-secondary-500 bg-secondary-100/80 hover:bg-secondary-200 transition-colors dark:bg-secondary-800 dark:hover:bg-secondary-700 dark:text-secondary-400"
                     >
-                      <span className="sr-only">Mở menu</span>
                       <Bars3Icon aria-hidden="true" className="h-5 w-5" />
                     </button>
                   </div>
+
+                  {/* Logo */}
                   <Link
                     href="/"
-                    className="group flex items-center gap-3 rounded-full bg-white/80 px-2 py-1 transition hover:bg-white dark:bg-gray-900/70"
+                    className="group flex items-center gap-3 rounded-2xl px-2 py-1.5 transition-all hover:bg-secondary-100/50 dark:hover:bg-secondary-800/50"
                   >
-                    <div className="rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-1 shadow-lg shadow-primary-500/30">
-                      <img
-                        src="/logo_img.png"
-                        alt="QuickBack"
-                        className="h-9 w-9 rounded-xl border border-white/40 object-cover"
-                      />
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-primary-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-1.5 shadow-primary-sm group-hover:shadow-primary transition-shadow">
+                        <img
+                          src="/logo_img.png"
+                          alt="QuickBack"
+                          className="h-9 w-9 rounded-xl object-cover"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-base font-semibold text-gray-900 transition group-hover:text-primary-600 dark:text-gray-100">
+                    <div className="hidden sm:block">
+                      <p className="text-lg font-bold text-secondary-900 group-hover:text-primary-600 transition-colors dark:text-white dark:group-hover:text-primary-400">
                         QuickBack
                       </p>
-                      <p className="text-xs uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500">
+                      <p className="text-2xs uppercase tracking-[0.2em] text-secondary-400 dark:text-secondary-500">
                         shopping studio
                       </p>
                     </div>
                   </Link>
                 </div>
-                <div className="hidden items-center gap-4 text-[11px] font-semibold uppercase tracking-[0.3em] text-gray-400 dark:text-gray-500 lg:flex">
-                  <span className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary-500" />
+
+                {/* Status Badges - Desktop */}
+                <div className="hidden lg:flex items-center gap-4">
+                  <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-secondary-400">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-success-500" />
+                    </span>
                     Trải nghiệm mới
                   </span>
-                  <span className="hidden xl:flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary-500/60" />
+                  <span className="hidden xl:flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.2em] text-secondary-400">
+                    <span className="h-2 w-2 rounded-full bg-primary-500/60" />
                     Hỗ trợ 24/7
                   </span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                {/* Flyout menus */}
-                <PopoverGroup className="hidden flex-1 items-center gap-6 lg:flex">
+              {/* Bottom Row - Navigation & Actions */}
+              <div className="flex flex-wrap items-center justify-between gap-4 mt-3 pt-3 border-t border-secondary-200/50 dark:border-secondary-700/50">
+                {/* Desktop Navigation */}
+                <PopoverGroup className="hidden lg:flex flex-1 items-center gap-1">
                   {NAVIGATION_LIST.pages.map((page) => (
                     <Link
                       key={page.name}
                       href={page.href}
-                      className="text-sm font-medium text-gray-600 transition hover:text-gray-900 hover:underline hover:underline-offset-8 dark:text-gray-300"
+                      className="px-4 py-2 rounded-xl text-sm font-medium text-secondary-600 hover:text-primary-600 hover:bg-primary-50 transition-all dark:text-secondary-300 dark:hover:text-primary-400 dark:hover:bg-primary-950/50"
                     >
                       {page.name}
                     </Link>
                   ))}
+
                   {NAVIGATION_LIST.categories.map((category) => (
-                    <Popover key={category.name} className="relative flex">
-                      <div className="relative flex">
-                        <PopoverButton className="relative z-10 -mb-px flex items-center gap-1 border-b-2 border-transparent  text-sm font-medium text-gray-700 transition hover:border-primary-500 hover:text-primary-600 dark:text-gray-200">
-                          {category.name}
-                        </PopoverButton>
-                      </div>
+                    <Popover key={category.name} className="relative">
+                      <PopoverButton className="group flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium text-secondary-600 hover:text-primary-600 hover:bg-primary-50 transition-all dark:text-secondary-300 dark:hover:text-primary-400 dark:hover:bg-primary-950/50 focus:outline-none">
+                        {category.name}
+                        <ChevronRightIcon className="h-4 w-4 rotate-90 transition-transform group-data-[open]:-rotate-90" />
+                      </PopoverButton>
 
                       <PopoverPanel
                         transition
-                        className="absolute inset-x-0 top-full text-sm text-gray-600 transition data-[closed]:opacity-0 data-[enter]:duration-200 data-[leave]:duration-150 data-[enter]:ease-out data-[leave]:ease-in"
+                        className="absolute left-0 top-full mt-2 w-[800px] rounded-3xl bg-white/95 dark:bg-secondary-900/95 backdrop-blur-2xl shadow-glass-xl border border-secondary-200/50 dark:border-secondary-700/50 transition data-[closed]:opacity-0 data-[closed]:translate-y-2 data-[enter]:duration-200 data-[leave]:duration-150"
                       >
-                        <div className="absolute inset-0 top-1/2 bg-white shadow-lg shadow-gray-900/5 dark:bg-gray-900" />
-
-                        <div className="relative bg-white dark:bg-gray-900">
-                          <div className="mx-auto px-8">
-                            <div className="grid grid-cols-2 gap-x-10 gap-y-12 py-14">
-                              <div className="col-start-2 grid grid-cols-2 gap-8">
+                        <div className="p-6">
+                          <div className="grid grid-cols-12 gap-8">
+                            {/* Featured Section */}
+                            <div className="col-span-5">
+                              <p className="text-xs font-bold uppercase tracking-[0.15em] text-secondary-400 mb-4">
+                                Nổi bật
+                              </p>
+                              <div className="grid grid-cols-2 gap-3">
                                 {category.featured.map((item) => (
-                                  <div
+                                  <Link
                                     key={item.name}
-                                    className="group relative text-base sm:text-sm"
+                                    href={item.href}
+                                    className="group relative rounded-2xl overflow-hidden aspect-[4/3] bg-secondary-100 dark:bg-secondary-800"
                                   >
-                                    <div className="aspect-h-1 aspect-w-1 overflow-hidden rounded-2xl bg-gray-100 shadow-inner ring-1 ring-inset ring-gray-200 transition group-hover:scale-[1.01] group-hover:ring-primary-200">
-                                      <img
-                                        alt={item.imageAlt || item.name}
-                                        src={item.imageSrc}
-                                        className="object-cover object-center"
-                                      />
+                                    <img
+                                      alt={item.imageAlt || item.name}
+                                      src={item.imageSrc}
+                                      className="object-cover w-full h-full transition-transform duration-500 group-hover:scale-110"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-secondary-900/80 via-secondary-900/20 to-transparent" />
+                                    <div className="absolute bottom-0 left-0 right-0 p-3">
+                                      <p className="font-semibold text-white text-sm group-hover:text-primary-300 transition-colors">
+                                        {item.name}
+                                      </p>
+                                      <p className="flex items-center gap-1 text-xs text-white/70 mt-0.5">
+                                        Mua ngay
+                                        <ArrowRightIcon className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                                      </p>
                                     </div>
-                                    <a
-                                      href={item.href}
-                                      className="mt-6 block font-semibold text-gray-900 transition group-hover:text-primary-600 dark:text-gray-100"
-                                    >
-                                      <span
-                                        aria-hidden="true"
-                                        className="absolute inset-0 z-10"
-                                      />
-                                      {item.name}
-                                    </a>
-                                    <p
-                                      aria-hidden="true"
-                                      className="mt-1 text-xs uppercase tracking-[0.3em] text-gray-400"
-                                    >
-                                      Mua ngay
-                                    </p>
-                                  </div>
+                                  </Link>
                                 ))}
                               </div>
-                              <div className="row-start-1 grid grid-cols-3 gap-x-8 gap-y-10 text-sm">
-                                {category.sections.map((section) => (
-                                  <div key={section.name}>
-                                    <p
-                                      id={`${section.name}-heading`}
-                                      className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-400"
-                                    >
-                                      {section.name}
-                                    </p>
-                                    <ul
-                                      role="list"
-                                      aria-labelledby={`${section.name}-heading`}
-                                      className="mt-5 space-y-4"
-                                    >
-                                      {section.items.map((item) => (
-                                        <li key={item.name} className="flex">
-                                          <a
-                                            href={item.href}
-                                            className="text-gray-700 transition hover:text-primary-600 dark:text-gray-300"
-                                          >
-                                            {item.name}
-                                          </a>
-                                        </li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                ))}
-                              </div>
+                            </div>
+
+                            {/* Category Links */}
+                            <div className="col-span-7 grid grid-cols-3 gap-6">
+                              {category.sections.map((section) => (
+                                <div key={section.name}>
+                                  <p className="text-xs font-bold uppercase tracking-[0.15em] text-secondary-400 mb-3">
+                                    {section.name}
+                                  </p>
+                                  <ul className="space-y-1">
+                                    {section.items.map((item) => (
+                                      <li key={item.name}>
+                                        <Link
+                                          href={item.href}
+                                          className="block py-2 px-3 -mx-3 rounded-lg text-sm text-secondary-600 hover:text-primary-600 hover:bg-primary-50 transition-colors dark:text-secondary-400 dark:hover:text-primary-400 dark:hover:bg-primary-950/50"
+                                        >
+                                          {item.name}
+                                        </Link>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         </div>
@@ -394,13 +449,15 @@ export default function NavBar({ isAuthenticated }: IProps) {
                   ))}
                 </PopoverGroup>
 
-                <div className="flex flex-1 items-center justify-end gap-3">
-                  <div className="hidden items-center gap-4 text-sm font-medium lg:flex">
+                {/* Right Actions */}
+                <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
+                  {/* Auth Links - Desktop */}
+                  <div className="hidden lg:flex items-center gap-1 mr-2">
                     {isAuthenticated ? (
                       <button
                         type="button"
                         onClick={handleOpenModal}
-                        className="text-gray-600 transition hover:text-primary-600 dark:text-gray-300"
+                        className="px-4 py-2 rounded-xl text-sm font-medium text-secondary-600 hover:text-error-600 hover:bg-error-50 transition-all dark:text-secondary-400 dark:hover:text-error-400 dark:hover:bg-error-950/50"
                       >
                         Đăng xuất
                       </button>
@@ -408,17 +465,13 @@ export default function NavBar({ isAuthenticated }: IProps) {
                       <>
                         <Link
                           href="/login"
-                          className="text-gray-600 transition hover:text-primary-600 dark:text-gray-300"
+                          className="px-4 py-2 rounded-xl text-sm font-medium text-secondary-600 hover:text-primary-600 hover:bg-primary-50 transition-all dark:text-secondary-400 dark:hover:text-primary-400 dark:hover:bg-primary-950/50"
                         >
                           {isAuthenticated === null ? "" : "Đăng nhập"}
                         </Link>
-                        <span
-                          aria-hidden="true"
-                          className="h-4 w-px bg-gray-200 dark:bg-gray-700"
-                        />
                         <Link
                           href="/register"
-                          className="text-gray-600 transition hover:text-primary-600 dark:text-gray-300"
+                          className="px-4 py-2 rounded-xl text-sm font-medium text-secondary-600 hover:text-primary-600 hover:bg-primary-50 transition-all dark:text-secondary-400 dark:hover:text-primary-400 dark:hover:bg-primary-950/50"
                         >
                           {isAuthenticated === null ? "" : "Đăng ký"}
                         </Link>
@@ -426,78 +479,90 @@ export default function NavBar({ isAuthenticated }: IProps) {
                     )}
                   </div>
 
+                  {/* Search Button */}
                   <button
                     type="button"
                     onClick={() => setShowSearch(!showSearch)}
-                    className="flex items-center gap-2 rounded-full border border-gray-200/80 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                    className={`
+                      flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl
+                      text-sm font-medium transition-all
+                      ${
+                        showSearch
+                          ? "bg-primary-100 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300"
+                          : "bg-secondary-100/80 text-secondary-600 hover:bg-secondary-200 dark:bg-secondary-800 dark:text-secondary-400 dark:hover:bg-secondary-700"
+                      }
+                    `}
                   >
-                    <MagnifyingGlassIcon
-                      aria-hidden="true"
-                      className="h-5 w-5 text-gray-400"
-                    />
+                    <MagnifyingGlassIcon className="h-5 w-5" />
                     <span className="hidden md:inline">Tìm kiếm</span>
                   </button>
 
+                  {/* Profile Button */}
                   <Link
                     href={`${isAuthenticated ? "/profile" : "/login"}`}
-                    className="group flex items-center gap-2 rounded-full border border-gray-200/80 bg-white px-3 py-2 text-sm font-medium text-gray-600 shadow-sm transition hover:border-primary-200 hover:text-primary-600 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl bg-secondary-100/80 text-secondary-600 hover:bg-secondary-200 transition-colors dark:bg-secondary-800 dark:text-secondary-400 dark:hover:bg-secondary-700"
                   >
-                    <UserIcon
-                      aria-hidden="true"
-                      className="h-5 w-5 text-gray-400 transition group-hover:text-primary-500"
-                    />
-                    <span className="hidden md:inline">
+                    <UserIcon className="h-5 w-5" />
+                    <span className="hidden md:inline text-sm font-medium">
                       {isAuthenticated ? "Tài khoản" : "Đăng nhập"}
                     </span>
                   </Link>
 
+                  {/* Cart Button */}
                   <button
                     type="button"
                     onClick={() => {
                       router.push(`/history/${cart?.[0]?.userId}?activeId=cart`);
                     }}
-                    className="group relative flex items-center gap-2 rounded-full bg-primary-600/90 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-primary-600/30 transition hover:bg-primary-600"
+                    className="group relative flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold shadow-primary-sm hover:shadow-primary hover:from-primary-600 hover:to-primary-700 transition-all"
                   >
-                    <ShoppingBagIcon
-                      aria-hidden="true"
-                      className="h-5 w-5 text-white"
-                    />
-                    <span className="hidden sm:inline">Giỏ hàng</span>
-                    <span className="rounded-full bg-white/20 px-2 text-xs font-bold tracking-wider">
-                      {total}
-                    </span>
-                    <span className="sr-only">items in cart, view bag</span>
+                    <ShoppingBagIcon className="h-5 w-5" />
+                    <span className="hidden sm:inline text-sm">Giỏ hàng</span>
+                    {total > 0 && (
+                      <span className="flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full bg-white/20 text-xs font-bold">
+                        {total}
+                      </span>
+                    )}
                   </button>
                 </div>
               </div>
             </div>
 
-            {isModalOpen ? (
+            {/* Logout Modal */}
+            {isModalOpen && (
               <BaseModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 title="Đăng xuất"
                 onConfirm={handleConfirm}
               >
-                <p>Bạn có chắc chắn muốn đăng xuất</p>
+                <p className="text-secondary-600 dark:text-secondary-400">
+                  Bạn có chắc chắn muốn đăng xuất khỏi tài khoản?
+                </p>
               </BaseModal>
-            ) : null}
+            )}
           </div>
         </nav>
       </header>
+
+      {/* Search Panel */}
       <div
-        className={`${showSearch ? "nav-enter" : "nav-exit h-0 hidden"
-          } bg-transparent`}
+        className={`
+          ${showSearch ? "nav-enter" : "nav-exit h-0 hidden"}
+          bg-white/80 dark:bg-secondary-900/80 backdrop-blur-xl border-t border-secondary-200/50 dark:border-secondary-700/50
+        `}
       >
-        <AutoCompleteSearch
-          categories={CATEGORIES}
-          styles={
-            {
-              top: 0,
-              width: "auto",
-            } as HTMLAttributes<HTMLDivElement>
-          }
-        />
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
+          <AutoCompleteSearch
+            categories={CATEGORIES}
+            styles={
+              {
+                top: 0,
+                width: "100%",
+              } as HTMLAttributes<HTMLDivElement>
+            }
+          />
+        </div>
       </div>
     </div>
   );

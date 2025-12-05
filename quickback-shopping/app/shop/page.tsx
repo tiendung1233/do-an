@@ -1,11 +1,11 @@
 "use client";
-import ProductCard from "@/components/card/product-card";
 import ShopCard from "@/components/card/shop-card";
 import Slider from "@/components/slider/slider";
 import Spinner from "@/components/spinner/spinner";
 import useAuth from "@/hook/useAuth";
+import Footer from "@/layout/app/footer";
 import NavBar from "@/layout/app/navbar";
-import { getShops, IShopArr, IShopQuery, IShops } from "@/ultils/api/shop";
+import { getShops, IShopArr, IShopQuery } from "@/ultils/api/shop";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -117,20 +117,22 @@ export default function ShopPage() {
   ];
 
   return (
-    <div className=" ">
+    <div className="bg-secondary-50 dark:bg-secondary-900 text-secondary-900 dark:text-white min-h-screen flex flex-col">
       <NavBar isAuthenticated={isAuthenticated} />
-      <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[30px]">
-        <div className="mx-auto mt[20px]">
-          <Slider slides={slides} loop={true} autoPlay={true} />
-        </div>
+      <main className="flex-1 py-8 mt-[60px] px-4 sm:px-8 lg:px-16">
+        <div className="max-w-7xl mx-auto">
+          {/* Slider */}
+          <div className="mb-8">
+            <Slider slides={slides} loop={true} autoPlay={true} />
+          </div>
 
-        <div>
-          <h2 className="text-xl font-bold text-black sm:text-normal md:text-2xl mt-5">
-            Ưu đãi Hoàn Tiền nổi bật
-          </h2>
-          <div className="flex overflow-x-auto custom-scrollbar pb-[5px] gap-4">
-            {shop?.map((item, i) => {
-              {
+          {/* Featured Shops */}
+          <section className="mb-10">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">
+              Ưu đãi Hoàn Tiền nổi bật
+            </h2>
+            <div className="flex overflow-x-auto custom-scrollbar pb-2 gap-4">
+              {shop?.map((item, i) => {
                 if (i < 5) {
                   return (
                     <ShopCard
@@ -143,34 +145,39 @@ export default function ShopPage() {
                     />
                   );
                 }
-              }
-            })}
-          </div>
-        </div>
-
-        {/* Shop Grid */}
-        <h2 className="text-xl font-bold text-black sm:text-normal md:text-2xl mt-8">
-          Danh sách cửa hàng
-        </h2>
-        <div className="flex flex-wrap justify-around sm:justify-left gap-2 sm:gap-4">
-          {!loading && shop?.length ? (
-            shop?.map((item, i) => (
-              <ShopCard
-                key={i}
-                name={item.shop}
-                src={item.firstProductImg}
-                commission={item.firstProductCommission}
-                link={`/product?shopName=${item.shop}`}
-              />
-            ))
-          ) : (
-            <div className="mx-auto">
-              <Spinner />
-              <p className="text-center">Đang tải ...</p>
+                return null;
+              })}
             </div>
-          )}
+          </section>
+
+          {/* Shop Grid */}
+          <section>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">
+              Danh sách cửa hàng
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {!loading && shop?.length ? (
+                shop?.map((item, i) => (
+                  <ShopCard
+                    key={i}
+                    name={item.shop}
+                    src={item.firstProductImg}
+                    commission={item.firstProductCommission}
+                    link={`/product?shopName=${item.shop}`}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full flex flex-col items-center justify-center py-10">
+                  <Spinner />
+                  <p className="text-center mt-2 text-secondary-500">Đang tải ...</p>
+                </div>
+              )}
+            </div>
+            <div ref={observerRef} className="h-10"></div>
+          </section>
         </div>
-      </section>
+      </main>
+      <Footer />
     </div>
   );
 }

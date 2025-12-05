@@ -1,5 +1,11 @@
 import Link from "next/link";
 import React from "react";
+import {
+  BanknotesIcon,
+  ArrowTrendingUpIcon,
+  WalletIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
 
 interface CashbackCardProps {
   totalCashback: string;
@@ -15,40 +21,68 @@ const CashbackCard: React.FC<CashbackCardProps> = ({
   userId,
 }) => {
   return (
-    <>
-      <div className="  w-full p-6 bg-gradient-to-r from-blue-500 to-blue-700 rounded-xl shadow-md text-white">
-        <div className="flex justify-between items-center mb-4 gap-[20px]">
-          <div className="flex items-center space-x-2">
-            <svg
-              className="w-6 h-6 text-white"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M12 1C5.92487 1 1 5.92487 1 12C1 18.0751 5.92487 23 12 23C18.0751 23 23 18.0751 23 12C23 5.92487 18.0751 1 12 1ZM11 15H13V17H11V15ZM11 7H13V13H11V7Z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <h2 className="text-lg font-semibold">Hoàn Tiền</h2>
+    <div className="relative w-full overflow-hidden rounded-2xl bg-gradient-to-br from-primary-500 via-primary-600 to-accent-500 p-6 shadow-card-lg">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white rounded-full blur-3xl transform translate-x-10 -translate-y-10" />
+        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white rounded-full blur-3xl transform -translate-x-10 translate-y-10" />
+      </div>
+
+      {/* Glass Effect Overlay */}
+      <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px]" />
+
+      <div className="relative">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <BanknotesIcon className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">Hoàn Tiền</h2>
+              <p className="text-sm text-white/70">Tổng tiền hoàn đã nhận</p>
+            </div>
           </div>
-          <p style={{ fontSize: "12px" }}>Tổng Tiền Hoàn đã nhận</p>
+          <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm">
+            <ArrowTrendingUpIcon className="w-4 h-4 text-success-300" />
+            <span className="text-xs font-medium text-white">Active</span>
+          </div>
         </div>
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-2xl font-bold">{totalCashback}</p>
+
+        {/* Total Cashback Amount */}
+        <div className="mb-6">
+          <p className="text-4xl font-bold text-white tracking-tight">
+            {totalCashback}
+          </p>
         </div>
-        <div className="flex justify-between items-center flex-wrap">
-          <p className="text-sm">Số dư khả dụng: {availableBalance}</p>
+
+        {/* Divider */}
+        <div className="h-px bg-white/20 mb-6" />
+
+        {/* Available Balance & Withdraw Button */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <WalletIcon className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <p className="text-xs text-white/70">Số dư khả dụng</p>
+              <p className="text-lg font-semibold text-white">
+                {availableBalance}
+              </p>
+            </div>
+          </div>
+
           <Link
             href={`/profile/${userId}`}
-            className="bg-white text-blue-700 font-bold py-2 px-4 rounded-lg shadow"
+            className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-primary-600 font-semibold shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all"
           >
-            Rút Tiền
+            <span>Rút Tiền</span>
+            <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

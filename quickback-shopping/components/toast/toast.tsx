@@ -1,4 +1,10 @@
 import { useEffect, useState } from "react";
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  XCircleIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 
 interface IToast {
   type: "success" | "warning" | "error";
@@ -16,7 +22,7 @@ export default function Toast(props: IToast) {
         setIsExiting(true);
         setTimeout(() => {
           props.onClose && props.onClose();
-        }, 1000);
+        }, 300);
       }, 3000);
 
       return () => clearTimeout(timer);
@@ -25,95 +31,91 @@ export default function Toast(props: IToast) {
     setIsExiting(true);
   }, [props.isHidden, props.onClose, props.content]);
 
-  const getTypeStyles = () => {
+  const getTypeConfig = () => {
     switch (props.type) {
       case "error":
-        return "bg-red-100 text-red-500 dark:bg-red-800 dark:text-red-200";
+        return {
+          bgClass: "bg-error-50 dark:bg-error-900/20",
+          borderClass: "border-error-200 dark:border-error-800",
+          iconBgClass: "bg-error-100 dark:bg-error-900/40",
+          iconClass: "text-error-500",
+          textClass: "text-error-800 dark:text-error-200",
+          icon: XCircleIcon,
+        };
       case "warning":
-        return "bg-yellow-100 text-yellow-500 dark:bg-yellow-800 dark:text-yellow-200";
+        return {
+          bgClass: "bg-warning-50 dark:bg-warning-900/20",
+          borderClass: "border-warning-200 dark:border-warning-800",
+          iconBgClass: "bg-warning-100 dark:bg-warning-900/40",
+          iconClass: "text-warning-500",
+          textClass: "text-warning-800 dark:text-warning-200",
+          icon: ExclamationTriangleIcon,
+        };
       case "success":
-        return "bg-green-100 text-green-500 dark:bg-green-800 dark:text-green-200";
       default:
-        return "bg-white text-gray-500 dark:bg-gray-800 dark:text-gray-400";
+        return {
+          bgClass: "bg-success-50 dark:bg-success-900/20",
+          borderClass: "border-success-200 dark:border-success-800",
+          iconBgClass: "bg-success-100 dark:bg-success-900/40",
+          iconClass: "text-success-500",
+          textClass: "text-success-800 dark:text-success-200",
+          icon: CheckCircleIcon,
+        };
     }
   };
 
+  const config = getTypeConfig();
+  const IconComponent = config.icon;
+
   return (
     <div
-      className={`min-w-[240px] flex items-center p-4 mb-4 rounded-lg shadow ${
-        isExiting ? "toast-exit" : "toast-enter"
-      } ${getTypeStyles()}`}
+      className={`
+        min-w-[300px] max-w-md
+        flex items-center gap-3
+        p-4
+        rounded-xl
+        border
+        shadow-card-lg
+        backdrop-blur-sm
+        ${config.bgClass}
+        ${config.borderClass}
+        ${isExiting ? "toast-exit" : "toast-enter"}
+      `}
       role="alert"
     >
+      {/* Icon Container */}
       <div
-        className={`inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg ${getTypeStyles()}`}
+        className={`
+          flex-shrink-0
+          w-10 h-10
+          rounded-xl
+          flex items-center justify-center
+          ${config.iconBgClass}
+        `}
       >
-        {props.type === "error" ? (
-          <>
-            <svg
-              className="w-5 h-5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 11.793a1 1 0 1 1-1.414 1.414L10 11.414l-2.293 2.293a1 1 0 0 1-1.414-1.414L8.586 10 6.293 7.707a1 1 0 0 1 1.414-1.414L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414Z" />
-            </svg>
-            <span className="sr-only">Error icon</span>
-          </>
-        ) : props.type === "warning" ? (
-          <>
-            <svg
-              className="w-5 h-5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM10 15a1 1 0 1 1 0-2 1 1 0 0 1 0 2Zm1-4a1 1 0 0 1-2 0V6a1 1 0 0 1 2 0v5Z" />
-            </svg>
-            <span className="sr-only">Warning icon</span>
-          </>
-        ) : (
-          <>
-            <svg
-              className="w-5 h-5"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z" />
-            </svg>
-            <span className="sr-only">Check icon</span>
-          </>
-        )}
+        <IconComponent className={`w-5 h-5 ${config.iconClass}`} />
       </div>
-      <div className="ms-3 text-sm font-normal overflow-hidden">
+
+      {/* Content */}
+      <div className={`flex-1 text-sm font-medium ${config.textClass}`}>
         {props.content}
       </div>
+
+      {/* Close Button */}
       <button
         type="button"
-        className="ms-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+        className={`
+          flex-shrink-0
+          p-1.5
+          rounded-lg
+          ${config.textClass}
+          hover:bg-secondary-200/50 dark:hover:bg-secondary-700/50
+          transition-colors
+        `}
         aria-label="Close"
         onClick={() => setIsExiting(true)}
       >
-        <span className="sr-only">Close</span>
-        <svg
-          className="w-3 h-3"
-          aria-hidden="true"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 14 14"
-        >
-          <path
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-          />
-        </svg>
+        <XMarkIcon className="w-4 h-4" />
       </button>
     </div>
   );

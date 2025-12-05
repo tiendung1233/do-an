@@ -8,6 +8,11 @@ import {
   useState,
 } from "react";
 import { useRouter } from "next/navigation";
+import {
+  MagnifyingGlassIcon,
+  ChevronDownIcon,
+  TagIcon,
+} from "@heroicons/react/24/outline";
 
 interface IAutoComplete {
   categories?: string[];
@@ -23,6 +28,7 @@ interface IAutoComplete {
 const AutoCompleteSearch = (props: IAutoComplete) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [searchValue, setSearchValue] = useState(props.value || "");
+  const [isFocused, setIsFocused] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const router = useRouter();
@@ -72,6 +78,7 @@ const AutoCompleteSearch = (props: IAutoComplete) => {
     } else {
       router.push(`/product?${params.toString()}`);
     }
+    setShowDropdown(false);
   };
 
   useEffect(() => {
@@ -82,92 +89,122 @@ const AutoCompleteSearch = (props: IAutoComplete) => {
   }, []);
 
   return (
-    <div className={`py-2 px-2`} style={props.styles}>
+    <div className="py-2 px-2" style={props.styles}>
       <form onSubmit={handleSearch} className="flex relative">
+        {/* Category Dropdown Button */}
         {!props.isHiddenCategory && (
           <>
             <button
               ref={buttonRef}
               id="dropdown-button"
-              className="flex-shrink-0 z-1 inline-flex items-center py-2.5 px-4 text-sm font-medium text-center text-gray-900 bg-gray-100 border border-e-0 border-gray-300 dark:border-gray-700 dark:text-white rounded-s-lg hover:bg-gray-200 focus:ring-4 focus:outline-none focus:ring-gray-300 dark:bg-gray-600 dark:hover:bg-gray-700 dark:focus:ring-gray-800"
-              type="submit"
+              className={`
+                flex-shrink-0 z-10
+                inline-flex items-center gap-2
+                py-3 px-4
+                text-sm font-medium
+                text-secondary-700 dark:text-secondary-300
+                bg-secondary-100 dark:bg-secondary-800
+                border-2 border-r-0
+                ${
+                  isFocused
+                    ? "border-primary-500 dark:border-primary-500"
+                    : "border-secondary-200 dark:border-secondary-700"
+                }
+                rounded-l-xl
+                hover:bg-secondary-200 dark:hover:bg-secondary-700
+                transition-all duration-200
+              `}
+              type="button"
               onClick={() => setShowDropdown(!showDropdown)}
             >
-              Danh mục{" "}
-              <svg
-                className="w-2.5 h-2.5 ms-2.5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 10 6"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="m1 1 4 4 4-4"
-                />
-              </svg>
+              <TagIcon className="w-4 h-4" />
+              <span className="hidden sm:inline">Danh mục</span>
+              <ChevronDownIcon
+                className={`w-4 h-4 transition-transform duration-200 ${
+                  showDropdown ? "rotate-180" : ""
+                }`}
+              />
             </button>
+
+            {/* Category Dropdown Menu */}
             {showDropdown && (
               <div
                 id="dropdown"
-                className="w-full absolute top-[50px] z-[1000] bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700"
                 ref={dropdownRef}
+                className="absolute top-full left-0 mt-2 z-[1000] w-full max-w-md bg-white dark:bg-secondary-800 rounded-xl border border-secondary-200 dark:border-secondary-700 shadow-card-lg overflow-hidden animate-scale-in"
               >
-                <ul
-                  className="py-3 px-1 text-sm text-gray-700 dark:text-gray-200 flex gap-1 justify-start flex-wrap nav-enter"
-                  aria-labelledby="dropdown-button"
-                >
-                  {props.categories?.map((item, i) => (
-                    <li
-                      className="cursor-pointer underline"
-                      key={i}
-                      onClick={() => {
-                        handleClickCate(item);
-                      }}
-                    >
-                      <div className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-secondary-500 dark:text-secondary-400 uppercase tracking-wider mb-3 px-2">
+                    Chọn danh mục
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {props.categories?.map((item, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => handleClickCate(item)}
+                        className="px-3 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-300 bg-secondary-100 dark:bg-secondary-700 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/30 hover:text-primary-600 dark:hover:text-primary-400 transition-all"
+                      >
                         {item}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </>
         )}
 
+        {/* Search Input Container */}
         <div className="relative w-full">
           <input
             type="search"
             id="search-dropdown"
-            className="block p-2.5 w-full z-2 text-sm text-gray-900 bg-gray-50 rounded-e-lg rounded-s-gray-100 rounded-s-2 border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:border-blue-500"
-            placeholder={props.placeholder || "Tìm kiếm"}
+            className={`
+              block w-full
+              py-3 px-4
+              ${props.isHiddenCategory ? "rounded-xl" : "rounded-r-xl rounded-l-none"}
+              text-sm
+              text-secondary-900 dark:text-white
+              bg-white dark:bg-secondary-800
+              border-2
+              ${
+                isFocused
+                  ? "border-primary-500 dark:border-primary-500 ring-4 ring-primary-500/20"
+                  : "border-secondary-200 dark:border-secondary-700"
+              }
+              ${!props.isHiddenCategory ? "border-l-0" : ""}
+              placeholder:text-secondary-400 dark:placeholder:text-secondary-500
+              focus:outline-none
+              transition-all duration-200
+              pr-12
+            `}
+            placeholder={props.placeholder || "Tìm kiếm sản phẩm..."}
             value={searchValue}
             onChange={handleInputChange}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
           />
+
+          {/* Search Button */}
           <button
             onClick={handleSearch}
             type="submit"
-            className="absolute top-0 end-0 p-2.5 h-full text-sm font-medium text-white bg-blue-700 rounded-e-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+            className={`
+              absolute top-1/2 -translate-y-1/2 right-1.5
+              p-2.5
+              rounded-lg
+              text-white
+              bg-gradient-to-r from-primary-500 to-primary-600
+              hover:from-primary-600 hover:to-primary-700
+              shadow-primary-sm hover:shadow-primary
+              transition-all duration-200
+              hover:scale-105
+              active:scale-95
+            `}
           >
-            <svg
-              className="w-4 h-4"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 20 20"
-            >
-              <path
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-              />
-            </svg>
+            <MagnifyingGlassIcon className="w-4 h-4" />
+            <span className="sr-only">Tìm kiếm</span>
           </button>
         </div>
       </form>

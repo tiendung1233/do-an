@@ -144,17 +144,19 @@ export default function HistoryPage() {
   }, [activeId]);
 
   return (
-    <div className=" ">
+    <div className="bg-secondary-50 dark:bg-secondary-900 text-secondary-900 dark:text-white min-h-screen flex flex-col">
       <NavBar isAuthenticated={isAuthenticated} />
-      <div className="bg-gray-100 dark:bg-gray-800 py-8 mt-[30px] px-4 h-full min-h-screen">
-        <h2 className="mt-[20px] text-center">Lịch sử</h2>
-        <Tabs
-          tabs={tabs}
-          onTabClick={handleTabClick}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
-      </div>
+      <main className="flex-1 py-8 mt-[60px] px-4 sm:px-8 lg:px-16">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8">Lịch sử</h2>
+          <Tabs
+            tabs={tabs}
+            onTabClick={handleTabClick}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
+      </main>
       <Footer />
     </div>
   );

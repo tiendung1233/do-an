@@ -202,13 +202,13 @@ const UserDetailInfo = () => {
   }
 
   return (
-    <div className=" ">
+    <div className="bg-secondary-50 dark:bg-secondary-900 text-secondary-900 dark:text-white min-h-screen flex flex-col">
       <NavBar isAuthenticated={isAuthenticated.isAuthenticated} />
       {formData?.email ? (
-        <div className="  mx-auto p-4 px-6 mt-[120px] h-full min-h-screen">
+        <main className="flex-1 mx-auto p-4 px-4 sm:px-8 lg:px-16 mt-[80px] w-full max-w-7xl">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Profile Card */}
-            <div className="w-full md:w-1/3 bg-white rounded-lg shadow p-4">
+            <div className="w-full md:w-1/3 bg-white dark:bg-secondary-800 rounded-2xl shadow-card p-6 border border-secondary-200/50 dark:border-secondary-700/50">
               <div className="flex flex-col items-center">
                 <img
                   className="w-24 h-24 rounded-full"
@@ -227,7 +227,7 @@ const UserDetailInfo = () => {
             </div>
 
             {/* Account Details */}
-            <div className="w-full md:w-2/3 bg-white rounded-lg shadow p-4">
+            <div className="w-full md:w-2/3 bg-white dark:bg-secondary-800 rounded-2xl shadow-card p-6 border border-secondary-200/50 dark:border-secondary-700/50">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Thông tin chi tiết</h3>
                 <div className="flex gap-3">
@@ -305,7 +305,7 @@ const UserDetailInfo = () => {
           </div>
 
           {/* Bank Details */}
-          <div className="mt-4 bg-white rounded-lg shadow p-4">
+          <div className="mt-4 bg-white dark:bg-secondary-800 rounded-2xl shadow-card p-6 border border-secondary-200/50 dark:border-secondary-700/50">
             <h3 className="text-lg font-semibold mb-4">
               Ngân hàng & phần thưởng
             </h3>
@@ -363,8 +363,8 @@ const UserDetailInfo = () => {
           </div>
 
           {isPopupOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[99999]">
-              <div className="bg-white p-6 rounded-lg shadow-lg">
+            <div className="fixed inset-0 bg-secondary-900/60 backdrop-blur-sm flex items-center justify-center z-[99999]">
+              <div className="bg-white dark:bg-secondary-800 p-6 rounded-2xl shadow-2xl border border-secondary-200/50 dark:border-secondary-700/50">
                 <h2 className="text-lg font-semibold mb-4">Chọn ảnh mới</h2>
                 <div className="grid grid-cols-3 gap-4">
                   {avaList.map((url) => (
@@ -378,7 +378,7 @@ const UserDetailInfo = () => {
                   ))}
                 </div>
                 <button
-                  className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+                  className="mt-4 px-4 py-2 rounded-xl bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-300 font-semibold hover:bg-secondary-200 dark:hover:bg-secondary-600 transition-colors"
                   onClick={() => setIsPopupOpen(false)}
                 >
                   Đóng
@@ -459,9 +459,11 @@ const UserDetailInfo = () => {
               </div>
             </BaseModal>
           )}
-        </div>
+        </main>
       ) : (
-        <Spinner />
+        <div className="flex-1 flex items-center justify-center">
+          <Spinner />
+        </div>
       )}
       <Footer />
     </div>

@@ -10,6 +10,7 @@ import React, {
 import ProductCard from "@/components/card/product-card";
 import Slider from "@/components/slider/slider";
 import NavBar from "@/layout/app/navbar";
+import Footer from "@/layout/app/footer";
 import useAuth from "@/hook/useAuth";
 import AccesstradeWidget from "@/components/acesstrade/accesstradeWidget";
 import { getProduct, IProduct, IProductQuery } from "@/ultils/api/product";
@@ -153,107 +154,120 @@ export default function ProductListPage() {
 
   return (
     <Suspense fallback={loading}>
-      <div className=" ">
+      <div className="bg-secondary-50 dark:bg-secondary-900 text-secondary-900 dark:text-white min-h-screen flex flex-col">
         <NavBar isAuthenticated={isAuthenticated} />
-        <section className="py-6 px-4 bg-gray-100 h-full min-h-screen overflow-hidden overflow-y-scroll mt-[30px]">
-          <div className="mx-auto mt-[20px]">
-            <Slider slides={slides} loop={true} autoPlay={true} />
-          </div>
+        <main className="flex-1 py-8 mt-[60px] px-4 sm:px-8 lg:px-16">
+          <div className="max-w-7xl mx-auto">
+            {/* Slider */}
+            <div className="mb-8">
+              <Slider slides={slides} loop={true} autoPlay={true} />
+            </div>
 
-          <div className="my-4">
-            <AccesstradeWidget />
-          </div>
+            {/* Widgets */}
+            <div className="my-4">
+              <AccesstradeWidget />
+            </div>
 
-          <div className="my-4">
-            <MediaMartWidget />
-          </div>
+            <div className="my-4">
+              <MediaMartWidget />
+            </div>
 
-          <div className="flex overflow-x-auto custom-scrollbar pb-[5px] mb-[20px]">
-            <button
-              className={`flex-shrink-0 py-2 px-4 ${sort === "newest"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-200 text-black"
-                } rounded`}
-              onClick={() => handleSortChange("newest")}
-            >
-              Mới nhất
-            </button>
-            <button
-              className={`flex-shrink-0 py-2 px-4 ${sort === "sales"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-200 text-black"
-                } rounded`}
-              onClick={() => handleSortChange("sales")}
-            >
-              Bán chạy
-            </button>
-            <button
-              className={`flex-shrink-0 py-2 px-4 ${sort === "price-asc"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-200 text-black"
-                } rounded`}
-              onClick={() => handleSortChange("price-asc")}
-            >
-              Giá rẻ nhất
-            </button>
-            <button
-              className={`flex-shrink-0 py-2 px-4 ${sort === "price-desc"
-                ? "bg-primary-600 text-white"
-                : "bg-gray-200 text-black"
-                } rounded`}
-              onClick={() => handleSortChange("price-desc")}
-            >
-              Giá cao nhất
-            </button>
-          </div>
+            {/* Sort Filters */}
+            <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-2 mb-6">
+              <button
+                className={`flex-shrink-0 py-2 px-4 rounded-xl text-sm font-medium transition-all ${
+                  sort === "newest"
+                    ? "bg-primary-600 text-white shadow-primary-sm"
+                    : "bg-white dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-700 hover:border-primary-300"
+                }`}
+                onClick={() => handleSortChange("newest")}
+              >
+                Mới nhất
+              </button>
+              <button
+                className={`flex-shrink-0 py-2 px-4 rounded-xl text-sm font-medium transition-all ${
+                  sort === "sales"
+                    ? "bg-primary-600 text-white shadow-primary-sm"
+                    : "bg-white dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-700 hover:border-primary-300"
+                }`}
+                onClick={() => handleSortChange("sales")}
+              >
+                Bán chạy
+              </button>
+              <button
+                className={`flex-shrink-0 py-2 px-4 rounded-xl text-sm font-medium transition-all ${
+                  sort === "price-asc"
+                    ? "bg-primary-600 text-white shadow-primary-sm"
+                    : "bg-white dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-700 hover:border-primary-300"
+                }`}
+                onClick={() => handleSortChange("price-asc")}
+              >
+                Giá rẻ nhất
+              </button>
+              <button
+                className={`flex-shrink-0 py-2 px-4 rounded-xl text-sm font-medium transition-all ${
+                  sort === "price-desc"
+                    ? "bg-primary-600 text-white shadow-primary-sm"
+                    : "bg-white dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300 border border-secondary-200 dark:border-secondary-700 hover:border-primary-300"
+                }`}
+                onClick={() => handleSortChange("price-desc")}
+              >
+                Giá cao nhất
+              </button>
+            </div>
 
-          <div className="max-w-[150px] pb-5">
-            <BasicButton
-              text="Reset bộ lọc"
-              variant="plain"
-              onClick={async () => {
-                window.history.replaceState(
-                  null,
-                  "",
-                  window.location.pathname.toString()
-                );
-                setHasMore(true);
-                await fetchMoreProducts();
-              }}
-            />
-          </div>
+            {/* Reset Button */}
+            <div className="mb-6">
+              <BasicButton
+                text="Reset bộ lọc"
+                variant="secondary"
+                onClick={async () => {
+                  window.history.replaceState(
+                    null,
+                    "",
+                    window.location.pathname.toString()
+                  );
+                  setHasMore(true);
+                  await fetchMoreProducts();
+                }}
+              />
+            </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 sm:justify-left gap-2 sm:gap-4 mt-2">
-            {products && products?.length > 0 ? (
-              products?.map((item, i) => (
-                <ProductCard
-                  key={i}
-                  cost={item.price}
-                  name={item.name}
-                  shop={item.shop}
-                  link={`${item.link}?utm_source=${userId}`}
-                  src={item.img || "/img_no_img.jpg"}
-                  commission={item.commission}
-                />
-              ))
-            ) : (
-              <div className="flex justify-center items-center flex-col mt-4">
-                {!loading && (
-                  <p className="p-2 text-black">Không tìm thấy sản phẩm</p>
-                )}
+            {/* Products Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
+              {products && products?.length > 0 ? (
+                products?.map((item, i) => (
+                  <ProductCard
+                    key={i}
+                    cost={item.price}
+                    name={item.name}
+                    shop={item.shop}
+                    link={`${item.link}?utm_source=${userId}`}
+                    src={item.img || "/img_no_img.jpg"}
+                    commission={item.commission}
+                  />
+                ))
+              ) : (
+                <div className="col-span-full flex justify-center items-center flex-col py-10">
+                  {!loading && (
+                    <p className="text-secondary-500">Không tìm thấy sản phẩm</p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Loading State */}
+            {loading && (
+              <div className="flex justify-center items-center flex-col py-10">
+                <Spinner />
+                <p className="mt-2 text-secondary-500">Đang tải sản phẩm...</p>
               </div>
             )}
+
+            <div ref={observerRef} className="h-10"></div>
           </div>
-
-          {loading && (
-            <div className="flex justify-center items-center flex-col mt-4">
-              <Spinner />
-              <p className="p-2 text-black">Đang tải sản phẩm...</p>
-            </div>
-          )}
-
-          <div ref={observerRef} className="h-10"></div>
-        </section>
+        </main>
+        <Footer />
       </div>
     </Suspense>
   );
