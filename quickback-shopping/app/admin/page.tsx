@@ -73,19 +73,18 @@ const navigationList = [
     current: false,
     type: "report",
   },
+  {
+    name: "Chat hỗ trợ",
+    href: "#",
+    icon: ChatBubbleLeftRightIcon,
+    current: false,
+    type: "chat",
+  },
 ];
 
 const teams = [
   {
     id: 1,
-    name: "Tin nhắn",
-    href: "http://localhost:3001",
-    icon: ChatBubbleLeftRightIcon,
-    current: false,
-    type: "",
-  },
-  {
-    id: 2,
     name: "Thông tin",
     href: "/our",
     icon: InformationCircleIcon,
@@ -93,7 +92,7 @@ const teams = [
     type: "info",
   },
   {
-    id: 3,
+    id: 2,
     name: "Hướng dẫn",
     href: "/policy",
     icon: BookOpenIcon,

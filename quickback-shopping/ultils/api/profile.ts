@@ -98,3 +98,59 @@ export const addUser = async (
 export const deleteUser = async (token: string, id: string): Promise<any> => {
   return apiCall<any>(`/api/user/admin-del-users/${id}`, "DELETE", undefined, token);
 };
+
+export interface ImportUsersResult {
+  success: number;
+  failed: number;
+  errors: { row: number; email: string; reason: string }[];
+}
+
+export interface ImportUsersResponse {
+  message: string;
+  results: ImportUsersResult;
+}
+
+export const importUsers = async (
+  token: string,
+  file: File
+): Promise<ImportUsersResponse> => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(
+    "http://localhost:5001/api/user/admin-import-users",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    }
+  );
+
+  return response.json();
+};
+
+export const downloadImportTemplate = async (token: string): Promise<void> => {
+  const response = await fetch(
+    "http://localhost:5001/api/user/admin-import-template",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (response.ok) {
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "import_users_template.xlsx";
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  }
+};

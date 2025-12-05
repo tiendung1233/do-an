@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteWithdrawHistory = exports.getWithdrawHistory = exports.createWithdraw = void 0;
+exports.getAllWithdrawHistory = exports.deleteWithdrawHistory = exports.getWithdrawHistory = exports.createWithdraw = void 0;
 const withdrawHistory_model_1 = __importDefault(require("../models/withdrawHistory.model"));
 const user_model_1 = __importDefault(require("../models/user.model"));
 const createWithdraw = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -77,3 +77,49 @@ const deleteWithdrawHistory = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.deleteWithdrawHistory = deleteWithdrawHistory;
+const getAllWithdrawHistory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const currentUser = yield user_model_1.default.findById(req.user._id).select("role");
+        if (!currentUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+        if ((currentUser === null || currentUser === void 0 ? void 0 : currentUser.role) <= 0) {
+            return res.status(403).json({ message: "Permission denied" });
+        }
+        const { search, page = 1, limit = 10 } = req.query;
+        const filter = {};
+        if (search) {
+            const searchRegex = new RegExp(search, "i");
+            const users = yield user_model_1.default.find({
+                $or: [{ email: searchRegex }, { accountBank: searchRegex }],
+            }).select("_id");
+            const userIds = users.map((user) => user._id);
+            if (userIds.length > 0) {
+                filter.userId = { $in: userIds };
+            }
+            else {
+                return res.status(200).json({ data: [], total: 0 });
+            }
+        }
+        const skip = (Number(page) - 1) * Number(limit);
+        const [withdrawHistories, total] = yield Promise.all([
+            withdrawHistory_model_1.default.find(filter)
+                .populate("userId", "email accountBank")
+                .sort({ withdrawDate: -1 })
+                .skip(skip)
+                .limit(Number(limit)),
+            withdrawHistory_model_1.default.countDocuments(filter),
+        ]);
+        res.status(200).json({
+            data: withdrawHistories,
+            total,
+            page: Number(page),
+            limit: Number(limit),
+        });
+    }
+    catch (error) {
+        console.error("Error fetching withdraw history:", error);
+        res.status(500).json({ message: "Server error, please try again later." });
+    }
+});
+exports.getAllWithdrawHistory = getAllWithdrawHistory;

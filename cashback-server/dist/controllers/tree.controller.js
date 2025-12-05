@@ -63,7 +63,8 @@ const waterTree = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const now = new Date();
         const oneDay = 24 * 60 * 60 * 1000;
         if (now.getTime() - tree.lastWateredAt.getTime() < oneDay &&
-            !payForExtraWatering) {
+            !payForExtraWatering &&
+            tree.waterings > 0) {
             return res
                 .status(400)
                 .json({ message: "You can only water the tree once a day for free." });

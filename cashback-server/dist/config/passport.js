@@ -28,6 +28,7 @@ passport_1.default.use(new passport_google_oauth20_1.Strategy({
                 email: profile.emails[0].value,
                 name: profile.displayName,
                 googleId: profile.id,
+                isVerified: true,
             });
         }
         const token = (0, generateToken_1.default)(user._id);

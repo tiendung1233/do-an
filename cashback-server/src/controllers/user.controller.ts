@@ -3,6 +3,7 @@ import User from "../models/user.model";
 import jwt from "jsonwebtoken";
 import validator from "validator";
 import { sendResetPasswordEmail } from "../ultils/sendEmail";
+import * as XLSX from "xlsx";
 
 export const getUserProfile = async (req: Request, res: Response) => {
   try {
@@ -286,6 +287,169 @@ export const createUser = async (req: Request, res: Response) => {
       .json({ message: "User created successfully.", user: newUser });
   } catch (error) {
     console.error("Error creating user:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+// Import users from CSV/XLSX file
+export const importUsers = async (req: Request, res: Response) => {
+  try {
+    if (!req.user || (req.user as any).role <= 0) {
+      return res.status(403).json({ error: "Forbidden: Insufficient role" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded." });
+    }
+
+    const workbook = XLSX.read(req.file.buffer, { type: "buffer" });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data: any[] = XLSX.utils.sheet_to_json(worksheet);
+
+    if (!data || data.length === 0) {
+      return res.status(400).json({ message: "File is empty or invalid format." });
+    }
+
+    const results = {
+      success: 0,
+      failed: 0,
+      errors: [] as { row: number; email: string; reason: string }[],
+    };
+
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const rowNumber = i + 2; // +2 because row 1 is header, and array is 0-indexed
+
+      try {
+        // Validate required fields
+        const email = row.email || row.Email || row.EMAIL;
+        const name = row.name || row.Name || row.NAME || row["Họ tên"] || row["Ho ten"];
+        const password = row.password || row.Password || row.PASSWORD || "123456";
+
+        if (!email) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            email: "N/A",
+            reason: "Email is required",
+          });
+          continue;
+        }
+
+        if (!validator.isEmail(email)) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            email,
+            reason: "Invalid email format",
+          });
+          continue;
+        }
+
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          results.failed++;
+          results.errors.push({
+            row: rowNumber,
+            email,
+            reason: "Email already exists",
+          });
+          continue;
+        }
+
+        // Create new user
+        const newUser = new User({
+          name: name || email.split("@")[0],
+          email,
+          password,
+          phoneNumber: row.phoneNumber || row.PhoneNumber || row["Số điện thoại"] || row["SDT"] || "",
+          address: row.address || row.Address || row["Địa chỉ"] || "",
+          city: row.city || row.City || row["Thành phố"] || "",
+          bankName: row.bankName || row.BankName || row["Ngân hàng"] || "",
+          accountBank: row.accountBank || row.AccountBank || row["Số tài khoản"] || row["STK"] || "",
+          money: parseFloat(row.money || row.Money || row["Số dư"] || "0") || 0,
+          total: parseFloat(row.total || row.Total || row["Tổng tiền"] || "0") || 0,
+          isVerified: true,
+          role: 0,
+        });
+
+        await newUser.save();
+        results.success++;
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push({
+          row: rowNumber,
+          email: row.email || row.Email || "N/A",
+          reason: error.message || "Unknown error",
+        });
+      }
+    }
+
+    res.status(200).json({
+      message: `Import completed. Success: ${results.success}, Failed: ${results.failed}`,
+      results,
+    });
+  } catch (error) {
+    console.error("Error importing users:", error);
+    res.status(500).json({ message: "Server error. Please try again later." });
+  }
+};
+
+// Download sample template for import
+export const downloadImportTemplate = async (req: Request, res: Response) => {
+  try {
+    if (!req.user || (req.user as any).role <= 0) {
+      return res.status(403).json({ error: "Forbidden: Insufficient role" });
+    }
+
+    const templateData = [
+      {
+        email: "example@email.com",
+        name: "Nguyễn Văn A",
+        password: "123456",
+        phoneNumber: "0901234567",
+        address: "123 Đường ABC",
+        city: "Hồ Chí Minh",
+        bankName: "Vietcombank",
+        accountBank: "1234567890",
+        money: 0,
+        total: 0,
+      },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Users");
+
+    // Set column widths
+    worksheet["!cols"] = [
+      { wch: 25 }, // email
+      { wch: 20 }, // name
+      { wch: 15 }, // password
+      { wch: 15 }, // phoneNumber
+      { wch: 30 }, // address
+      { wch: 15 }, // city
+      { wch: 20 }, // bankName
+      { wch: 20 }, // accountBank
+      { wch: 10 }, // money
+      { wch: 10 }, // total
+    ];
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="import_users_template.xlsx"'
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    res.send(buffer);
+  } catch (error) {
+    console.error("Error generating template:", error);
     res.status(500).json({ message: "Server error. Please try again later." });
   }
 };

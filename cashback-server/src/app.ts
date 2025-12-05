@@ -9,6 +9,8 @@ import gardenRoutes from "./routes/tree.routes";
 import productRoutes from "./routes/product.routes";
 import shopRoutes from "./routes/shop.routes";
 import purchaseHistoryRoutes from "./routes/purchaseHistory.routes";
+import chatRoutes from "./routes/chat.routes";
+import leaderboardRoutes from "./routes/leaderboard.routes";
 import passport from "passport";
 import session from "express-session";
 import cors from "cors";
@@ -57,5 +59,7 @@ app.use("/api/garden", gardenRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/shop", shopRoutes);
 app.use("/api/purchase-history", purchaseHistoryRoutes);
+app.use("/api/chat", chatRoutes);
+app.use("/api/leaderboard", leaderboardRoutes);
 
 export default app;

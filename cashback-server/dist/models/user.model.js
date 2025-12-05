@@ -43,12 +43,15 @@ const UserSchema = new mongoose_1.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String },
     accountBank: { type: String },
+    bankName: { type: String },
     googleId: { type: String },
-    phoneNumber: { type: String },
+    phoneNumber: { type: String, unique: true },
     address: { type: String },
     city: { type: String },
     inviteCode: { type: String },
+    image: { type: String, default: null },
     money: { type: Number, default: 0 },
+    total: { type: Number, default: 0 },
     trees: [tree_model_1.TreeSchema],
     freeSpins: { type: Number, default: 1 },
     lastSpinDate: { type: Date },
@@ -58,6 +61,19 @@ const UserSchema = new mongoose_1.Schema({
     moneyByEvent: {
         tree: { type: Number, default: 0 },
         wheel: { type: Number, default: 0 },
+    },
+    isVerified: { type: Boolean, default: false },
+    verificationRequestsCount: {
+        type: Number,
+        default: 0,
+    },
+    lastVerificationRequest: {
+        type: Date,
+        default: null,
+    },
+    role: {
+        type: Number,
+        default: 0,
     },
 }, {
     timestamps: true,

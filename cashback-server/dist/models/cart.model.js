@@ -16,16 +16,18 @@ const CartSchema = new mongoose_1.Schema({
         required: true,
     },
     price: {
-        type: Number,
+        type: String,
         required: true,
     },
     productLink: {
         type: String,
         required: true,
     },
+    productImg: {
+        type: String,
+    },
     cashbackPercentage: {
         type: Number,
-        required: true,
     },
     quantity: {
         type: Number,

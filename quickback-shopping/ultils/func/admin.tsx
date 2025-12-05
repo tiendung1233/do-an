@@ -1,3 +1,4 @@
+import ChatAdmin from "@/layout/admin/chat-admin";
 import Dashboard from "@/layout/admin/dashboard";
 import InfoAdmin from "@/layout/admin/info-admin";
 import ProductAdmin from "@/layout/admin/product-admin";
@@ -26,5 +27,7 @@ export function viewAdmin(
       return <InfoAdmin />;
     case "product":
       return <ProductAdmin />;
+    case "chat":
+      return <ChatAdmin />;
   }
 }

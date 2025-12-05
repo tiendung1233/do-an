@@ -16,11 +16,10 @@ exports.getCart = exports.removeFromCart = exports.updateCartQuantity = exports.
 const cart_model_1 = __importDefault(require("../models/cart.model"));
 const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { productName, price, productLink, cashbackPercentage, quantity, productId, } = req.body;
+        const { productName, price, productLink, cashbackPercentage, quantity, productId, productImg, } = req.body;
         if (!productName ||
             !price ||
             !productLink ||
-            !cashbackPercentage ||
             !quantity ||
             !productId) {
             return res
@@ -49,6 +48,7 @@ const addToCart = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 cashbackPercentage,
                 quantity,
                 productId,
+                productImg,
             });
             return res.status(201).json({
                 message: "Product added to cart successfully.",
