@@ -1,10 +1,11 @@
 import { Request, Response } from "express";
-import User from "../models/user.model";
+import User, { generateReferralCode } from "../models/user.model";
 import generateToken from "../ultils/generateToken";
 import jwt from "jsonwebtoken";
 import BlacklistToken from "../models/blackList.model";
 import validator from "validator";
 import { sendVerificationEmail } from "../ultils/sendEmail";
+import ReferralReward, { getRewardAmount } from "../models/referralReward.model";
 
 export const verifyToken = async (req: Request, res: Response) => {
   const token = req.body.token;
@@ -33,7 +34,7 @@ export const verifyToken = async (req: Request, res: Response) => {
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
-    const { email, password, name, accountBank } = req.body;
+    const { email, password, name, accountBank, referralCode } = req.body;
 
     if (!email || !password || !name) {
       return res.status(400).json({
@@ -50,15 +51,56 @@ export const registerUser = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Xử lý mã giới thiệu
+    let referrerId = null;
+    let referrer = null;
+    if (referralCode) {
+      referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+      if (referrer) {
+        referrerId = referrer._id;
+      }
+    }
+
+    // Tạo mã giới thiệu unique cho user mới
+    let newReferralCode = generateReferralCode();
+    let attempts = 0;
+    while (attempts < 100) {
+      const existing = await User.findOne({ referralCode: newReferralCode });
+      if (!existing) break;
+      newReferralCode = generateReferralCode();
+      attempts++;
+    }
+
     const user = await User.create({
       email,
       password,
       name,
       accountBank,
       isVerified: false,
+      referralCode: newReferralCode,
+      referredBy: referrerId,
     });
 
     if (user) {
+      // Nếu có người giới thiệu, tạo record ReferralReward
+      if (referrer) {
+        // Đếm số người đã được giới thiệu bởi referrer
+        const existingReferrals = await ReferralReward.countDocuments({
+          referrerId: referrer._id,
+        });
+
+        const referralNumber = existingReferrals + 1;
+        const rewardAmount = getRewardAmount(referralNumber);
+
+        await ReferralReward.create({
+          referrerId: referrer._id,
+          referredUserId: user._id,
+          referralNumber,
+          rewardAmount,
+          status: "pending",
+        });
+      }
+
       const verificationToken = jwt.sign(
         { userId: user._id },
         process.env.JWT_SECRET!,
@@ -70,6 +112,7 @@ export const registerUser = async (req: Request, res: Response) => {
       res.status(201).json({
         success: true,
         message: "User registered. Please verify your email to log in.",
+        referralCode: newReferralCode,
       });
     } else {
       res.status(400).json({ message: "Invalid user data" });

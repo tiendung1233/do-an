@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Cookies from "js-cookie";
 import { verifyToken } from "@/ultils/api/auth";
+import { checkAndRewardReferrals } from "@/ultils/api/referral";
 
 const useAuth = (isNavigation?: boolean) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -28,6 +29,8 @@ const useAuth = (isNavigation?: boolean) => {
           if (isValid.valid) {
             setIsAuthenticated(true);
             setRole(isValid?.role!);
+            // Check và cộng tiền thưởng giới thiệu (nếu có)
+            checkAndRewardReferrals(token).catch(console.error);
           } else {
             Cookies.remove("authToken");
             Cookies.remove("id");

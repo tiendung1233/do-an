@@ -2,6 +2,7 @@ import ChatAdmin from "@/layout/admin/chat-admin";
 import Dashboard from "@/layout/admin/dashboard";
 import InfoAdmin from "@/layout/admin/info-admin";
 import ProductAdmin from "@/layout/admin/product-admin";
+import PurchaseAdmin from "@/layout/admin/purchase-admin";
 import ReportAdmin from "@/layout/admin/report";
 import RequirementAdmin from "@/layout/admin/requirement";
 import Account from "@/layout/admin/settings";
@@ -27,6 +28,8 @@ export function viewAdmin(
       return <InfoAdmin />;
     case "product":
       return <ProductAdmin />;
+    case "purchase":
+      return <PurchaseAdmin />;
     case "chat":
       return <ChatAdmin />;
   }

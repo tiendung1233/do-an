@@ -25,6 +25,7 @@ import {
   ChatBubbleLeftRightIcon,
   InformationCircleIcon,
   BookOpenIcon,
+  ShoppingCartIcon,
 } from "@heroicons/react/24/outline";
 import {
   ChevronDownIcon,
@@ -58,6 +59,13 @@ const navigationList = [
     icon: FolderIcon,
     current: false,
     type: "product",
+  },
+  {
+    name: "Đơn hàng",
+    href: "#",
+    icon: ShoppingCartIcon,
+    current: false,
+    type: "purchase",
   },
   {
     name: "Yêu cầu",

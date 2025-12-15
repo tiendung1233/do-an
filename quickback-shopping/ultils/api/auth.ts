@@ -9,6 +9,7 @@ interface RegisterCredentials extends LoginCredentials {
   name: string;
   phoneNumber: string;
   accountBank?: string;
+  referralCode?: string;  // Mã giới thiệu
 }
 
 interface LoginResponse {

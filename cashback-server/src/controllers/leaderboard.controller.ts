@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import User from "../models/user.model";
 import PurchaseHistory from "../models/purchaseHistory.model";
 import LeaderboardReward from "../models/leaderboardReward.model";
+import ReferralReward from "../models/referralReward.model";
 
 // Cấu hình phần thưởng cho top 3
 const REWARD_CONFIG = {
@@ -104,46 +105,54 @@ export const getTopReferrers = async (req: Request, res: Response) => {
 
     // Tính ngày đầu và cuối tháng
     const startDate = new Date(targetYear, targetMonth - 1, 1);
-    const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59);
+    const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59, 999);
 
-    // Lấy tất cả users đăng ký trong tháng với inviteCode
-    const usersWithInviteCode = await User.find({
-      createdAt: { $gte: startDate, $lte: endDate },
-      inviteCode: { $exists: true, $nin: [null, ""] },
-    }).select("inviteCode");
+    // Dùng ReferralReward model để đếm số người giới thiệu trong tháng
+    const topReferrers = await ReferralReward.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: "$referrerId",
+          referralCount: { $sum: 1 },
+          completedCount: {
+            $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+          },
+          totalEarned: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "completed"] }, "$rewardAmount", 0],
+            },
+          },
+        },
+      },
+      {
+        $sort: { referralCount: -1 },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
 
-    // Đếm số lượng referrals cho mỗi inviteCode
-    const referralCounts: { [key: string]: number } = {};
-    usersWithInviteCode.forEach((user) => {
-      const code = user.inviteCode as unknown as string;
-      if (code) {
-        referralCounts[code] = (referralCounts[code] || 0) + 1;
-      }
-    });
-
-    // Tìm users có inviteCode và map với số lượng referrals
-    const allUsers = await User.find({
-      email: { $in: Object.keys(referralCounts) },
-    }).select("_id name email image");
-
-    const referrersData = allUsers
-      .map((user) => ({
-        userId: user._id,
-        userName: user.name,
-        userEmail: user.email,
-        userImage: user.image,
-        referralCount: referralCounts[user.email] || 0,
-      }))
-      .filter((r) => r.referralCount > 0)
-      .sort((a, b) => b.referralCount - a.referralCount)
-      .slice(0, 10);
-
-    // Thêm rank
-    const rankedReferrers = referrersData.map((referrer, index) => ({
-      ...referrer,
-      rank: index + 1,
-      reward: index < 3 ? REWARD_CONFIG.referral[(index + 1) as 1 | 2 | 3] : 0,
-    }));
+    // Lấy thông tin user cho từng referrer
+    const rankedReferrers = await Promise.all(
+      topReferrers.map(async (referrer, index) => {
+        const user = await User.findById(referrer._id).select("name email image");
+        return {
+          rank: index + 1,
+          userId: referrer._id,
+          userName: user?.name || "Unknown",
+          userEmail: user?.email || "",
+          userImage: user?.image || null,
+          referralCount: referrer.referralCount,
+          completedCount: referrer.completedCount,
+          totalEarned: referrer.totalEarned,
+          reward: index < 3 ? REWARD_CONFIG.referral[(index + 1) as 1 | 2 | 3] : 0,
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -169,41 +178,45 @@ export const getAllTimeLeaderboard = async (req: Request, res: Response) => {
       .limit(10)
       .select("_id name email image total money");
 
-    console.log("Top cashback all-time:", topCashback.map(u => ({
-      name: u.name,
-      total: u.total,
-      money: u.money
-    })));
+    // Top referrers all-time - dùng ReferralReward model
+    const topReferrersData = await ReferralReward.aggregate([
+      {
+        $group: {
+          _id: "$referrerId",
+          referralCount: { $sum: 1 },
+          completedCount: {
+            $sum: { $cond: [{ $eq: ["$status", "completed"] }, 1, 0] },
+          },
+          totalEarned: {
+            $sum: {
+              $cond: [{ $eq: ["$status", "completed"] }, "$rewardAmount", 0],
+            },
+          },
+        },
+      },
+      {
+        $sort: { referralCount: -1 },
+      },
+      {
+        $limit: 10,
+      },
+    ]);
 
-    // Top referrers all-time - đếm số users có inviteCode trỏ đến email của user
-    const allUsers = await User.find({
-      inviteCode: { $exists: true, $nin: [null, ""] },
-    }).select("inviteCode");
-
-    const referralCounts: { [key: string]: number } = {};
-    allUsers.forEach((user) => {
-      const code = user.inviteCode as unknown as string;
-      if (code) {
-        referralCounts[code] = (referralCounts[code] || 0) + 1;
-      }
-    });
-
-    const usersWithReferrals = await User.find({
-      email: { $in: Object.keys(referralCounts) },
-      role: { $ne: 1 },
-    }).select("_id name email image");
-
-    const topReferrers = usersWithReferrals
-      .map((user) => ({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        image: user.image,
-        referralCount: referralCounts[user.email] || 0,
-      }))
-      .filter((r) => r.referralCount > 0)
-      .sort((a, b) => b.referralCount - a.referralCount)
-      .slice(0, 10);
+    // Lấy thông tin user cho topReferrers
+    const topReferrers = await Promise.all(
+      topReferrersData.map(async (referrer) => {
+        const user = await User.findById(referrer._id).select("name email image");
+        return {
+          _id: referrer._id,
+          name: user?.name || "Unknown",
+          email: user?.email || "",
+          image: user?.image || null,
+          referralCount: referrer.referralCount,
+          completedCount: referrer.completedCount,
+          totalEarned: referrer.totalEarned,
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -222,6 +235,8 @@ export const getAllTimeLeaderboard = async (req: Request, res: Response) => {
         userEmail: user.email,
         userImage: user.image,
         referralCount: user.referralCount,
+        completedCount: user.completedCount,
+        totalEarned: user.totalEarned,
       })),
     });
   } catch (error) {
@@ -278,23 +293,22 @@ export const distributeMonthlyRewards = async (req: Request, res: Response) => {
       { $limit: 3 },
     ]);
 
-    // Lấy top 3 referrers
-    const usersInMonth = await User.find({
-      createdAt: { $gte: startDate, $lte: endDate },
-      inviteCode: { $exists: true, $nin: [null, ""] },
-    }).select("inviteCode");
-
-    const referralCounts: { [key: string]: number } = {};
-    usersInMonth.forEach((u) => {
-      const code = u.inviteCode as unknown as string;
-      if (code) {
-        referralCounts[code] = (referralCounts[code] || 0) + 1;
-      }
-    });
-
-    const topReferrerEmails = Object.entries(referralCounts)
-      .sort(([, a], [, b]) => b - a)
-      .slice(0, 3);
+    // Lấy top 3 referrers từ ReferralReward model
+    const topReferrersData = await ReferralReward.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startDate, $lte: endDate },
+        },
+      },
+      {
+        $group: {
+          _id: "$referrerId",
+          referralCount: { $sum: 1 },
+        },
+      },
+      { $sort: { referralCount: -1 } },
+      { $limit: 3 },
+    ]);
 
     const rewards: any[] = [];
 
@@ -326,9 +340,9 @@ export const distributeMonthlyRewards = async (req: Request, res: Response) => {
     }
 
     // Tạo rewards cho top referrers
-    for (let i = 0; i < topReferrerEmails.length; i++) {
-      const [email, count] = topReferrerEmails[i];
-      const userData = await User.findOne({ email });
+    for (let i = 0; i < topReferrersData.length; i++) {
+      const referrerData = topReferrersData[i];
+      const userData = await User.findById(referrerData._id);
       if (userData) {
         const reward = new LeaderboardReward({
           userId: userData._id,
@@ -339,7 +353,7 @@ export const distributeMonthlyRewards = async (req: Request, res: Response) => {
           year: targetYear,
           rank: i + 1,
           type: "referral",
-          amount: count,
+          amount: referrerData.referralCount,
           rewardAmount: REWARD_CONFIG.referral[(i + 1) as 1 | 2 | 3],
         });
         await reward.save();
@@ -464,29 +478,28 @@ export const getMyRanking = async (req: Request, res: Response) => {
 
     const cashbackRank = (higherCashbackCount[0]?.count || 0) + 1;
 
-    // Đếm số referrals của user trong tháng
-    const myReferrals = await User.countDocuments({
+    // Đếm số referrals của user trong tháng (dùng ReferralReward model)
+    const myReferralsCount = await ReferralReward.countDocuments({
+      referrerId: user._id,
       createdAt: { $gte: startDate, $lte: endDate },
-      inviteCode: user.email,
     });
 
-    // Tính rank referral
-    const allReferralCounts = await User.aggregate([
+    // Tính rank referral dựa trên ReferralReward
+    const allReferralCounts = await ReferralReward.aggregate([
       {
         $match: {
           createdAt: { $gte: startDate, $lte: endDate },
-          inviteCode: { $exists: true, $nin: [null, ""] },
         },
       },
       {
         $group: {
-          _id: "$inviteCode",
+          _id: "$referrerId",
           count: { $sum: 1 },
         },
       },
       {
         $match: {
-          count: { $gt: myReferrals },
+          count: { $gt: myReferralsCount },
         },
       },
       {
@@ -494,7 +507,7 @@ export const getMyRanking = async (req: Request, res: Response) => {
       },
     ]);
 
-    const referralRank = myReferrals > 0 ? (allReferralCounts[0]?.count || 0) + 1 : null;
+    const referralRank = myReferralsCount > 0 ? (allReferralCounts[0]?.count || 0) + 1 : null;
 
     res.json({
       success: true,
@@ -505,7 +518,7 @@ export const getMyRanking = async (req: Request, res: Response) => {
         rank: cashbackRank,
       },
       referral: {
-        count: myReferrals,
+        count: myReferralsCount,
         rank: referralRank,
       },
     });

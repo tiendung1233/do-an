@@ -148,6 +148,145 @@ const saveToDatabase = async (data: APIData[]) => {
   }
 };
 
+// Admin tạo đơn hàng thủ công cho user
+export const adminCreatePurchaseHistory = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // Kiểm tra quyền admin
+    if (!req.user || (req.user as any).role <= 0) {
+      return res.status(403).json({ error: "Forbidden: Insufficient role" });
+    }
+
+    const {
+      userId,
+      productName,
+      price,
+      productLink,
+      cashbackPercentage,
+      quantity,
+      status = "Đang xử lý",
+      transaction_id,
+    } = req.body;
+
+    // Validate required fields
+    if (!userId || !productName || !price || !productLink || !quantity) {
+      return res.status(400).json({
+        message: "Vui lòng điền đầy đủ thông tin: userId, productName, price, productLink, quantity",
+      });
+    }
+
+    // Validate price và quantity
+    if (price <= 0 || quantity <= 0) {
+      return res.status(400).json({
+        message: "Giá và số lượng phải lớn hơn 0",
+      });
+    }
+
+    // Validate cashbackPercentage
+    const cashbackPercent = cashbackPercentage || 0;
+    if (cashbackPercent < 0 || cashbackPercent > 100) {
+      return res.status(400).json({
+        message: "Phần trăm hoàn tiền phải từ 0 đến 100",
+      });
+    }
+
+    // Validate status
+    const validStatuses = ["Đang xử lý", "Đã duyệt", "Hủy"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        message: "Trạng thái không hợp lệ. Chọn: Đang xử lý, Đã duyệt, hoặc Hủy",
+      });
+    }
+
+    // Kiểm tra user tồn tại
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng" });
+    }
+
+    // Tính cashback
+    const cashback = (price * quantity * cashbackPercent) / 100;
+
+    // Tạo transaction_id nếu không có
+    const transId = transaction_id || `ADMIN-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
+
+    // Tạo purchase history
+    const purchaseHistory = await PurchaseHistory.create({
+      userId,
+      productName,
+      price,
+      productLink,
+      cashbackPercentage: cashbackPercent,
+      cashback,
+      quantity,
+      status,
+      transaction_id: transId,
+      purchaseDate: new Date(),
+    });
+
+    // Nếu status là "Đã duyệt", cộng tiền cho user
+    if (status === "Đã duyệt") {
+      user.money = (user.money || 0) + cashback;
+      await user.save();
+    }
+
+    res.status(201).json({
+      message: "Tạo đơn hàng thành công",
+      purchaseHistory,
+      userMoneyUpdated: status === "Đã duyệt",
+    });
+  } catch (error) {
+    console.error("Error creating purchase history:", error);
+    res.status(500).json({ message: "Lỗi server, vui lòng thử lại sau" });
+  }
+};
+
+// Admin lấy tất cả đơn hàng
+export const adminGetAllPurchaseHistory = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    // Kiểm tra quyền admin
+    if (!req.user || (req.user as any).role <= 0) {
+      return res.status(403).json({ error: "Forbidden: Insufficient role" });
+    }
+
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 20;
+    const search = req.query.search as string;
+
+    // Build query
+    let query: any = {};
+    if (search) {
+      query.$or = [
+        { productName: { $regex: search, $options: "i" } },
+        { transaction_id: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const total = await PurchaseHistory.countDocuments(query);
+
+    const purchaseHistory = await PurchaseHistory.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .skip((page - 1) * limit)
+      .populate("userId", "name email");
+
+    res.json({
+      page,
+      pages: Math.ceil(total / limit),
+      total,
+      purchaseHistory,
+    });
+  } catch (error) {
+    console.error("Error fetching all purchase history:", error);
+    res.status(500).json({ message: "Lỗi server, vui lòng thử lại sau" });
+  }
+};
+
 export const fetchAndSaveDataAffiliate = async (
   req: Request,
   res: Response

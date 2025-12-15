@@ -11,6 +11,10 @@ interface IPurchaseHistory extends Document {
   purchaseDate: Date;
   status: "Đang xử lý" | "Đã duyệt" | "Hủy";
   transaction_id: string;
+  // Voucher fields
+  voucherUsed: boolean;
+  voucherCode?: string;
+  bonusCashback: number;
 }
 
 const PurchaseHistorySchema = new Schema<IPurchaseHistory>({
@@ -54,6 +58,19 @@ const PurchaseHistorySchema = new Schema<IPurchaseHistory>({
   transaction_id: {
     type: String,
     required: true,
+  },
+  // Voucher fields
+  voucherUsed: {
+    type: Boolean,
+    default: false,
+  },
+  voucherCode: {
+    type: String,
+    default: null,
+  },
+  bonusCashback: {
+    type: Number,
+    default: 0,
   },
 });
 

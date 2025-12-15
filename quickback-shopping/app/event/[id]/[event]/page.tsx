@@ -5,6 +5,10 @@ import Spinner from "@/components/spinner/spinner";
 import useAuth from "@/hook/useAuth";
 import GardenLayout from "@/layout/app/garden";
 import LuckyWheelLayout from "@/layout/app/lucky-wheel";
+import ReferralLayout from "@/layout/app/referral";
+import CheckInLayout from "@/layout/app/checkIn";
+import VoucherManagementLayout from "@/layout/app/voucherManagement";
+import PurchaseHistoryLayout from "@/layout/app/purchaseHistory";
 import NavBar from "@/layout/app/navbar";
 import { useParams } from "next/navigation";
 import Cookies from "js-cookie";
@@ -39,6 +43,14 @@ export default function EventPage() {
       return <LuckyWheelLayout profile={profile} />;
     } else if (event === "tree") {
       return <GardenLayout isAuthenticated={isAuthenticated} />;
+    } else if (event === "referral") {
+      return <ReferralLayout />;
+    } else if (event === "checkin") {
+      return <CheckInLayout />;
+    } else if (event === "voucher") {
+      return <VoucherManagementLayout />;
+    } else if (event === "apply-voucher") {
+      return <PurchaseHistoryLayout />;
     }
   }, [event, isAuthenticated, profile]);
 

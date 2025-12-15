@@ -11,6 +11,9 @@ import shopRoutes from "./routes/shop.routes";
 import purchaseHistoryRoutes from "./routes/purchaseHistory.routes";
 import chatRoutes from "./routes/chat.routes";
 import leaderboardRoutes from "./routes/leaderboard.routes";
+import referralRoutes from "./routes/referral.routes";
+import checkInRoutes from "./routes/checkIn.routes";
+import voucherRoutes from "./routes/voucher.routes";
 import passport from "passport";
 import session from "express-session";
 import cors from "cors";
@@ -61,5 +64,8 @@ app.use("/api/shop", shopRoutes);
 app.use("/api/purchase-history", purchaseHistoryRoutes);
 app.use("/api/chat", chatRoutes);
 app.use("/api/leaderboard", leaderboardRoutes);
+app.use("/api/referral", referralRoutes);
+app.use("/api/checkin", checkInRoutes);
+app.use("/api/voucher", voucherRoutes);
 
 export default app;

@@ -20,6 +20,7 @@ const RegisterPage = () => {
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [inviteCode, setInviteCode] = useState("");  // Mã giới thiệu
   const [error, setError] = useState<string | null>(null);
   const [isChecked, setIsChecked] = useState<boolean>(false);
   const [googleError, setGoogleError] = useState<string | null>(null);
@@ -46,6 +47,7 @@ const RegisterPage = () => {
         password,
         name,
         phoneNumber: trimmedPhoneNumber,
+        referralCode: inviteCode.trim() || undefined,
       });
       if (response) {
         router.push("/verify-account");
@@ -147,8 +149,10 @@ const RegisterPage = () => {
                 type="text"
                 name="invite"
                 id="invite"
-                placeholder="Mã mời"
+                placeholder="Mã mời (VD: QB1A2B3C)"
                 label="Mã mời"
+                value={inviteCode}
+                onChange={(el) => setInviteCode(el.target.value)}
               />
               <div className="flex">
                 <div className="flex items-center h-5">

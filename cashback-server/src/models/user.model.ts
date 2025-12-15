@@ -13,7 +13,9 @@ export interface IUser extends Document {
   address?: string;
   city?: string;
   image?: string;
-  inviteCode?: string[];
+  inviteCode?: string;
+  referralCode?: string;  // Mã giới thiệu unique của user (VD: QB1A2B3C)
+  referredBy?: mongoose.Types.ObjectId;  // ID người đã giới thiệu user này
   money: number;
   trees?: ITree[];
   freeSpins?: number;
@@ -33,6 +35,16 @@ export interface IUser extends Document {
   comparePassword?(candidatePassword: string): Promise<boolean>;
 }
 
+// Function tạo mã giới thiệu unique
+export function generateReferralCode(): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = 'QB';
+  for (let i = 0; i < 6; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return code;
+}
+
 const UserSchema: Schema = new Schema(
   {
     name: { type: String, required: true },
@@ -45,6 +57,8 @@ const UserSchema: Schema = new Schema(
     address: { type: String },
     city: { type: String },
     inviteCode: { type: String },
+    referralCode: { type: String, unique: true, sparse: true },  // Mã giới thiệu unique
+    referredBy: { type: Schema.Types.ObjectId, ref: 'User', default: null },  // Người đã giới thiệu
     image: { type: String, default: null },
     money: { type: Number, default: 0 },
     total: { type: Number, default: 0 },
