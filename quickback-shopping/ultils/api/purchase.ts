@@ -1,11 +1,24 @@
 import { apiCall } from "../func/api";
 
-interface PurchaseHistoryItem {
-  orderId: string;
+export interface PurchaseHistoryItem {
+  _id: string;
   productName: string;
-  quantity: number;
   price: number;
-  orderDate: string;
+  productLink: string;
+  cashbackPercentage: number;
+  cashback: number;
+  quantity: number;
+  purchaseDate: string;
+  status: "Đang xử lý" | "Đã duyệt" | "Hủy";
+  transaction_id: string;
+  // Membership bonus
+  membershipBonusPercent?: number;
+  membershipBonusAmount?: number;
+  // Voucher bonus
+  voucherUsed?: boolean;
+  voucherCode?: string;
+  voucherBonusPercent?: number;
+  bonusCashback?: number;
 }
 
 // Interface cho admin tạo đơn hàng
@@ -37,6 +50,14 @@ export interface AdminPurchaseHistoryItem {
   transaction_id: string;
   purchaseDate: string;
   createdAt: string;
+  // Membership bonus
+  membershipBonusPercent?: number;
+  membershipBonusAmount?: number;
+  // Voucher bonus
+  voucherUsed?: boolean;
+  voucherCode?: string;
+  voucherBonusPercent?: number;
+  bonusCashback?: number;
 }
 
 export interface AdminGetAllPurchaseResponse {

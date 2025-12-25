@@ -10,6 +10,7 @@ import Footer from "@/layout/app/footer";
 import NavBar from "@/layout/app/navbar";
 import Image from "next/image";
 import Link from "next/link";
+import Cookies from "js-cookie";
 import {
   ShieldCheckIcon,
   BanknotesIcon,
@@ -17,6 +18,7 @@ import {
   ArrowRightIcon,
   SparklesIcon,
 } from "@heroicons/react/24/outline";
+import MembershipCard from "@/components/membership/MembershipCard";
 
 const features = [
   {
@@ -44,6 +46,7 @@ const features = [
 
 export default function Home() {
   const { isAuthenticated } = useAuth(false);
+  const userId = Cookies.get("id");
   const slides = [
     <div
       className="relative h-[220px] sm:h-[380px] rounded-2xl overflow-hidden shadow-card"
@@ -107,6 +110,17 @@ export default function Home() {
       <main className="flex-1">
         {/* Hero Section */}
         <Hero />
+
+        {/* Membership Card Section - Only for logged in users */}
+        {isAuthenticated && userId && (
+          <section className="relative py-8 lg:py-12">
+            <div className="px-4 sm:px-8 lg:px-16 max-w-7xl mx-auto">
+              <div className="max-w-md mx-auto lg:max-w-lg">
+                <MembershipCard userId={userId} />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Slider Section */}
         <section className="relative py-16 lg:py-24 overflow-hidden">

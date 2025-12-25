@@ -14,6 +14,7 @@ import BaseModal from "@/components/modals/base-modal";
 import { useToast } from "@/context/toastContext";
 import Link from "next/link";
 import { requestWithdraw, verifyRequestWithdraw } from "@/ultils/api/withdraw";
+import MembershipBanner from "@/components/membership/MembershipBanner";
 
 const UserDetailInfo = () => {
   const token = Cookies.get("authToken");
@@ -302,6 +303,11 @@ const UserDetailInfo = () => {
                 )}
               </div>
             </div>
+          </div>
+
+          {/* Membership Banner */}
+          <div className="mt-4">
+            <MembershipBanner />
           </div>
 
           {/* Bank Details */}

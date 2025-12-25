@@ -2,6 +2,9 @@ import { Request, Response } from "express";
 import PurchaseHistory from "../models/purchaseHistory.model";
 import User from "../models/user.model";
 import { extractId } from "../ultils/func";
+import { updateMembershipTier } from "./membership.controller";
+import { checkAndAwardSpins } from "./spinWheel.controller";
+import { MEMBERSHIP_CASHBACK_BONUS, MembershipTier } from "../models/membership.model";
 
 export const savePurchaseHistory = async (req: Request, res: Response) => {
   try {
@@ -121,13 +124,25 @@ const saveToDatabase = async (data: APIData[]) => {
 
       if (!existingRecord) {
         const user = await User.findById(item.utm_source);
+
+        // Tinh cashback co ban + membership bonus
+        let totalCashback = item.commission;
+        let membershipBonusPercent = 0;
+        let membershipBonusAmount = 0;
+        if (user && item.status === 1) {
+          const membershipTier = (user.membershipTier || "none") as MembershipTier;
+          membershipBonusPercent = MEMBERSHIP_CASHBACK_BONUS[membershipTier];
+          membershipBonusAmount = (item.transaction_value * membershipBonusPercent) / 100;
+          totalCashback += membershipBonusAmount;
+        }
+
         const newRecord = new PurchaseHistory({
           userId: item.utm_source,
           productName: item.merchant,
           price: item.transaction_value,
           productLink: item.click_url,
           cashbackPercentage: 0,
-          cashback: item.commission,
+          cashback: totalCashback,
           quantity: item.product_quantity,
           purchaseDate: new Date(item.transaction_time),
           transaction_id: item.transaction_id,
@@ -137,11 +152,29 @@ const saveToDatabase = async (data: APIData[]) => {
               : item.status === 0
               ? "Đang xử lý"
               : "Hủy",
+          // Lưu membership bonus info
+          membershipBonusPercent: membershipBonusPercent,
+          membershipBonusAmount: membershipBonusAmount,
         });
         await newRecord.save();
-        if (user) {
-          user.money! += item.commission;
+
+        if (user && item.status === 1) {
+          user.money! += totalCashback;
           await user.save();
+
+          // Check membership upgrade
+          try {
+            await updateMembershipTier(item.utm_source);
+          } catch (err) {
+            console.error("Error updating membership tier:", err);
+          }
+
+          // Check và tặng lượt quay nếu đạt mốc
+          try {
+            await checkAndAwardSpins(item.utm_source);
+          } catch (err) {
+            console.error("Error checking spin award:", err);
+          }
         }
       }
     }
@@ -206,8 +239,14 @@ export const adminCreatePurchaseHistory = async (
       return res.status(404).json({ message: "Không tìm thấy người dùng" });
     }
 
-    // Tính cashback
-    const cashback = (price * quantity * cashbackPercent) / 100;
+    // Tính cashback cơ bản
+    let cashback = (price * quantity * cashbackPercent) / 100;
+
+    // Cộng thêm bonus từ membership tier
+    const membershipTier = (user.membershipTier || "none") as MembershipTier;
+    const membershipBonus = MEMBERSHIP_CASHBACK_BONUS[membershipTier];
+    const membershipBonusAmount = (price * quantity * membershipBonus) / 100;
+    const totalCashback = cashback + membershipBonusAmount;
 
     // Tạo transaction_id nếu không có
     const transId = transaction_id || `ADMIN-${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -219,23 +258,45 @@ export const adminCreatePurchaseHistory = async (
       price,
       productLink,
       cashbackPercentage: cashbackPercent,
-      cashback,
+      cashback: totalCashback,
       quantity,
       status,
       transaction_id: transId,
       purchaseDate: new Date(),
+      // Lưu membership bonus info
+      membershipBonusPercent: membershipBonus,
+      membershipBonusAmount: membershipBonusAmount,
     });
 
-    // Nếu status là "Đã duyệt", cộng tiền cho user
+    // Nếu status là "Đã duyệt", cộng tiền cho user và check membership upgrade
+    let membershipUpgrade = null;
+    let spinAward = null;
     if (status === "Đã duyệt") {
-      user.money = (user.money || 0) + cashback;
+      user.money = (user.money || 0) + totalCashback;
       await user.save();
+
+      // Check và update membership tier
+      try {
+        membershipUpgrade = await updateMembershipTier(userId);
+      } catch (err) {
+        console.error("Error updating membership tier:", err);
+      }
+
+      // Check và tặng lượt quay nếu đạt mốc
+      try {
+        spinAward = await checkAndAwardSpins(userId);
+      } catch (err) {
+        console.error("Error checking spin award:", err);
+      }
     }
 
     res.status(201).json({
       message: "Tạo đơn hàng thành công",
       purchaseHistory,
       userMoneyUpdated: status === "Đã duyệt",
+      membershipBonus: membershipBonusAmount,
+      membershipUpgrade,
+      spinAward,
     });
   } catch (error) {
     console.error("Error creating purchase history:", error);

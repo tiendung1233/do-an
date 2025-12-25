@@ -2,6 +2,8 @@ import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import { ITree, TreeSchema } from "./tree.model";
 
+export type MembershipTier = "none" | "bronze" | "silver" | "gold";
+
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -32,6 +34,9 @@ export interface IUser extends Document {
     tree: number;
     wheel: number;
   };
+  // Membership fields
+  membershipTier: MembershipTier;
+  totalSpent: number;  // Tổng tiền đã chi tiêu (các đơn hàng đã duyệt)
   comparePassword?(candidatePassword: string): Promise<boolean>;
 }
 
@@ -82,6 +87,16 @@ const UserSchema: Schema = new Schema(
       default: null,
     },
     role: {
+      type: Number,
+      default: 0,
+    },
+    // Membership fields
+    membershipTier: {
+      type: String,
+      enum: ["none", "bronze", "silver", "gold"],
+      default: "none",
+    },
+    totalSpent: {
       type: Number,
       default: 0,
     },

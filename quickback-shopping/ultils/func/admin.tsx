@@ -1,3 +1,4 @@
+import AnalyticsAdmin from "@/layout/admin/analytics-admin";
 import ChatAdmin from "@/layout/admin/chat-admin";
 import Dashboard from "@/layout/admin/dashboard";
 import InfoAdmin from "@/layout/admin/info-admin";
@@ -32,5 +33,7 @@ export function viewAdmin(
       return <PurchaseAdmin />;
     case "chat":
       return <ChatAdmin />;
+    case "analytics":
+      return <AnalyticsAdmin />;
   }
 }

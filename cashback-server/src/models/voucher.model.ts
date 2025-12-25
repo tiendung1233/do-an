@@ -3,8 +3,9 @@ import mongoose, { Document, Schema } from "mongoose";
 export interface IVoucher extends Document {
   userId: mongoose.Types.ObjectId;
   code: string;                    // Mã voucher unique (VD: VCH-ABC123)
-  percentage: number;              // % được cộng thêm (1-7%)
-  dayNumber: number;               // Ngày điểm danh nhận được voucher (1-7)
+  percentage: number;              // % được cộng thêm (1-15%)
+  dayNumber?: number;              // Ngày điểm danh nhận được voucher (1-7), null nếu từ nguồn khác
+  source: "checkin" | "spin_wheel" | "promotion"; // Nguồn voucher
   status: "active" | "used" | "expired";
   usedOnPurchaseId?: mongoose.Types.ObjectId;  // ID đơn hàng đã dùng voucher
   usedAt?: Date;                   // Ngày sử dụng
@@ -39,13 +40,18 @@ const VoucherSchema: Schema = new Schema(
       type: Number,
       required: true,
       min: 1,
-      max: 7,
+      max: 15,
     },
     dayNumber: {
       type: Number,
-      required: true,
       min: 1,
       max: 7,
+      default: null,
+    },
+    source: {
+      type: String,
+      enum: ["checkin", "spin_wheel", "promotion"],
+      default: "checkin",
     },
     status: {
       type: String,

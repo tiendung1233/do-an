@@ -10,7 +10,7 @@ import {
   AdminCreatePurchaseData,
 } from "@/ultils/api/purchase";
 import Cookies from "js-cookie";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import {
   ShoppingCartIcon,
   PlusIcon,
@@ -19,7 +19,23 @@ import {
   CheckCircleIcon,
   ClockIcon,
   XCircleIcon,
+  StarIcon,
 } from "@heroicons/react/24/outline";
+
+// Membership constants
+const MEMBERSHIP_CASHBACK_BONUS: { [key: string]: number } = {
+  none: 0,
+  bronze: 1,
+  silver: 2,
+  gold: 3,
+};
+
+const MEMBERSHIP_INFO: { [key: string]: { nameVi: string; color: string } } = {
+  none: { nameVi: "Chưa có hạng", color: "#9CA3AF" },
+  bronze: { nameVi: "Đồng", color: "#CD7F32" },
+  silver: { nameVi: "Bạc", color: "#C0C0C0" },
+  gold: { nameVi: "Vàng", color: "#FFD700" },
+};
 
 const defaultFormData: AdminCreatePurchaseData = {
   userId: "",
@@ -261,6 +277,37 @@ export default function PurchaseAdmin() {
                         </option>
                       ))}
                     </select>
+
+                    {/* Membership Info Display */}
+                    {formData.userId && (() => {
+                      const selectedUser = users.find((u) => u._id === formData.userId);
+                      if (!selectedUser) return null;
+                      const tier = selectedUser.membershipTier || "none";
+                      const tierInfo = MEMBERSHIP_INFO[tier];
+                      const bonus = MEMBERSHIP_CASHBACK_BONUS[tier];
+                      return (
+                        <div className="mt-2 p-3 rounded-xl bg-secondary-50 dark:bg-secondary-700/50 border border-secondary-200 dark:border-secondary-600">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <StarIcon className="size-5" style={{ color: tierInfo.color }} />
+                              <span className="text-sm font-medium text-secondary-700 dark:text-secondary-300">
+                                Hạng: <span style={{ color: tierInfo.color }}>{tierInfo.nameVi}</span>
+                              </span>
+                            </div>
+                            {bonus > 0 && (
+                              <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                                +{bonus}% cashback bonus
+                              </span>
+                            )}
+                          </div>
+                          {bonus > 0 && (
+                            <p className="text-xs text-secondary-500 mt-1">
+                              Người dùng này sẽ được cộng thêm {bonus}% vào mỗi đơn hàng
+                            </p>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Product Name */}
@@ -363,19 +410,40 @@ export default function PurchaseAdmin() {
                   </div>
 
                   {/* Cashback Preview */}
-                  <div className="sm:col-span-2 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
-                    <p className="text-sm text-primary-700 dark:text-primary-300">
-                      <span className="font-medium">Tiền hoàn dự kiến:</span>{" "}
-                      {formatMoney(
-                        (formData.price * formData.quantity * formData.cashbackPercentage) / 100
-                      )}
-                    </p>
-                    {formData.status === "Đã duyệt" && (
-                      <p className="text-xs text-primary-600 dark:text-primary-400 mt-1">
-                        * Số tiền này sẽ được cộng vào tài khoản người dùng
-                      </p>
-                    )}
-                  </div>
+                  {(() => {
+                    const selectedUser = users.find((u) => u._id === formData.userId);
+                    const tier = selectedUser?.membershipTier || "none";
+                    const membershipBonus = MEMBERSHIP_CASHBACK_BONUS[tier];
+                    const baseCashback = (formData.price * formData.quantity * formData.cashbackPercentage) / 100;
+                    const membershipBonusAmount = (formData.price * formData.quantity * membershipBonus) / 100;
+                    const totalCashback = baseCashback + membershipBonusAmount;
+
+                    return (
+                      <div className="sm:col-span-2 p-4 rounded-xl bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800">
+                        <div className="space-y-1">
+                          <p className="text-sm text-primary-700 dark:text-primary-300">
+                            <span className="font-medium">Cashback cơ bản ({formData.cashbackPercentage}%):</span>{" "}
+                            {formatMoney(baseCashback)}
+                          </p>
+                          {membershipBonus > 0 && (
+                            <p className="text-sm text-green-600 dark:text-green-400">
+                              <span className="font-medium">+ Membership bonus ({membershipBonus}%):</span>{" "}
+                              {formatMoney(membershipBonusAmount)}
+                            </p>
+                          )}
+                          <p className="text-sm font-bold text-primary-800 dark:text-primary-200 pt-1 border-t border-primary-200 dark:border-primary-700">
+                            <span>Tổng tiền hoàn:</span>{" "}
+                            {formatMoney(totalCashback)}
+                          </p>
+                        </div>
+                        {formData.status === "Đã duyệt" && (
+                          <p className="text-xs text-primary-600 dark:text-primary-400 mt-2">
+                            * Số tiền này sẽ được cộng vào tài khoản người dùng
+                          </p>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="flex justify-end gap-3 mt-6">
@@ -513,8 +581,27 @@ export default function PurchaseAdmin() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-secondary-600 dark:text-secondary-400">
                         {purchase.quantity}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-success-600 dark:text-success-400">
-                        {formatMoney(purchase.cashback)}
+                      <td className="px-6 py-4">
+                        <div className="text-sm">
+                          <p className="font-medium text-success-600 dark:text-success-400">
+                            {formatMoney(purchase.cashback)}
+                          </p>
+                          {/* Chi tiết bonus */}
+                          {(purchase.membershipBonusPercent || purchase.voucherBonusPercent) ? (
+                            <div className="mt-1 space-y-0.5">
+                              {purchase.membershipBonusPercent ? (
+                                <p className="text-xs text-amber-600 dark:text-amber-400">
+                                  ★ Hạng +{purchase.membershipBonusPercent}%: {formatMoney(purchase.membershipBonusAmount || 0)}
+                                </p>
+                              ) : null}
+                              {purchase.voucherUsed && purchase.voucherBonusPercent ? (
+                                <p className="text-xs text-purple-600 dark:text-purple-400">
+                                  🎫 Voucher +{purchase.voucherBonusPercent}%: {formatMoney(purchase.bonusCashback || 0)}
+                                </p>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(purchase.status)}

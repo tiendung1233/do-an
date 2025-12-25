@@ -160,6 +160,7 @@ export const applyVoucher = async (req: Request, res: Response) => {
     // Cập nhật đơn hàng
     purchase.voucherUsed = true;
     purchase.voucherCode = voucher.code;
+    purchase.voucherBonusPercent = voucher.percentage;
     purchase.bonusCashback = bonusCashback;
     await purchase.save();
 

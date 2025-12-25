@@ -14,6 +14,9 @@ import leaderboardRoutes from "./routes/leaderboard.routes";
 import referralRoutes from "./routes/referral.routes";
 import checkInRoutes from "./routes/checkIn.routes";
 import voucherRoutes from "./routes/voucher.routes";
+import membershipRoutes from "./routes/membership.routes";
+import analyticsRoutes from "./routes/analytics.routes";
+import spinWheelRoutes from "./routes/spinWheel.routes";
 import passport from "passport";
 import session from "express-session";
 import cors from "cors";
@@ -67,5 +70,8 @@ app.use("/api/leaderboard", leaderboardRoutes);
 app.use("/api/referral", referralRoutes);
 app.use("/api/checkin", checkInRoutes);
 app.use("/api/voucher", voucherRoutes);
+app.use("/api/membership", membershipRoutes);
+app.use("/api/analytics", analyticsRoutes);
+app.use("/api/spin-wheel", spinWheelRoutes);
 
 export default app;

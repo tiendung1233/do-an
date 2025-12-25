@@ -9,11 +9,16 @@ import { useFetchDataForTab } from "@/hook/useFetchDataForTab";
 import Footer from "@/layout/app/footer";
 import NavBar from "@/layout/app/navbar";
 import { getCart } from "@/ultils/api/cart";
-import { getPurchase } from "@/ultils/api/purchase";
+import { getPurchase, PurchaseHistoryItem } from "@/ultils/api/purchase";
 import { getWithdraw } from "@/ultils/api/withdraw";
 import Cookies from "js-cookie";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+
+// Helper format currency
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
+};
 
 export default function HistoryPage() {
   const { isAuthenticated } = useAuth(true);
@@ -84,11 +89,54 @@ export default function HistoryPage() {
 
   const columnsBuy = [
     { header: "Tên", key: "productName" },
-    { header: "Giá", key: "price" },
+    {
+      header: "Giá",
+      key: "price",
+      render: (value: number) => (
+        <span className="font-medium">{formatCurrency(value)}</span>
+      ),
+    },
     { header: "Ảnh", key: "img", type: "image" },
     { header: "Số lượng", key: "quantity" },
-    { header: "Đường dẫn mua hàng", key: "productLink" },
-    { header: "% Tiền hoàn", key: "cashbackPercentage" },
+    {
+      header: "Cashback",
+      key: "cashback",
+      render: (value: number, row: PurchaseHistoryItem) => (
+        <div className="text-left">
+          <p className="font-medium text-green-600">{formatCurrency(value)}</p>
+          {/* Chi tiết bonus */}
+          {(row.membershipBonusPercent || row.voucherBonusPercent) ? (
+            <div className="mt-1 space-y-0.5 text-xs">
+              {row.membershipBonusPercent ? (
+                <p className="text-amber-600">
+                  ★ Hạng +{row.membershipBonusPercent}%: {formatCurrency(row.membershipBonusAmount || 0)}
+                </p>
+              ) : null}
+              {row.voucherUsed && row.voucherBonusPercent ? (
+                <p className="text-purple-600">
+                  🎫 Voucher +{row.voucherBonusPercent}%: {formatCurrency(row.bonusCashback || 0)}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+      ),
+    },
+    {
+      header: "Trạng thái",
+      key: "status",
+      render: (value: string) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+          value === "Đã duyệt"
+            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+            : value === "Hủy"
+            ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
+            : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400"
+        }`}>
+          {value}
+        </span>
+      ),
+    },
     { header: "Ngày mua", key: "purchaseDate" },
   ];
 

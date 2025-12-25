@@ -15,6 +15,7 @@ import {
   Bars3Icon,
   BellIcon,
   ChartPieIcon,
+  ChartBarIcon,
   Cog6ToothIcon,
   DocumentDuplicateIcon,
   FolderIcon,
@@ -87,6 +88,13 @@ const navigationList = [
     icon: ChatBubbleLeftRightIcon,
     current: false,
     type: "chat",
+  },
+  {
+    name: "Thống kê",
+    href: "#",
+    icon: ChartBarIcon,
+    current: false,
+    type: "analytics",
   },
 ];
 

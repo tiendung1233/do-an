@@ -8,6 +8,7 @@ import NavBar from "@/layout/app/navbar";
 import { getProfile, IProfileResponse } from "@/ultils/api/profile";
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
+import MembershipCard from "@/components/membership/MembershipCard";
 
 export default function EventPage() {
   const { isAuthenticated } = useAuth(false);
@@ -61,44 +62,30 @@ export default function EventPage() {
           onWithdraw={() => { }}
           userId={profile?._id!}
         />
+
+        {/* Membership Card */}
         <div className="mt-4 w-full">
-          <HelpCard
-            title={`Số tiền từ sự kiện trồng cây: ${profile?.moneyByEvent.tree || 0
-              }đ`}
-            imgContent={
-              <svg
-                className="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path d="M18 5h-.7c.229-.467.349-.98.351-1.5a3.5 3.5 0 0 0-3.5-3.5c-1.717 0-3.215 1.2-4.331 2.481C8.4.842 6.949 0 5.5 0A3.5 3.5 0 0 0 2 3.5c.003.52.123 1.033.351 1.5H2a2 2 0 0 0-2 2v3a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7a2 2 0 0 0-2-2ZM8.058 5H5.5a1.5 1.5 0 0 1 0-3c.9 0 2 .754 3.092 2.122-.219.337-.392.635-.534.878Zm6.1 0h-3.742c.933-1.368 2.371-3 3.739-3a1.5 1.5 0 0 1 0 3h.003ZM11 13H9v7h2v-7Zm-4 0H2v5a2 2 0 0 0 2 2h3v-7Zm6 0v7h3a2 2 0 0 0 2-2v-5h-5Z" />
-              </svg>
-            }
-            description="Hạt giống QuickBack!"
-            guidelineLink={`/event/${profile?._id}/tree`}
-          />
+          <MembershipCard userId={profile?._id} />
         </div>
+
         <div className="mt-4 w-full">
           <HelpCard
-            title={`Số tiền từ sự kiện vòng quay: ${profile?.moneyByEvent.wheel || 0
-              }đ`}
+            title="Vòng Quay May Mắn"
             imgContent={
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
                 fill="currentColor"
-                className="w-7 h-7 text-gray-500 dark:text-gray-400 mb-3"
+                className="w-7 h-7 text-yellow-500 mb-3"
                 viewBox="0 0 16 16"
               >
                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
-                <path d="M11.354 4.646a.5.5 0 0 0-.708 0l-6 6a.5.5 0 0 0 .708.708l6-6a.5.5 0 0 0 0-.708" />
+                <path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12" />
+                <path d="M8 4.5a.5.5 0 0 1 .5.5v2.5H11a.5.5 0 0 1 0 1H8.5V11a.5.5 0 0 1-1 0V8.5H5a.5.5 0 0 1 0-1h2.5V5a.5.5 0 0 1 .5-.5" />
               </svg>
             }
-            description="Vòng quay QuickBack!"
-            guidelineLink={`/event/${profile?._id}/wheel`}
+            description="Hoàn thành đơn hàng để nhận lượt quay miễn phí! Trúng tiền mặt và voucher giảm giá!"
+            guidelineLink="/spin-wheel"
+            btnContent="Quay ngay"
           />
         </div>
         <div className="mt-4 w-full">

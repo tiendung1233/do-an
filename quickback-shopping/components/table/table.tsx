@@ -5,10 +5,11 @@ export type TableColumn = {
   header: string;
   key: string;
   type?: string;
+  render?: (value: any, row: TableRow) => React.ReactNode;
 };
 
 export type TableRow = {
-  [key: string]: string | number;
+  [key: string]: any;
 };
 
 interface TableProps {
@@ -63,7 +64,9 @@ const DataTable: React.FC<TableProps> = ({ columns, data, navigate }) => {
                   key={column.key}
                   className="px-6 py-4 min-w-[150px] max-h-[150px] overflow-hidden text-center"
                 >
-                  {column?.type === "image" ? (
+                  {column.render ? (
+                    column.render(row[column.key], row)
+                  ) : column?.type === "image" ? (
                     <img
                       className="min-w-[100px] text-center"
                       src={row[column.key]?.toString() || "/img_no_img.jpg"}

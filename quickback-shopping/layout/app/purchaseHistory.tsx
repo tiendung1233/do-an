@@ -2,31 +2,14 @@
 
 import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
-import { getPurchase } from "@/ultils/api/purchase";
+import { getPurchase, PurchaseHistoryItem } from "@/ultils/api/purchase";
 import { validateVoucher, applyVoucher } from "@/ultils/api/voucher";
 import Spinner from "@/components/spinner/spinner";
 
-interface PurchaseItem {
-  _id: string;
-  productName: string;
-  price: number;
-  productLink: string;
-  cashbackPercentage: number;
-  cashback: number;
-  quantity: number;
-  purchaseDate: string;
-  status: "Đang xử lý" | "Đã duyệt" | "Hủy";
-  transaction_id: string;
-  voucherUsed?: boolean;
-  voucherCode?: string;
-  bonusCashback?: number;
-  img?: string;
-}
-
 export default function PurchaseHistoryLayout() {
-  const [purchases, setPurchases] = useState<PurchaseItem[]>([]);
+  const [purchases, setPurchases] = useState<PurchaseHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseItem | null>(null);
+  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseHistoryItem | null>(null);
   const [voucherCode, setVoucherCode] = useState("");
   const [validating, setValidating] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -238,8 +221,35 @@ export default function PurchaseHistoryLayout() {
                   </div>
                 </div>
 
-                {/* Voucher Status */}
-                {purchase.voucherUsed && (
+                {/* Cashback Detail */}
+                {purchase.status === "Đã duyệt" && (purchase.membershipBonusPercent || purchase.voucherBonusPercent) ? (
+                  <div className="mt-3 p-2 bg-gray-50 rounded-lg space-y-1">
+                    {/* Membership Bonus */}
+                    {purchase.membershipBonusPercent ? (
+                      <div className="flex justify-between items-center text-sm">
+                        <div className="flex items-center gap-1">
+                          <span className="text-amber-600">★</span>
+                          <span className="text-gray-600">Bonus hang ({purchase.membershipBonusPercent}%):</span>
+                        </div>
+                        <span className="text-amber-600 font-medium">
+                          +{formatCurrency(purchase.membershipBonusAmount || 0)}
+                        </span>
+                      </div>
+                    ) : null}
+
+                    {/* Voucher Bonus */}
+                    {purchase.voucherUsed && purchase.voucherBonusPercent ? (
+                      <div className="flex justify-between items-center text-sm">
+                        <div>
+                          <span className="text-purple-600">Voucher {purchase.voucherCode} ({purchase.voucherBonusPercent}%):</span>
+                        </div>
+                        <span className="text-purple-600 font-medium">
+                          +{formatCurrency(purchase.bonusCashback || 0)}
+                        </span>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : purchase.voucherUsed ? (
                   <div className="mt-3 p-2 bg-purple-50 rounded-lg">
                     <div className="flex justify-between items-center text-sm">
                       <div>
@@ -251,7 +261,7 @@ export default function PurchaseHistoryLayout() {
                       </span>
                     </div>
                   </div>
-                )}
+                ) : null}
 
                 {/* Apply Voucher Button */}
                 {purchase.status === "Đã duyệt" && !purchase.voucherUsed && (
