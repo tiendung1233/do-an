@@ -1,0 +1,68 @@
+@startuml Use Case - Hệ Thống Hạng Thành Viên
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Hệ thống" as System
+
+rectangle "Hệ thống Hạng Thành Viên" {
+  rectangle "Xem thông tin hạng thành viên" as UC_ViewMembership
+  rectangle "Tính tổng tiền đã chi tiêu" as UC_CalculateTotalSpent
+  rectangle "Xác định hạng hiện tại" as UC_DetermineTier
+  rectangle "Tự động nâng hạng" as UC_AutoUpgrade
+  rectangle "Tạo voucher chúc mừng" as UC_CreateCongratVoucher
+  rectangle "Áp dụng bonus cashback" as UC_ApplyCashbackBonus
+}
+
+User --> UC_ViewMembership
+
+System --> UC_CalculateTotalSpent
+System --> UC_DetermineTier
+System --> UC_AutoUpgrade
+System --> UC_ApplyCashbackBonus
+
+UC_ViewMembership --> UC_CalculateTotalSpent : <<include>>
+UC_ViewMembership --> UC_DetermineTier : <<include>>
+
+UC_AutoUpgrade --> UC_CalculateTotalSpent : <<include>>
+UC_AutoUpgrade --> UC_DetermineTier : <<include>>
+UC_AutoUpgrade --> UC_CreateCongratVoucher : <<extend>>
+
+UC_ApplyCashbackBonus --> UC_DetermineTier : <<include>>
+
+note right of UC_ViewMembership
+  Người dùng xem:
+  - Hạng hiện tại (None/Bronze/Silver/Gold)
+  - Tổng tiền đã chi tiêu
+  - Hạng tiếp theo và số tiền cần
+  - Lợi ích của từng hạng
+end note
+
+note right of UC_AutoUpgrade
+  Hệ thống tự động nâng hạng
+  khi đơn hàng được duyệt
+  và tổng tiền đạt ngưỡng
+  Tạo voucher chúc mừng
+end note
+
+note right of UC_ApplyCashbackBonus
+  Bonus cashback theo hạng:
+  - None: 0%
+  - Bronze: 2%
+  - Silver: 5%
+  - Gold: 10%
+end note
+
+@enduml
+

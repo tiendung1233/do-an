@@ -1,0 +1,56 @@
+@startuml
+title Activity Diagram - Thêm Vào Giỏ Hàng
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Xem chi tiết sản phẩm;
+
+|Controller|
+:Hiển thị thông tin sản phẩm;
+
+|User|
+:Chọn số lượng và click "Thêm vào giỏ hàng";
+
+|Controller|
+if (Đã đăng nhập?) then (Không)
+  :Yêu cầu đăng nhập;
+  |User|
+  :Đăng nhập;
+  |Controller|
+endif
+
+|Database|
+:Kiểm tra sản phẩm đã có trong giỏ?;
+
+if (Đã có?) then (Có)
+  :UPDATE số lượng\n(quantity = quantity + newQuantity);
+else (Chưa có)
+  :INSERT sản phẩm mới vào giỏ hàng;
+endif
+
+|Database|
+:Kiểm tra tồn kho sản phẩm;
+
+if (Số lượng vượt quá tồn kho?) then (Có)
+  |Controller|
+  :Hiển thị lỗi "Vượt quá tồn kho";
+  stop
+else (Không)
+  |Controller|
+  :Cập nhật số lượng trong icon giỏ hàng;
+  :Hiển thị thông báo "Đã thêm vào giỏ hàng";
+  stop
+endif
+
+@enduml
+

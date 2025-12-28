@@ -1,0 +1,70 @@
+@startuml
+title Activity Diagram - Hệ Thống Hạng Thành Viên
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang hạng thành viên;
+
+|Controller|
+:Tính tổng tiền đã chi tiêu (từ đơn hàng đã duyệt);
+
+|Controller|
+:Xác định hạng hiện tại (None/Bronze/Silver/Gold);
+
+|Controller|
+:Tính hạng tiếp theo và số tiền cần;
+
+|Controller|
+:Hiển thị thông tin hạng thành viên;
+
+|Hệ thống|
+:Đơn hàng được duyệt;
+
+|Hệ thống|
+:Tính tổng tiền đã chi tiêu;
+
+|Hệ thống|
+:Tính hạng mới dựa trên totalSpent;
+
+if (Hạng mới cao hơn hạng hiện tại?) then (Có)
+  |Database|
+  :UPDATE user (membershipTier = newTier);
+  :INSERT membership_history;
+  if (Hạng mới là Bronze/Silver/Gold?) then (Có)
+    :Tạo voucher chúc mừng;
+    :INSERT voucher;
+  endif
+  |Email Service|
+  :Gửi email chúc mừng nâng hạng;
+  |User|
+  :Nhận email thông báo;
+else (Không)
+  :Không có thay đổi;
+endif
+
+|Hệ thống|
+:Khi tính cashback cho đơn hàng;
+
+|Hệ thống|
+:Lấy hạng thành viên của user;
+
+|Hệ thống|
+:Tính cashback base + bonus từ hạng;
+
+|Hệ thống|
+:CashbackAmount = baseAmount * (1 + membershipBonus);
+
+stop
+
+@enduml
+

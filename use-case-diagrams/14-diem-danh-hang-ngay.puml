@@ -1,0 +1,56 @@
+@startuml Use Case - Điểm Danh Hàng Ngày
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+
+rectangle "Hệ thống Điểm Danh" {
+  rectangle "Xem trạng thái điểm danh" as UC_ViewCheckInStatus
+  rectangle "Xem lịch điểm danh tuần" as UC_ViewWeeklyCalendar
+  rectangle "Điểm danh hôm nay" as UC_CheckInToday
+  rectangle "Kiểm tra đã điểm danh" as UC_CheckAlreadyCheckedIn
+  rectangle "Tạo voucher cashback" as UC_CreateVoucher
+  rectangle "Cập nhật streak" as UC_UpdateStreak
+  rectangle "Xem lịch sử điểm danh" as UC_ViewCheckInHistory
+}
+
+User --> UC_ViewCheckInStatus
+User --> UC_CheckInToday
+User --> UC_ViewCheckInHistory
+
+UC_ViewCheckInStatus --> UC_ViewWeeklyCalendar : <<include>>
+
+UC_CheckInToday --> UC_CheckAlreadyCheckedIn : <<include>>
+UC_CheckInToday --> UC_CreateVoucher : <<extend>>
+UC_CheckInToday --> UC_UpdateStreak : <<include>>
+
+note right of UC_ViewWeeklyCalendar
+  Lịch điểm danh tuần:
+  - Thứ 2: 1% voucher
+  - Thứ 3: 2% voucher
+  - Thứ 4: 3% voucher
+  - Thứ 5: 4% voucher
+  - Thứ 6: 5% voucher
+  - Thứ 7: 6% voucher
+  - Chủ nhật: 7% voucher
+end note
+
+note right of UC_CheckInToday
+  Mỗi ngày chỉ được điểm danh 1 lần
+  Nhận voucher theo phần trăm của ngày
+  Cập nhật streak (số ngày liên tiếp)
+end note
+
+@enduml
+

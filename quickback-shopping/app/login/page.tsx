@@ -144,7 +144,7 @@ const LoginPage = () => {
           alt="robot"
         />
         <h1 className="mb-6 text-2xl font-semibold text-gray-900 dark:text-white">
-          QuickBack Shopping
+          SmartCash Shopping
         </h1>
         <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-5 sm:p-8">
@@ -192,7 +192,7 @@ const LoginPage = () => {
                       className="text-gray-500 dark:text-gray-300"
                     >
                       <Link href="/policy">
-                        Tôi đồng ý với mọi điều khoản của QuickBack Shopping
+                        Tôi đồng ý với mọi điều khoản của SmartCash Shopping
                       </Link>
                     </label>
                   </div>

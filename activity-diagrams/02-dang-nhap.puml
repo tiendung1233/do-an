@@ -1,0 +1,60 @@
+@startuml
+title Activity Diagram - Đăng Nhập
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Đăng nhập;
+
+|Controller|
+:Mở form đăng nhập;
+
+|User|
+if (Chọn phương thức đăng nhập?) then (Email/Password)
+  :Nhập email và password;
+  |Controller|
+  :Kiểm tra thông tin đăng nhập;
+  |Database|
+  :Query user WHERE email = ?;
+  if (Email tồn tại và password đúng?) then (Không)
+    |Controller|
+    :Hiển thị lỗi "Email hoặc mật khẩu không đúng";
+    |User|
+    :Nhập lại;
+  else (Có)
+    |Controller|
+    :Tạo JWT token;
+    :Chuyển hướng đến trang chủ;
+    stop
+  endif
+else (Google OAuth)
+  |Google OAuth|
+  :Redirect đến Google;
+  :Xác thực quyền truy cập;
+  :Trả về OAuth code;
+  |Controller|
+  :Exchange code for access token;
+  :GET user info từ Google;
+  |Database|
+  if (Email đã tồn tại?) then (Có)
+    :UPDATE lastLoginAt;
+  else (Không)
+    :INSERT user mới (emailVerified=true);
+  endif
+  |Controller|
+  :Tạo JWT token;
+  :Chuyển hướng đến trang chủ;
+  stop
+endif
+
+@enduml
+

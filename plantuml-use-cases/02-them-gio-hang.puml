@@ -1,0 +1,95 @@
+@startuml Use Case - Thêm Giỏ Hàng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Thêm Sản Phẩm Vào Giỏ Hàng
+
+actor "Người dùng" as User
+participant "Giao diện Web/Mobile" as UI
+participant "Controller Giỏ hàng" as Controller
+participant "Service Giỏ hàng" as Service
+database "Database" as DB
+participant "Hệ thống Xác thực" as Auth
+
+== Luồng chính ==
+
+User -> UI: 1. Xem chi tiết sản phẩm
+activate UI
+UI -> Controller: 2. Lấy thông tin sản phẩm
+Controller -> DB: 3. Query thông tin sản phẩm
+DB --> Controller: 4. Trả về thông tin sản phẩm
+Controller --> UI: 5. Dữ liệu sản phẩm
+UI --> User: 6. Hiển thị chi tiết sản phẩm
+
+User -> UI: 7. Chọn số lượng và click "Thêm vào giỏ hàng"
+UI -> Controller: 8. Request thêm vào giỏ hàng (productId, quantity)
+activate Controller
+Controller -> Auth: 9. Kiểm tra đăng nhập
+activate Auth
+
+alt Chưa đăng nhập
+    Auth --> Controller: 10a. Chưa đăng nhập
+    Controller --> UI: 11a. Yêu cầu đăng nhập
+    UI --> User: 12a. Hiển thị form đăng nhập
+else Đã đăng nhập
+    Auth --> Controller: 10b. Đã đăng nhập (userId)
+    Controller -> Service: 11b. Thêm vào giỏ hàng (userId, productId, quantity)
+    activate Service
+    Service -> DB: 12b. Kiểm tra sản phẩm đã có  trong giỏ hàng chưa
+    
+    alt Sản phẩm chưa có trong giỏ
+        DB --> Service: 13b1. Chưa có
+        Service -> DB: 14b1. INSERT vào bảng Cart
+        DB --> Service: 15b1. Xác nhận thành công
+    else Sản phẩm đã có trong giỏ
+        DB --> Service: 13b2. Đã có (cartId, currentQuantity)
+        Service -> DB: 14b2. UPDATE số lượng  (quantity = currentQuantity + newQuantity)
+        DB --> Service: 15b2. Xác nhận cập nhật
+    end
+    
+    Service -> DB: 16b. Kiểm tra tồn kho sản phẩm
+    DB --> Service: 17b. Số lượng tồn kho
+    
+    alt Số lượng vượt quá tồn kho
+        Service --> Controller: 18b1. Lỗi: Vượt quá tồn kho
+        Controller --> UI: 19b1. Thông báo lỗi
+        UI --> User: 20b1. Hiển thị lỗi
+    else Số lượng hợp lệ
+        Service --> Controller: 18b2. Thành công
+        deactivate Service
+        Controller --> UI: 19b2. Thông báo thành công
+        deactivate Controller
+        UI -> UI: 20b2. Cập nhật số lượng  trong icon giỏ hàng
+        UI --> User: 21b2. Hiển thị thông báo "Đã thêm vào giỏ hàng"
+    end
+end
+
+deactivate Auth
+deactivate UI
+
+== Luồng ngoại lệ ==
+
+note over User, DB
+  **Luồng ngoại lệ:**
+  
+  1. Sản phẩm không tồn tại
+     - Hệ thống hiển thị lỗi "Sản phẩm không tồn tại"
+  
+  2. Sản phẩm đã hết hàng
+     - Hệ thống hiển thị lỗi "Sản phẩm đã hết hàng"
+  
+  3. Số lượng không hợp lệ
+     - Hệ thống hiển thị lỗi "Số lượng không hợp lệ"
+  
+  4. Lỗi kết nối database
+     - Hệ thống hiển thị lỗi "Có lỗi xảy ra, vui lòng thử lại"
+end note
+
+@enduml
+
+
+

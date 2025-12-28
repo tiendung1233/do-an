@@ -1,0 +1,53 @@
+@startuml
+title Activity Diagram - Duyệt Đơn Hàng (Admin)
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|Admin|
+start
+:Truy cập trang quản lý đơn hàng;
+
+|Controller|
+:Hiển thị danh sách đơn hàng;
+
+|Admin|
+:Xem chi tiết đơn hàng;
+
+|Admin|
+if (Quyết định?) then (Duyệt)
+  |Controller|
+  :Tính cashback (base + bonus hạng + voucher);
+  |Database|
+  :BEGIN TRANSACTION;
+  :UPDATE purchase_history (status=approved, cashbackAmount);
+  :UPDATE user (balance += cashbackAmount, totalSpent += orderAmount);
+  :UPDATE voucher (status=used) nếu có;
+  :COMMIT;
+  |Hệ thống|
+  :Kiểm tra và nâng hạng thành viên nếu đủ điều kiện;
+  :Tạo lượt quay vòng quay may mắn;
+  |Email Service|
+  :Gửi email thông báo "Đơn hàng đã được duyệt";
+  |Controller|
+  :Hiển thị "Đã duyệt đơn hàng thành công";
+  stop
+else (Hủy)
+  |Database|
+  :UPDATE purchase_history (status=cancelled, reason);
+  |Email Service|
+  :Gửi email thông báo "Đơn hàng đã bị hủy";
+  |Controller|
+  :Hiển thị "Đã hủy đơn hàng";
+  stop
+endif
+
+@enduml
+

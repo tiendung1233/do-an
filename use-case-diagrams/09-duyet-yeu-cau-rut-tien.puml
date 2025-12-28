@@ -1,0 +1,64 @@
+@startuml Use Case - Duyệt Yêu Cầu Rút Tiền (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Admin" as Admin
+actor "Hệ thống Thanh toán" as Payment
+
+rectangle "Hệ thống Duyệt Rút Tiền" {
+  rectangle "Xem danh sách yêu cầu rút tiền" as UC_ViewRequests
+  rectangle "Xem chi tiết yêu cầu" as UC_ViewDetail
+  rectangle "Kiểm tra số dư người dùng" as UC_CheckBalance
+  rectangle "Duyệt yêu cầu rút tiền" as UC_ApproveRequest
+  rectangle "Từ chối yêu cầu rút tiền" as UC_RejectRequest
+  rectangle "Gửi yêu cầu chuyển khoản" as UC_SendPayment
+  rectangle "Cập nhật trạng thái yêu cầu" as UC_UpdateStatus
+  rectangle "Gửi email thông báo" as UC_SendNotification
+}
+
+Admin --> UC_ViewRequests
+Admin --> UC_ViewDetail
+Admin --> UC_ApproveRequest
+Admin --> UC_RejectRequest
+
+UC_ViewRequests --> UC_ViewDetail : <<extend>>
+
+UC_ApproveRequest --> UC_CheckBalance : <<include>>
+UC_ApproveRequest --> UC_SendPayment : <<include>>
+UC_ApproveRequest --> UC_UpdateStatus : <<include>>
+UC_ApproveRequest --> UC_SendNotification : <<include>>
+
+UC_RejectRequest --> UC_UpdateStatus : <<include>>
+UC_RejectRequest --> UC_SendNotification : <<include>>
+
+UC_SendPayment ..> Payment : <<extend>>
+
+note right of UC_ApproveRequest
+  Khi duyệt yêu cầu:
+  - Kiểm tra số dư đủ
+  - Trừ số tiền từ tài khoản
+  - Gửi yêu cầu chuyển khoản
+  - Cập nhật trạng thái
+  - Gửi email thông báo
+end note
+
+note right of UC_RejectRequest
+  Khi từ chối:
+  - Cập nhật trạng thái rejected
+  - Lưu lý do từ chối
+  - Gửi email thông báo
+end note
+
+@enduml
+

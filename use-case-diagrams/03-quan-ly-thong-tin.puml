@@ -1,0 +1,82 @@
+@startuml Use Case - Quản Lý Thông Tin
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+
+rectangle "Hệ thống Quản lý Thông tin" {
+  rectangle "Xem thông tin cá nhân" as UC_ViewInfo
+  rectangle "Chỉnh sửa thông tin cá nhân" as UC_EditInfo
+  rectangle "Quản lý thông tin ngân hàng" as UC_BankInfo
+  rectangle "Xem hạng thành viên" as UC_Membership
+  rectangle "Xem lịch sử hoạt động" as UC_ActivityHistory
+  
+  ' Chi tiết Xem thông tin
+  rectangle "Xem tên, Email, SĐT" as UC_ViewBasic
+  rectangle "Xem địa chỉ" as UC_ViewAddress
+  rectangle "Xem ảnh đại diện" as UC_ViewAvatar
+  
+  ' Chi tiết Chỉnh sửa
+  rectangle "Cập nhật tên" as UC_UpdateName
+  rectangle "Cập nhật email" as UC_UpdateEmail
+  rectangle "Cập nhật số điện thoại" as UC_UpdatePhone
+  rectangle "Cập nhật địa chỉ" as UC_UpdateAddress
+  rectangle "Upload ảnh đại diện" as UC_UploadAvatar
+  
+  ' Chi tiết Quản lý ngân hàng
+  rectangle "Thêm thông tin ngân hàng" as UC_AddBank
+  rectangle "Sửa thông tin ngân hàng" as UC_EditBank
+  rectangle "Xóa thông tin ngân hàng" as UC_DeleteBank
+}
+
+User --> UC_ViewInfo
+User --> UC_EditInfo
+User --> UC_BankInfo
+User --> UC_Membership
+User --> UC_ActivityHistory
+
+UC_ViewInfo --> UC_ViewBasic
+UC_ViewInfo --> UC_ViewAddress
+UC_ViewInfo --> UC_ViewAvatar
+
+UC_EditInfo --> UC_UpdateName
+UC_EditInfo --> UC_UpdateEmail
+UC_EditInfo --> UC_UpdatePhone
+UC_EditInfo --> UC_UpdateAddress
+UC_EditInfo --> UC_UploadAvatar
+
+UC_BankInfo --> UC_AddBank
+UC_BankInfo --> UC_EditBank
+UC_BankInfo --> UC_DeleteBank
+
+note right of UC_ViewInfo
+  Người dùng có thể xem:
+  - Thông tin cơ bản (tên, email, SĐT)
+  - Địa chỉ giao hàng
+  - Ảnh đại diện
+  - Hạng thành viên
+  - Số tiền hoàn tiền tích lũy
+end note
+
+note right of UC_EditInfo
+  Người dùng có thể chỉnh sửa:
+  - Tên hiển thị
+  - Email (cần xác thực)
+  - Số điện thoại (cần xác thực OTP)
+  - Địa chỉ
+  - Ảnh đại diện
+end note
+
+@enduml
+

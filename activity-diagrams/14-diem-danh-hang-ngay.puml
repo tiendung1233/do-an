@@ -1,0 +1,55 @@
+@startuml
+title Activity Diagram - Điểm Danh Hàng Ngày
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang điểm danh;
+
+|Controller|
+:Lấy trạng thái check-in tuần hiện tại;
+
+|Database|
+if (Chưa có record cho tuần này?) then (Có)
+  :Tạo record mới;
+endif
+
+|Controller|
+:Tính toán trạng thái các ngày (1-7);
+
+|Controller|
+:Hiển thị lịch điểm danh tuần;
+
+|User|
+:Click "Điểm danh hôm nay";
+
+|Database|
+:Kiểm tra đã điểm danh hôm nay chưa?;
+
+if (Đã điểm danh?) then (Có)
+  |Controller|
+  :Hiển thị lỗi "Đã điểm danh hôm nay";
+  stop
+else (Chưa)
+  |Controller|
+  :Xác định ngày trong tuần (1-7);
+  :Lấy phần trăm voucher tương ứng\n(1%=Thứ 2, 7%=Chủ nhật);
+  |Database|
+  :INSERT voucher (type=checkin, percentage);
+  :UPDATE daily_checkin\n(thêm ngày, cập nhật lastCheckInDate, tăng streak);
+  |Controller|
+  :Hiển thị "Điểm danh thành công! Nhận voucher X%";
+  stop
+endif
+
+@enduml
+

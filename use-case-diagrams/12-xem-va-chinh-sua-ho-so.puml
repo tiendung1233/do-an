@@ -1,0 +1,66 @@
+@startuml Use Case - Xem Và Chỉnh Sửa Hồ Sơ
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+
+rectangle "Hệ thống Quản lý Hồ sơ" {
+  rectangle "Xem hồ sơ cá nhân" as UC_ViewProfile
+  rectangle "Chỉnh sửa thông tin cơ bản" as UC_EditBasicInfo
+  rectangle "Cập nhật email" as UC_UpdateEmail
+  rectangle "Cập nhật số điện thoại" as UC_UpdatePhone
+  rectangle "Upload ảnh đại diện" as UC_UploadAvatar
+  rectangle "Quản lý thông tin ngân hàng" as UC_ManageBankInfo
+  
+  ' Chi tiết Quản lý ngân hàng
+  rectangle "Thêm tài khoản ngân hàng" as UC_AddBank
+  rectangle "Sửa thông tin ngân hàng" as UC_EditBank
+  rectangle "Xóa tài khoản ngân hàng" as UC_DeleteBank
+}
+
+User --> UC_ViewProfile
+User --> UC_EditBasicInfo
+User --> UC_UpdateEmail
+User --> UC_UpdatePhone
+User --> UC_UploadAvatar
+User --> UC_ManageBankInfo
+
+UC_ManageBankInfo --> UC_AddBank
+UC_ManageBankInfo --> UC_EditBank
+UC_ManageBankInfo --> UC_DeleteBank
+
+note right of UC_ViewProfile
+  Hiển thị thông tin:
+  - Thông tin cơ bản
+  - Ảnh đại diện
+  - Địa chỉ
+  - Thông tin ngân hàng
+  - Hạng thành viên
+  - Số tiền hoàn tiền
+end note
+
+note right of UC_UpdateEmail
+  Khi cập nhật email:
+  - Gửi email xác thực
+  - Cần xác thực để hoàn tất
+end note
+
+note right of UC_UpdatePhone
+  Khi cập nhật số điện thoại:
+  - Gửi OTP qua SMS
+  - Cần nhập OTP để xác thực
+end note
+
+@enduml
+

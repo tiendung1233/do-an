@@ -1,0 +1,65 @@
+@startuml Sequence Diagram - Bảng Xếp Hạng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Biểu đồ chức năng bảng xếp hạng
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Leaderboard Controller" as Controller
+participant "Leaderboard Service" as Service
+database "Database" as DB
+actor "Hệ thống" as System
+participant "Email Service" as Email
+
+== Luồng chính - Xem bảng xếp hạng ==
+
+User -> UI: Truy cập trang bảng xếp hạng
+UI -> Controller: getLeaderboard(period, type)
+Controller -> Service: Lấy bảng xếp hạng
+Service -> DB: Query users + aggregate (tổng tiền đã chi tiêu hoặc cashback)
+
+alt Xếp hạng theo tổng chi tiêu
+    Service -> DB: Aggregate purchase_history (group by userId, sum price)
+else Xếp hạng theo cashback
+    Service -> DB: Aggregate purchase_history (group by userId, sum cashbackAmount)
+end
+
+DB --> Service: Danh sách user với điểm số
+Service -> Service: Sắp xếp theo tiêu chí, lấy top N
+Service -> Service: Tìm vị trí của user hiện tại
+Service --> UI: Bảng xếp hạng + vị trí của user
+UI --> User: Hiển thị top 10 và vị trí của mình
+
+== Luồng chính - Nhận thưởng top 3 (tự động) ==
+
+System -> Service: Cron job chạy cuối tháng
+Service -> DB: Tính bảng xếp hạng tháng trước
+Service -> DB: Xác định top 3
+
+alt User trong top 3
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: INSERT leaderboard_reward (userId, rank, period, rewardAmount)
+    Service -> DB: UPDATE user (balance += rewardAmount)
+    Service -> DB: COMMIT
+    Service -> Email: Gửi email chúc mừng
+    Email --> User: "Chúc mừng bạn đứng thứ X! Nhận thưởng Y VNĐ"
+end
+
+== Ngoại lệ ==
+
+note over User, System
+  - Bảng xếp hạng có thể theo: tổng chi tiêu, tổng cashback, số đơn hàng
+  - Thời kỳ: hàng tuần, hàng tháng, hàng năm
+  - Top 3 nhận thưởng tự động cuối mỗi kỳ
+  - Thưởng được cấu hình bởi admin (ví dụ: #1=100k, #2=50k, #3=25k)
+  - User có thể xem thứ hạng của mình và top 10
+  - Lịch sử thưởng được lưu để tra cứu
+end note
+
+@enduml
+

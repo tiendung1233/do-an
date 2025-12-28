@@ -1,0 +1,70 @@
+@startuml Use Case - Nhắn Tin / Chat Hỗ Trợ
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Nhắn Tin / Chat Hỗ Trợ (Rút gọn)
+
+actor "Người dùng" as User
+participant "Giao diện Chat" as UI
+participant "Chat Controller" as Controller
+participant "Chat Service" as Service
+database "Database" as DB
+participant "WebSocket Server" as WS
+actor "Admin" as Admin
+participant "Admin Chat Interface" as AdminUI
+
+== Luồng chính - Người dùng gửi ==
+
+User -> UI: Mở chat, tải hội thoại (nếu có)
+UI -> Controller: Yêu cầu danh sách hội thoại
+Controller -> Service: Lấy conversations/messages
+Service -> DB: Truy vấn conversations + messages
+DB --> Service: Dữ liệu
+Service --> UI: Trả danh sách + tin nhắn
+UI --> User: Hiển thị hội thoại
+
+User -> UI: Soạn và gửi tin nhắn
+UI -> Controller: sendMessage(userId, content)
+Controller -> Service: Lưu tin nhắn
+Service -> DB: Tạo conversation nếu chưa có; lưu message
+DB --> Service: OK
+Service -> WS: Emit "new message"
+WS --> AdminUI: Thông báo tin mới
+WS --> UI: Cập nhật tin nhắn
+UI --> User: Hiển thị đã gửi
+
+== Luồng chính - Admin trả lời ==
+
+Admin -> AdminUI: Xem tin nhắn chờ
+AdminUI -> Controller: Lấy danh sách chưa đọc
+Controller -> Service: Query unread
+Service -> DB: Truy vấn
+DB --> Service: Dữ liệu
+Service --> AdminUI: Danh sách
+AdminUI --> Admin: Hiển thị
+
+Admin -> AdminUI: Chọn hội thoại, gửi phản hồi
+AdminUI -> Controller: sendReply(adminId, conversationId, content)
+Controller -> Service: Lưu phản hồi
+Service -> DB: Lưu message; cập nhật lastMessage
+DB --> Service: OK
+Service -> WS: Emit "reply"
+WS --> UI: Push "Admin đã trả lời"
+UI --> User: Hiển thị phản hồi
+AdminUI --> Admin: Xác nhận đã gửi
+
+== Ngoại lệ ngắn gọn ==
+
+note over User, Admin
+  - Mất kết nối WebSocket: tự reconnect, đồng bộ lại
+  - Tin nhắn quá dài (>1000 ký tự): cảnh báo
+  - Spam (>10 tin/phút): chặn tạm thời
+  - Lỗi lưu tin: báo lỗi và cho gửi lại
+end note
+
+@enduml
+

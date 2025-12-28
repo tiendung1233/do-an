@@ -1,0 +1,76 @@
+@startuml Sequence Diagram - Thêm Vào Giỏ Hàng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.20. Biểu đồ chức năng thêm vào giỏ hàng
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Cart Controller" as Controller
+participant "Cart Service" as Service
+database "Database" as DB
+participant "Hệ thống Xác thực" as Auth
+
+== Luồng chính ==
+
+User -> UI: Xem chi tiết sản phẩm
+UI -> Controller: getProductDetails(productId)
+Controller -> DB: Query thông tin sản phẩm
+DB --> Controller: Thông tin sản phẩm
+Controller --> UI: Dữ liệu sản phẩm
+UI --> User: Hiển thị chi tiết sản phẩm
+
+User -> UI: Chọn số lượng và click "Thêm vào giỏ hàng"
+UI -> Controller: addToCart(userId, productId, quantity)
+Controller -> Auth: Kiểm tra đăng nhập
+
+alt Chưa đăng nhập
+    Auth --> Controller: Chưa đăng nhập
+    Controller --> UI: Yêu cầu đăng nhập
+    UI --> User: Hiển thị form đăng nhập
+    
+else Đã đăng nhập
+    Auth --> Controller: Đã đăng nhập (userId)
+    Controller -> Service: Thêm vào giỏ hàng
+    Service -> DB: Kiểm tra sản phẩm đã có trong giỏ
+    
+    alt Sản phẩm chưa có trong giỏ
+        Service -> DB: INSERT INTO cart (userId, productId, quantity)
+        DB --> Service: cartId
+        
+    else Sản phẩm đã có trong giỏ
+        Service -> DB: UPDATE cart SET quantity = quantity + newQuantity WHERE userId=? AND productId=?
+        DB --> Service: Cập nhật thành công
+    end
+    
+    Service -> DB: Kiểm tra tồn kho sản phẩm
+    DB --> Service: Số lượng tồn kho
+    
+    alt Số lượng vượt quá tồn kho
+        Service --> Controller: Lỗi "Vượt quá tồn kho"
+        Controller --> UI: Thông báo lỗi
+        UI --> User: "Số lượng vượt quá tồn kho"
+        
+    else Số lượng hợp lệ
+        Service --> Controller: Thành công
+        Controller --> UI: Thông báo thành công
+        UI -> UI: Cập nhật số lượng trong icon giỏ hàng
+        UI --> User: "Đã thêm vào giỏ hàng"
+    end
+end
+
+== Ngoại lệ ==
+
+note over User, Auth
+  - Sản phẩm không tồn tại: kiểm tra productId, báo lỗi
+  - Sản phẩm đã hết hàng: kiểm tra stock, báo "Sản phẩm đã hết hàng"
+  - Số lượng không hợp lệ: validate quantity > 0, báo lỗi
+  - Lỗi kết nối database: báo "Có lỗi xảy ra, vui lòng thử lại"
+end note
+
+@enduml
+

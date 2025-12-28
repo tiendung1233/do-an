@@ -18,7 +18,7 @@ export default function PolicyPgae() {
         <>
           <h2 className="p-4 text-center text-2xl text-bold">Chính sách </h2>
           <p className="mb-3 text-black-500 dark:text-black-400">
-            Mục đích của tài liệu này là để thông báo cho bạn cách QuickBack
+            Mục đích của tài liệu này là để thông báo cho bạn cách SmartCash
             quản lý, thu thập, sử dụng và tiết lộ Dữ Liệu Cá Nhân liên quan đến
             bạn và những người dùng khác của trang web của chúng tôi, tiện ích
             mở rộng cho trình duyệt web trên máy tính để bàn (“tiện ích trang
@@ -53,46 +53,46 @@ export default function PolicyPgae() {
         <>
           <h2 className="p-4 text-center text-2xl text-bold">Điều khoản </h2>
           <p className="mb-3 text-black-500 dark:text-black-400">
-            Căn cứ theo Thỏa Thuận này, QuickBack sau đây cấp cho bạn quyền sử
+            Căn cứ theo Thỏa Thuận này, SmartCash sau đây cấp cho bạn quyền sử
             dụng có thể hủy ngang, không độc quyền, không thể chuyển nhượng
             (không bao gồm quyền sử dụng thứ cấp) để truy cập và sử dụng Nền
-            Tảng QuickBack và Dịch Vụ cho mục đích sử dụng duy nhất của cá nhân
+            Tảng SmartCash và Dịch Vụ cho mục đích sử dụng duy nhất của cá nhân
             bạn. Bạn đồng ý rằng bạn không có quyền nào ngoài các quyền lợi và
-            quyền sử dụng được cấp rõ ràng theo Thỏa Thuận này. QuickBack bảo
+            quyền sử dụng được cấp rõ ràng theo Thỏa Thuận này. SmartCash bảo
             lưu các quyền thay đổi, nâng cấp hoặc ngưng bất kỳ hoặc tất cả Dịch
-            Vụ hoặc Nền Tảng QuickBack hoặc bất kỳ chức năng của Dịch Vụ hoặc
-            của Nền Tảng QuickBack bất cứ lúc nào, có hoặc không có thông báo.
+            Vụ hoặc Nền Tảng SmartCash hoặc bất kỳ chức năng của Dịch Vụ hoặc
+            của Nền Tảng SmartCash bất cứ lúc nào, có hoặc không có thông báo.
             Tất cả các quyền lợi không được cấp rõ ràng theo Thỏa Thuận này được
-            bảo lưu bởi QuickBack và các bên cấp phép của QuickBack.
+            bảo lưu bởi SmartCash và các bên cấp phép của SmartCash.
           </p>
           <p className="text-black-500 dark:text-black-400">
             Một số Dịch Vụ yêu cầu người dùng phải duy trì một tài khoản với
-            QuickBack. Người dùng có thể tạo một tài khoản miễn phí bằng cách
+            SmartCash. Người dùng có thể tạo một tài khoản miễn phí bằng cách
             cung cấp các chi tiết có liên quan được yêu cầu. Việc sử dụng tài
             khoản và Dịch Vụ (bao gồm các cơ hội được Hoàn Tiền từ các đối tác
             thương nhân của chúng tôi và/hoặc chúng tôi) được cung cấp dựa trên
-            quyết định riêng của QuickBack và căn cứ theo sự tuân thủ của bạn
+            quyết định riêng của SmartCash và căn cứ theo sự tuân thủ của bạn
             với Thỏa Thuận này. Một cá nhân không được tạo hoặc có quyền kiểm
-            soát và/hoặc nắm giữ nhiều tài khoản QuickBack. Cụ thể: (a) Mỗi số
-            điện thoại di động chỉ có thể kết nối với một tài khoản QuickBack;
+            soát và/hoặc nắm giữ nhiều tài khoản SmartCash. Cụ thể: (a) Mỗi số
+            điện thoại di động chỉ có thể kết nối với một tài khoản SmartCash;
             (b) Mỗi tài khoản thanh toán (ví dụ mỗi tài khoản ngân hàng, mỗi tài
-            khoản paypal) chỉ có thể kết nối với một tài khoản QuickBack; Việc
+            khoản paypal) chỉ có thể kết nối với một tài khoản SmartCash; Việc
             không tuân thủ bất kỳ điều khoản và điều kiện nào, bất kỳ sự gian
             lận hoặc lạm dụng nào liên quan đến việc tích lũy hoặc nhận tiền
             hoàn lại và/hoặc các phần thưởng khác, và/hoặc bất kỳ sự cung cấp
-            sai lệch của bất kỳ thông tin nào gửi đến QuickBack hoặc các chi
-            nhánh của QuickBack đều có thể dẫn đến tài khoản QuickBack của bạn
+            sai lệch của bất kỳ thông tin nào gửi đến SmartCash hoặc các chi
+            nhánh của SmartCash đều có thể dẫn đến tài khoản SmartCash của bạn
             bị đánh dấu là hoạt động đáng ngờ và bị đình chỉ hoặc chấm dứt và
             bất kỳ khoản Hoàn Tiền tích lũy nào của bạn sẽ bị tịch thu.
           </p>
           <div className="text-black-500 dark:text-black-400 mt-4">
-            Trong số các dịch vụ do QuickBack cung cấp có cơ hội nhận giảm giá,
+            Trong số các dịch vụ do SmartCash cung cấp có cơ hội nhận giảm giá,
             chiết khấu ưu đãi hoặc phần thưởng như hoàn lại tiền hoặc các chương
             trình khuyến mãi khác từ các đối tác thương nhân của chúng tôi
-            và/hoặc QuickBack tính trên các giao dịch mua hàng được thực hiện
+            và/hoặc SmartCash tính trên các giao dịch mua hàng được thực hiện
             tại các đối tác thương nhân khác nhau của chúng tôi thông qua các
-            Nền Tảng QuickBack khác nhau. Việc tạo và duy trì tài khoản với
-            QuickBack là bắt buộc trước khi người dùng có thể bắt đầu nhận tiền
+            Nền Tảng SmartCash khác nhau. Việc tạo và duy trì tài khoản với
+            SmartCash là bắt buộc trước khi người dùng có thể bắt đầu nhận tiền
             hoàn lại. Việc ghi có cho số tiền hoàn lại cũng phải tuân theo các
             điều khoản, điều kiện và yêu cầu khác nhau, rõ ràng hoặc ngụ ý, liên
             quan đến tín dụng hoàn lại tiền nói chung hoặc các điều khoản, điều
@@ -102,12 +102,12 @@ export default function PolicyPgae() {
             <p>
               {" "}
               (+) Yêu cầu người dùng kích hoạt cookies trong suốt quá trình truy
-              cập Nền Tảng QuickBack và sau đó là trang web của đối tác thương
+              cập Nền Tảng SmartCash và sau đó là trang web của đối tác thương
               nhân;
             </p>{" "}
             <p>
               (+) Không mở một cửa sổ hoặc trình duyệt riêng biệt trong khi truy
-              cập Nền Tảng QuickBack và sau đó là trang web của đối tác thương
+              cập Nền Tảng SmartCash và sau đó là trang web của đối tác thương
               nhân;
             </p>{" "}
             <p>
@@ -123,16 +123,16 @@ export default function PolicyPgae() {
               (+) Không tham gia vào bất kỳ hành vi gian lận hoặc không trung
               thực nào và/hoặc tuân thủ các điều khoản của Thỏa Thuận này hoặc
               bất kỳ điều khoản và điều kiện nào khác được quy định bởi
-              QuickBack hoặc đối tác thương nhân hiện hành; Ngoài ra, một số
+              SmartCash hoặc đối tác thương nhân hiện hành; Ngoài ra, một số
               giao dịch mua hàng nhất định có thể không được áp dụng việc Hoàn
               Tiền. Nhìn chung, việc Hoàn Tiền được nhận từ thương nhân và/hoặc
-              QuickBack tính trên giá mua gốc không bao gồm vận chuyển và xử lý.
+              SmartCash tính trên giá mua gốc không bao gồm vận chuyển và xử lý.
               Tuy nhiên, số tiền hoàn lại và trường hợp không áp dụng Hoàn Tiền
               sẽ khác nhau giữa các đối tác thương nhân và các chương trình
               khuyến mãi cá nhân có thể bao gồm các trường hợp không áp dụng cụ
               thể. Vui lòng xem lại các điều khoản này một cách cẩn thận. Các
               trường hợp không áp dụng này được căn cứ trên thay đổi không cần
-              báo trước, và QuickBack theo đây từ chối bất kỳ và mọi trách nhiệm
+              báo trước, và SmartCash theo đây từ chối bất kỳ và mọi trách nhiệm
               pháp lý liên quan đến bất kỳ thông tin không chính xác nào hoặc
               thất bại trong việc bao quát hết các thông tin trong danh sách
               loại trừ. Một số ví dụ về các trường hợp không áp dụng Hoàn Tiền
@@ -144,7 +144,7 @@ export default function PolicyPgae() {
                 (-) Chỉ đủ điều kiện Hoàn Tiền khi giao dịch được hoàn thành
                 bằng các phương thức thanh toán được chỉ định; và <br />
                 (-) Hoàn Tiền không được áp dụng cho các giao dịch mua hàng mà
-                QuickBack xác định là không hợp lệ (ví dụ: các giao dịch mua sắm
+                SmartCash xác định là không hợp lệ (ví dụ: các giao dịch mua sắm
                 gian lận để tích lũy và (hoặc) quy đổi Hoàn Tiền, nhằm mục đích
                 tối đa hóa lợi nhuận cá nhân).
               </p>
@@ -181,17 +181,17 @@ export default function PolicyPgae() {
             <p>
               Không tham gia vào bất kỳ hành vi gian lận hoặc không trung thực
               nào và/hoặc tuân thủ các điều khoản của Thỏa Thuận này hoặc bất kỳ
-              điều khoản và điều kiện nào khác được quy định bởi QuickBack hoặc
+              điều khoản và điều kiện nào khác được quy định bởi SmartCash hoặc
               đối tác thương nhân hiện hành; Ngoài ra, một số giao dịch mua hàng
               nhất định có thể không được áp dụng việc Hoàn Tiền. Nhìn chung,
-              việc Hoàn Tiền được nhận từ thương nhân và/hoặc QuickBack tính
+              việc Hoàn Tiền được nhận từ thương nhân và/hoặc SmartCash tính
               trên giá mua gốc không bao gồm vận chuyển và xử lý. Tuy nhiên, số
               tiền hoàn lại và trường hợp không áp dụng Hoàn Tiền sẽ khác nhau
               giữa các đối tác thương nhân và các chương trình khuyến mãi cá
               nhân có thể bao gồm các trường hợp không áp dụng cụ thể. Vui lòng
               xem lại các điều khoản này một cách cẩn thận. Các trường hợp không
               áp dụng này được căn cứ trên thay đổi không cần báo trước, và
-              QuickBack theo đây từ chối bất kỳ và mọi trách nhiệm pháp lý liên
+              SmartCash theo đây từ chối bất kỳ và mọi trách nhiệm pháp lý liên
               quan đến bất kỳ thông tin không chính xác nào hoặc thất bại trong
               việc bao quát hết các thông tin trong danh sách loại trừ.
             </p>

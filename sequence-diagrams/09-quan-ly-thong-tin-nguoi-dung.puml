@@ -1,0 +1,77 @@
+@startuml Sequence Diagram - Quản Lý Thông Tin Người Dùng (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.21. Biểu đồ chức năng quản lý thông tin người dùng
+
+actor "Admin" as Admin
+participant "Giao diện Admin" as UI
+participant "User Controller" as Controller
+participant "User Service" as Service
+database "Database" as DB
+
+== Luồng chính - Xem danh sách người dùng ==
+
+Admin -> UI: Truy cập trang quản lý người dùng
+UI -> Controller: getUsers(filters, page, limit)
+Controller -> Service: Lấy danh sách người dùng
+Service -> DB: Query users với filters (hạng, trạng thái, ngày đăng ký)
+DB --> Service: Danh sách người dùng
+Service -> DB: Đếm tổng số (để phân trang)
+DB --> Service: Total count
+Service --> UI: Danh sách + tổng số
+UI --> Admin: Hiển thị danh sách (tên, email, hạng, trạng thái, ngày đăng ký)
+
+== Luồng chính - Xem chi tiết người dùng ==
+
+Admin -> UI: Click xem chi tiết người dùng
+UI -> Controller: getUserDetails(userId)
+Controller -> Service: Lấy chi tiết
+Service -> DB: Query user + purchase_history + withdraw_history
+DB --> Service: Chi tiết (thông tin cá nhân, lịch sử mua hàng, lịch sử rút tiền, số tiền hoàn tiền)
+Service --> UI: Dữ liệu chi tiết
+UI --> Admin: Hiển thị đầy đủ thông tin người dùng
+
+== Luồng chính - Chỉnh sửa thông tin ==
+
+Admin -> UI: Chỉnh sửa thông tin người dùng
+UI -> Controller: updateUser(userId, data)
+Controller -> Service: Cập nhật
+Service -> DB: UPDATE user (name, email, phone, address, membershipTier, status, balance)
+DB --> Service: Xác nhận cập nhật
+Service --> UI: Thành công
+UI --> Admin: "Đã cập nhật thông tin người dùng"
+
+== Luồng chính - Phân quyền ==
+
+Admin -> UI: Phân quyền người dùng
+UI -> Controller: updateUserRole(userId, role)
+Controller -> Service: Cập nhật quyền
+Service -> DB: UPDATE user (role = newRole)
+Service --> UI: Thành công
+UI --> Admin: "Đã cập nhật quyền"
+
+== Luồng chính - Khóa/Mở khóa tài khoản ==
+
+Admin -> UI: Khóa/Mở khóa tài khoản
+UI -> Controller: toggleUserStatus(userId, status)
+Controller -> Service: Cập nhật trạng thái
+Service -> DB: UPDATE user (status = locked/unlocked, lockedAt, lockReason)
+Service --> UI: Thành công
+UI --> Admin: "Đã cập nhật trạng thái tài khoản"
+
+== Ngoại lệ ==
+
+note over Admin, DB
+  - User không tồn tại: kiểm tra userId, báo lỗi
+  - Thông tin không hợp lệ: validate dữ liệu, báo lỗi cụ thể
+  - Không có quyền: kiểm tra quyền admin, báo lỗi
+  - Lỗi database: rollback transaction, báo lỗi
+end note
+
+@enduml
+

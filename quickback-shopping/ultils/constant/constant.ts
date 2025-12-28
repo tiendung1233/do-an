@@ -179,7 +179,7 @@ export const valuesOur = [
   {
     name: "Chia sẻ mọi giá trị",
     description:
-      "Lan tỏa mọi kiến thức và cơ hội. QuickBack Shopping luôn đồng hành và chia sẻ những ưu đãi tốt nhất để bạn mua sắm thông minh hơn.",
+      "Lan tỏa mọi kiến thức và cơ hội. SmartCash Shopping luôn đồng hành và chia sẻ những ưu đãi tốt nhất để bạn mua sắm thông minh hơn.",
   },
   {
     name: "Không ngừng học hỏi",
@@ -189,7 +189,7 @@ export const valuesOur = [
   {
     name: "Luôn đồng hành cùng bạn",
     description:
-      "QuickBack Shopping đặt khách hàng lên hàng đầu. Chúng tôi hỗ trợ tận tình và luôn ở đây khi bạn cần.",
+      "SmartCash Shopping đặt khách hàng lên hàng đầu. Chúng tôi hỗ trợ tận tình và luôn ở đây khi bạn cần.",
   },
   {
     name: "Chịu trách nhiệm",
@@ -199,7 +199,7 @@ export const valuesOur = [
   {
     name: "Tận hưởng cuộc sống",
     description:
-      "Mua sắm tiết kiệm để bạn có thể dành thời gian cho những điều thực sự quan trọng. QuickBack Shopping giúp bạn tận hưởng trọn vẹn hơn.",
+      "Mua sắm tiết kiệm để bạn có thể dành thời gian cho những điều thực sự quan trọng. SmartCash Shopping giúp bạn tận hưởng trọn vẹn hơn.",
   },
 ];
 

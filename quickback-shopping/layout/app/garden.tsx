@@ -27,7 +27,7 @@ const treeList: TreeItem[] = [
   {
     id: 1,
     title: "Làm quen bạn mới",
-    description: "Lần đầu vào QuickBack Garden",
+    description: "Lần đầu vào SmartCash Garden",
     src: "/Sunflower_05.svg",
     bgColor: "bg-green-500",
     type: "Sunflower",

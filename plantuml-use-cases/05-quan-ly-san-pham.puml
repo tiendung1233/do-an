@@ -1,0 +1,116 @@
+@startuml Use Case - Quản Lý Sản Phẩm (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam roundcorner 0
+
+title Use Case: Quản Lý Sản Phẩm - Admin
+
+left to right direction
+
+actor "Admin" as Admin
+actor "Hệ thống Affiliate API" as AffiliateAPI
+
+rectangle "Hệ thống Quản lý Sản phẩm" {
+  rectangle "Thêm sản phẩm" as UC_AddProduct
+  rectangle "Sửa sản phẩm" as UC_EditProduct
+  rectangle "Xóa sản phẩm" as UC_DeleteProduct
+  rectangle "Quản lý cửa hàng" as UC_ManageShop
+  rectangle "Đồng bộ sản phẩm từ API" as UC_SyncAPI
+  rectangle "Xem danh sách sản phẩm" as UC_ViewProducts
+  rectangle "Tìm kiếm sản phẩm" as UC_SearchProduct
+  
+  ' Chi tiết Thêm sản phẩm
+  rectangle "Nhập thông tin sản phẩm" as UC_InputInfo
+  rectangle "Upload hình ảnh" as UC_UploadImage
+  rectangle "Thiết lập tỷ lệ hoàn tiền" as UC_SetCashbackRate
+  rectangle "Thiết lập link affiliate" as UC_SetAffiliateLink
+  rectangle "Chọn cửa hàng" as UC_SelectShop
+  
+  ' Chi tiết Sửa sản phẩm
+  rectangle "Cập nhật giá" as UC_UpdatePrice
+  rectangle "Cập nhật mô tả" as UC_UpdateDescription
+  rectangle "Cập nhật hình ảnh" as UC_UpdateImage
+  rectangle "Cập nhật tỷ lệ hoàn tiền" as UC_UpdateCashbackRate
+  rectangle "Cập nhật trạng thái" as UC_UpdateStatus
+  
+  ' Chi tiết Quản lý cửa hàng
+  rectangle "Thêm cửa hàng" as UC_AddShop
+  rectangle "Sửa thông tin cửa hàng" as UC_EditShop
+  rectangle "Xóa cửa hàng" as UC_DeleteShop
+  rectangle "Xem danh sách cửa hàng" as UC_ViewShops
+  
+  ' Chi tiết Đồng bộ API
+  rectangle "Đồng bộ từ AccessTrade" as UC_SyncAccessTrade
+  rectangle "Đồng bộ từ MediaMart" as UC_SyncMediaMart
+  rectangle "Đồng bộ từ Tiki" as UC_SyncTiki
+}
+
+Admin --> UC_AddProduct
+Admin --> UC_EditProduct
+Admin --> UC_DeleteProduct
+Admin --> UC_ManageShop
+Admin --> UC_SyncAPI
+Admin --> UC_ViewProducts
+Admin --> UC_SearchProduct
+
+UC_AddProduct --> UC_InputInfo
+UC_AddProduct --> UC_UploadImage
+UC_AddProduct --> UC_SetCashbackRate
+UC_AddProduct --> UC_SetAffiliateLink
+UC_AddProduct --> UC_SelectShop
+
+UC_EditProduct --> UC_UpdatePrice
+UC_EditProduct --> UC_UpdateDescription
+UC_EditProduct --> UC_UpdateImage
+UC_EditProduct --> UC_UpdateCashbackRate
+UC_EditProduct --> UC_UpdateStatus
+
+UC_ManageShop --> UC_AddShop
+UC_ManageShop --> UC_EditShop
+UC_ManageShop --> UC_DeleteShop
+UC_ManageShop --> UC_ViewShops
+
+UC_SyncAPI --> UC_SyncAccessTrade
+UC_SyncAPI --> UC_SyncMediaMart
+UC_SyncAPI --> UC_SyncTiki
+
+UC_SyncAccessTrade ..> AffiliateAPI : <<extend>>
+UC_SyncMediaMart ..> AffiliateAPI : <<extend>>
+UC_SyncTiki ..> AffiliateAPI : <<extend>>
+
+note right of UC_AddProduct
+  Thông tin sản phẩm bao gồm:
+  - Tên sản phẩm
+  - Mô tả
+  - Giá gốc
+  - Giá khuyến mãi
+  - Hình ảnh
+  - Danh mục
+  - Tỷ lệ hoàn tiền (%)
+  - Link affiliate
+  - Cửa hàng
+end note
+
+note right of UC_SyncAPI
+  Đồng bộ sản phẩm từ các API:
+  - Tự động lấy danh sách sản phẩm
+  - Cập nhật giá và thông tin
+  - Tạo link affiliate tự động
+  - Có thể lên lịch đồng bộ định kỳ
+end note
+
+note right of UC_ManageShop
+  Quản lý thông tin cửa hàng:
+  - Tên cửa hàng
+  - Logo
+  - Mô tả
+  - Link website
+  - API credentials
+  - Trạng thái hoạt động
+end note
+
+@enduml
+
+
+

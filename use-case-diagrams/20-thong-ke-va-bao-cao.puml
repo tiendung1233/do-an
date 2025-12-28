@@ -1,0 +1,79 @@
+@startuml Use Case - Thống Kê Và Báo Cáo (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Admin" as Admin
+
+rectangle "Hệ thống Thống Kê và Báo Cáo" {
+  rectangle "Xem dashboard tổng quan" as UC_ViewDashboard
+  rectangle "Xem thống kê doanh thu" as UC_ViewRevenueStats
+  rectangle "Xem thống kê người dùng" as UC_ViewUserStats
+  rectangle "Xem thống kê đơn hàng" as UC_ViewOrderStats
+  rectangle "Xem thống kê cashback" as UC_ViewCashbackStats
+  rectangle "Tạo biểu đồ thống kê" as UC_CreateCharts
+  rectangle "Xuất báo cáo PDF" as UC_ExportPDF
+  rectangle "Xuất báo cáo Excel" as UC_ExportExcel
+  rectangle "Lọc theo thời gian" as UC_FilterByTime
+  rectangle "So sánh giữa các kỳ" as UC_ComparePeriods
+}
+
+Admin --> UC_ViewDashboard
+Admin --> UC_ViewRevenueStats
+Admin --> UC_ViewUserStats
+Admin --> UC_ViewOrderStats
+Admin --> UC_ViewCashbackStats
+Admin --> UC_ExportPDF
+Admin --> UC_ExportExcel
+
+UC_ViewDashboard --> UC_ViewRevenueStats : <<include>>
+UC_ViewDashboard --> UC_ViewUserStats : <<include>>
+UC_ViewDashboard --> UC_ViewOrderStats : <<include>>
+
+UC_ViewRevenueStats --> UC_FilterByTime : <<include>>
+UC_ViewRevenueStats --> UC_CreateCharts : <<include>>
+UC_ViewRevenueStats --> UC_ComparePeriods : <<extend>>
+
+UC_ViewUserStats --> UC_FilterByTime : <<include>>
+UC_ViewUserStats --> UC_CreateCharts : <<include>>
+
+UC_ViewOrderStats --> UC_FilterByTime : <<include>>
+UC_ViewOrderStats --> UC_CreateCharts : <<include>>
+
+UC_ViewCashbackStats --> UC_FilterByTime : <<include>>
+
+note right of UC_ViewDashboard
+  Hiển thị các chỉ số:
+  - Tổng số user
+  - Tổng doanh thu
+  - Tổng đơn hàng
+  - Tổng cashback
+  - Số yêu cầu rút tiền chờ duyệt
+end note
+
+note right of UC_CreateCharts
+  Tạo các loại biểu đồ:
+  - Line chart (xu hướng)
+  - Bar chart (so sánh)
+  - Pie chart (phân bổ)
+end note
+
+note right of UC_ExportPDF
+  Xuất báo cáo chi tiết
+  ra file PDF hoặc Excel
+  Bao gồm tất cả dữ liệu
+  và biểu đồ thống kê
+end note
+
+@enduml
+

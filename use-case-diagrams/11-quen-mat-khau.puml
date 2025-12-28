@@ -1,0 +1,62 @@
+@startuml Use Case - Quên Mật Khẩu
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Hệ thống Email" as Email
+
+rectangle "Hệ thống Đặt lại Mật khẩu" {
+  rectangle "Yêu cầu đặt lại mật khẩu" as UC_RequestReset
+  rectangle "Nhập email" as UC_InputEmail
+  rectangle "Kiểm tra email tồn tại" as UC_CheckEmail
+  rectangle "Tạo reset token" as UC_GenerateToken
+  rectangle "Gửi email reset password" as UC_SendResetEmail
+  rectangle "Click link reset password" as UC_ClickResetLink
+  rectangle "Xác thực token" as UC_VerifyToken
+  rectangle "Nhập mật khẩu mới" as UC_InputNewPassword
+  rectangle "Cập nhật mật khẩu" as UC_UpdatePassword
+}
+
+User --> UC_RequestReset
+User --> UC_InputEmail
+User --> UC_ClickResetLink
+User --> UC_InputNewPassword
+
+UC_RequestReset --> UC_InputEmail : <<include>>
+UC_InputEmail --> UC_CheckEmail : <<include>>
+
+UC_CheckEmail --> UC_GenerateToken : <<extend>>
+UC_GenerateToken --> UC_SendResetEmail : <<include>>
+
+UC_SendResetEmail ..> Email : <<extend>>
+
+UC_ClickResetLink --> UC_VerifyToken : <<include>>
+UC_VerifyToken --> UC_InputNewPassword : <<extend>>
+UC_InputNewPassword --> UC_UpdatePassword : <<include>>
+
+note right of UC_GenerateToken
+  Tạo token reset password
+  (32 ký tự, hết hạn sau 1 giờ)
+  Lưu vào database
+end note
+
+note right of UC_VerifyToken
+  Kiểm tra token hợp lệ
+  và chưa hết hạn
+  Nếu hợp lệ, hiển thị form
+  đặt lại mật khẩu
+end note
+
+@enduml
+

@@ -1,0 +1,98 @@
+@startuml Use Case - Tìm Kiếm Sản Phẩm và Cửa Hàng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam roundcorner 0
+
+title Use Case: Tìm Kiếm Sản Phẩm và Cửa Hàng
+
+left to right direction
+
+actor "Khách hàng" as Customer
+
+rectangle "Hệ thống Tìm kiếm" {
+  rectangle "Tìm kiếm sản phẩm" as UC_SearchProduct
+  rectangle "Tìm kiếm cửa hàng" as UC_SearchShop
+  rectangle "Lọc sản phẩm" as UC_FilterProduct
+  rectangle "Sắp xếp sản phẩm" as UC_SortProduct
+  
+  ' Chi tiết Tìm kiếm sản phẩm
+  rectangle "Tìm theo từ khóa" as UC_KeywordSearch
+  rectangle "Tìm theo cửa hàng" as UC_ShopSearch
+  rectangle "Tìm theo danh mục" as UC_CategorySearch
+  rectangle "Tìm theo thương hiệu" as UC_BrandSearch
+  
+  ' Chi tiết Lọc sản phẩm
+  rectangle "Lọc theo giá" as UC_FilterPrice
+  rectangle "Lọc theo tỷ lệ hoàn tiền" as UC_FilterCashback
+  rectangle "Lọc theo cửa hàng" as UC_FilterByShop
+  rectangle "Lọc theo đánh giá" as UC_FilterRating
+  rectangle "Lọc theo tình trạng (khuyến mãi, mới)" as UC_FilterCondition
+  
+  ' Chi tiết Sắp xếp
+  rectangle "Sắp xếp theo giá tăng dần" as UC_SortPriceAsc
+  rectangle "Sắp xếp theo giá giảm dần" as UC_SortPriceDesc
+  rectangle "Sắp xếp theo độ bán chạy" as UC_SortPopularity
+  rectangle "Sắp xếp theo mới nhất" as UC_SortNewest
+  rectangle "Sắp xếp theo tỷ lệ hoàn tiền cao nhất" as UC_SortCashback
+}
+
+Customer --> UC_SearchProduct
+Customer --> UC_SearchShop
+Customer --> UC_FilterProduct
+Customer --> UC_SortProduct
+
+UC_SearchProduct --> UC_KeywordSearch
+UC_SearchProduct --> UC_ShopSearch
+UC_SearchProduct --> UC_CategorySearch
+UC_SearchProduct --> UC_BrandSearch
+
+UC_FilterProduct --> UC_FilterPrice
+UC_FilterProduct --> UC_FilterCashback
+UC_FilterProduct --> UC_FilterByShop
+UC_FilterProduct --> UC_FilterRating
+UC_FilterProduct --> UC_FilterCondition
+
+UC_SortProduct --> UC_SortPriceAsc
+UC_SortProduct --> UC_SortPriceDesc
+UC_SortProduct --> UC_SortPopularity
+UC_SortProduct --> UC_SortNewest
+UC_SortProduct --> UC_SortCashback
+
+note right of UC_SearchProduct
+  Tìm kiếm sản phẩm theo:
+  - Từ khóa (tên sản phẩm)
+  - Cửa hàng cụ thể
+  - Danh mục sản phẩm
+  - Thương hiệu
+  
+  Hỗ trợ tìm kiếm tiếng Việt
+  có dấu và không dấu
+end note
+
+note right of UC_FilterProduct
+  Bộ lọc cho phép:
+  - Lọc theo khoảng giá
+  - Lọc theo tỷ lệ hoàn tiền
+  - Lọc theo cửa hàng
+  - Lọc theo đánh giá (sao)
+  - Lọc sản phẩm khuyến mãi
+  - Lọc sản phẩm mới
+  
+  Có thể kết hợp nhiều bộ lọc
+end note
+
+note right of UC_SortProduct
+  Sắp xếp kết quả theo:
+  - Giá (tăng/giảm)
+  - Độ phổ biến
+  - Mới nhất
+  - Tỷ lệ hoàn tiền cao nhất
+  
+  Mặc định: Sắp xếp theo độ phổ biến
+end note
+
+@enduml
+
+
+

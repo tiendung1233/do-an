@@ -1,0 +1,49 @@
+@startuml
+title Activity Diagram - Gửi Yêu Cầu Hoàn Tiền
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang lịch sử mua hàng;
+
+|Controller|
+:Hiển thị danh sách đơn hàng;
+
+|User|
+:Chọn đơn hàng chưa được duyệt;
+
+|Controller|
+:Kiểm tra trạng thái đơn hàng;
+
+if (Đơn hàng đã được duyệt?) then (Có)
+  |Controller|
+  :Hiển thị "Đơn hàng đã được duyệt,\ncashback đã được tính";
+  stop
+else (Chưa)
+  |Database|
+  :Kiểm tra đã có yêu cầu chưa?;
+  if (Đã có yêu cầu?) then (Có)
+    |Controller|
+    :Hiển thị "Đã gửi yêu cầu trước đó";
+    stop
+  else (Chưa)
+    |Database|
+    :INSERT cashback_request (status=pending);
+    :UPDATE purchase_history (cashbackStatus=pending);
+    |Controller|
+    :Hiển thị "Yêu cầu hoàn tiền đã được gửi";
+    stop
+  endif
+endif
+
+@enduml
+

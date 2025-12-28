@@ -1,0 +1,536 @@
+@startuml
+!theme plain
+skinparam linetype ortho
+skinparam roundcorner 0
+skinparam backgroundColor #FFFFFF
+skinparam entity {
+  BackgroundColor #E8F4F8
+  BorderColor #2E86AB
+}
+skinparam relationship {
+  Color #2E86AB
+}
+
+title Sơ Đồ Cơ Sở Dữ Liệu - Hệ Thống SmartCash Shopping
+
+' ============================================
+' BẢNG NGƯỜI DÙNG
+' ============================================
+
+entity "users" {
+  * id : ObjectId <<PK>>
+  --
+  * name : String
+  * email : String <<unique>>
+  password : String
+  googleId : String <<unique>>
+  phoneNumber : String <<unique>>
+  address : String
+  city : String
+  image : String
+  --
+  * money : Number <<default: 0>>
+  total : Number <<default: 0>>
+  * membershipTier : Enum <<none|bronze|silver|gold>>
+  * totalSpent : Number <<default: 0>>
+  --
+  referralCode : String <<unique>>
+  referredBy : ObjectId <<FK>>
+  --
+  freeSpins : Number <<default: 1>>
+  lastSpinDate : Date
+  spinToken : String
+  spinStartTime : Date
+  --
+  isVerified : Boolean <<default: false>>
+  verificationToken : String
+  verificationRequestsCount : Number
+  lastVerificationRequest : Date
+  --
+  role : Number <<default: 0>> <<0=User, 1=Staff, 2=Admin>>
+  status : Enum <<active|locked|suspended>>
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG SẢN PHẨM VÀ CỬA HÀNG
+' ============================================
+
+entity "shops" {
+  * id : ObjectId <<PK>>
+  --
+  * name : String
+  description : String
+  logo : String
+  website : String
+  --
+  cashbackRate : Number <<default: 0>>
+  status : Enum <<active|inactive>>
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+entity "products" {
+  * id : ObjectId <<PK>>
+  --
+  * shopId : ObjectId <<FK>>
+  --
+  * name : String
+  description : String
+  * price : Number
+  salePrice : Number
+  images : Array<String>
+  category : String
+  brand : String
+  --
+  * cashbackPercentage : Number
+  affiliateLink : String
+  originalLink : String
+  --
+  stock : Number <<default: 0>>
+  status : Enum <<active|inactive|out_of_stock>>
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG GIỎ HÀNG
+' ============================================
+
+entity "cart" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  * productId : ObjectId <<FK>>
+  --
+  * quantity : Number
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG LỊCH SỬ MUA HÀNG
+' ============================================
+
+entity "purchase_history" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  * productId : ObjectId <<FK>>
+  * shopId : ObjectId <<FK>>
+  --
+  * productName : String
+  * price : Number
+  * quantity : Number
+  productLink : String
+  --
+  * cashbackPercentage : Number
+  * cashback : Number
+  membershipBonusPercent : Number
+  membershipBonusAmount : Number
+  --
+  voucherUsed : Boolean <<default: false>>
+  voucherCode : String
+  voucherBonusPercent : Number
+  bonusCashback : Number
+  --
+  * purchaseDate : Date
+  * status : Enum <<pending|approved|cancelled>>
+  transaction_id : String <<unique>>
+  --
+  approvedBy : ObjectId <<FK>>
+  approvedAt : Date
+  cancelledBy : ObjectId <<FK>>
+  cancelledAt : Date
+  cancelReason : String
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG YÊU CẦU RÚT TIỀN
+' ============================================
+
+entity "withdraw_request" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * amount : Number
+  * bankName : String
+  * accountNumber : String
+  accountHolder : String
+  --
+  * status : Enum <<pending|approved|rejected>>
+  reason : String
+  --
+  requestedAt : Date
+  approvedBy : ObjectId <<FK>>
+  approvedAt : Date
+  rejectedBy : ObjectId <<FK>>
+  rejectedAt : Date
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+entity "withdraw_history" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  * withdrawRequestId : ObjectId <<FK>>
+  --
+  * amount : Number
+  * bankName : String
+  * accountNumber : String
+  --
+  * status : Enum <<pending|completed|failed>>
+  transactionId : String
+  paymentStatus : Enum <<pending|completed|failed>>
+  --
+  processedBy : ObjectId <<FK>>
+  processedAt : Date
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG THÔNG TIN NGÂN HÀNG
+' ============================================
+
+entity "bank_info" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * bankName : String
+  * accountNumber : String
+  * accountHolder : String
+  branch : String
+  --
+  isDefault : Boolean <<default: false>>
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG VOUCHER
+' ============================================
+
+entity "vouchers" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * code : String <<unique>>
+  * type : Enum <<checkin|membership|spinwheel|admin>>
+  * value : Number
+  percentage : Number
+  --
+  minOrderAmount : Number
+  maxDiscountAmount : Number
+  --
+  * status : Enum <<available|used|expired>>
+  usedAt : Date
+  usedOrderId : ObjectId <<FK>>
+  --
+  * expiredAt : Date
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG HỆ THỐNG HẠNG THÀNH VIÊN
+' ============================================
+
+entity "membership_history" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  oldTier : Enum <<none|bronze|silver|gold>>
+  * newTier : Enum <<none|bronze|silver|gold>>
+  * totalSpent : Number
+  --
+  upgradedAt : Date
+  --
+  createdAt : Date
+}
+
+' ============================================
+' BẢNG ĐIỂM DANH HÀNG NGÀY
+' ============================================
+
+entity "daily_checkin" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * weekStartDate : Date
+  checkInDays : Array<Number> <<1-7>>
+  * currentStreak : Number <<default: 0>>
+  lastCheckInDate : Date
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+' ============================================
+' BẢNG VÒNG QUAY MAY MẮN
+' ============================================
+
+entity "spin_wheel" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * availableSpins : Number <<default: 0>>
+  totalSpins : Number <<default: 0>>
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+entity "spin_history" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  rewardType : Enum <<voucher|money|points|none>>
+  rewardValue : Number
+  voucherId : ObjectId <<FK>>
+  --
+  spunAt : Date
+  --
+  createdAt : Date
+}
+
+' ============================================
+' BẢNG TRÒ CHƠI VƯỜN CÂY
+' ============================================
+
+entity "tree" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * treeType : String
+  * level : Number <<default: 1>>
+  * health : Number <<default: 100>> <<0-100>>
+  * water : Number <<default: 0>> <<0-100>>
+  --
+  lastWateredAt : Date
+  lastHarvestAt : Date
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+entity "harvest_history" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  * treeId : ObjectId <<FK>>
+  --
+  * level : Number
+  * rewardAmount : Number
+  --
+  harvestedAt : Date
+  --
+  createdAt : Date
+}
+
+' ============================================
+' BẢNG HỆ THỐNG GIỚI THIỆU
+' ============================================
+
+entity "referral_reward" {
+  * id : ObjectId <<PK>>
+  --
+  * referrerId : ObjectId <<FK>>
+  * referredUserId : ObjectId <<FK>>
+  --
+  * status : Enum <<pending|approved|rejected>>
+  * rewardAmount : Number
+  --
+  orderId : ObjectId <<FK>>
+  --
+  approvedAt : Date
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+entity "referral_history" {
+  * id : ObjectId <<PK>>
+  --
+  * referrerId : ObjectId <<FK>>
+  * referredUserId : ObjectId <<FK>>
+  --
+  * rewardAmount : Number
+  * orderId : ObjectId <<FK>>
+  --
+  rewardedAt : Date
+  --
+  createdAt : Date
+}
+
+' ============================================
+' BẢNG BẢNG XẾP HẠNG
+' ============================================
+
+entity "leaderboard_reward" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * rank : Number <<1|2|3>>
+  * period : Enum <<weekly|monthly|yearly>>
+  periodStartDate : Date
+  periodEndDate : Date
+  --
+  * rewardAmount : Number
+  criteria : Enum <<totalSpent|totalCashback|orderCount>>
+  --
+  rewardedAt : Date
+  --
+  createdAt : Date
+}
+
+' ============================================
+' BẢNG CHAT/NHẮN TIN
+' ============================================
+
+entity "conversations" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  lastMessage : String
+  lastMessageAt : Date
+  unreadCount : Number <<default: 0>>
+  --
+  createdAt : Date
+  updatedAt : Date
+}
+
+entity "messages" {
+  * id : ObjectId <<PK>>
+  --
+  * conversationId : ObjectId <<FK>>
+  * senderId : ObjectId <<FK>>
+  senderType : Enum <<user|admin>>
+  --
+  * content : String
+  isRead : Boolean <<default: false>>
+  readAt : Date
+  --
+  createdAt : Date
+}
+
+' ============================================
+' BẢNG XÁC THỰC VÀ BẢO MẬT
+' ============================================
+
+entity "password_reset" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  * token : String <<unique>>
+  * expiresAt : Date
+  used : Boolean <<default: false>>
+  --
+  createdAt : Date
+}
+
+entity "password_reset_history" {
+  * id : ObjectId <<PK>>
+  --
+  * userId : ObjectId <<FK>>
+  --
+  resetAt : Date
+  ipAddress : String
+  userAgent : String
+  --
+  createdAt : Date
+}
+
+' ============================================
+' QUAN HỆ GIỮA CÁC BẢNG
+' ============================================
+' Giải thích ký hiệu:
+' ||--o{ : One-to-Many (1 người dùng có nhiều...)
+' ||--o| : One-to-One (1 người dùng có 1...)
+' }o--o| : Many-to-One (nhiều... thuộc về 1...)
+' }o--o{ : Many-to-Many (nhiều... có nhiều...)
+
+' Quan hệ One-to-Many: 1 user có nhiều...
+users ||--o{ cart : "có nhiều"
+users ||--o{ purchase_history : "có nhiều"
+users ||--o{ withdraw_request : "có nhiều"
+users ||--o{ withdraw_history : "có nhiều"
+users ||--o{ bank_info : "có nhiều"
+users ||--o{ vouchers : "có nhiều"
+users ||--o{ membership_history : "có nhiều"
+users ||--o{ daily_checkin : "có nhiều"
+users ||--o{ spin_wheel : "có nhiều"
+users ||--o{ spin_history : "có nhiều"
+users ||--o{ tree : "có nhiều"
+users ||--o{ harvest_history : "có nhiều"
+users ||--o{ referral_reward : "giới thiệu (referrer)"
+users ||--o{ referral_reward : "được giới thiệu (referred)"
+users ||--o{ referral_history : "giới thiệu (referrer)"
+users ||--o{ referral_history : "được giới thiệu (referred)"
+users ||--o{ leaderboard_reward : "có nhiều"
+users ||--o{ conversations : "có nhiều"
+users ||--o{ messages : "gửi nhiều"
+users ||--o{ password_reset : "có nhiều"
+users ||--o{ password_reset_history : "có nhiều"
+
+' Quan hệ One-to-One: 1 user được giới thiệu bởi 1 user
+users ||--o| users : "được giới thiệu bởi (referredBy)"
+
+' Quan hệ One-to-Many: 1 shop có nhiều products
+shops ||--o{ products : "có nhiều"
+' Quan hệ Many-to-One: nhiều cart items thuộc về 1 product
+products }o--o{ cart : "có trong"
+' Quan hệ Many-to-One: nhiều purchase_history thuộc về 1 product
+products }o--o{ purchase_history : "có trong"
+
+' Quan hệ Many-to-One: nhiều purchase_history thuộc về 1 shop
+purchase_history }o--|| shops : "thuộc về"
+
+' Quan hệ One-to-Many: 1 withdraw_request có nhiều withdraw_history
+withdraw_request ||--o{ withdraw_history : "có nhiều"
+
+' Quan hệ One-to-Many: 1 tree có nhiều harvest_history
+tree ||--o{ harvest_history : "có nhiều"
+
+' Quan hệ One-to-Many: 1 conversation có nhiều messages
+conversations ||--o{ messages : "có nhiều"
+
+' Quan hệ Many-to-One: nhiều purchase_history có thể sử dụng 1 voucher
+vouchers }o--o| purchase_history : "được sử dụng trong"
+' Quan hệ Many-to-One: nhiều spin_history có thể nhận được 1 voucher
+vouchers }o--o| spin_history : "nhận được từ"
+
+' Quan hệ Many-to-One: nhiều referral_reward từ 1 purchase_history
+referral_reward }o--o| purchase_history : "từ đơn hàng"
+' Quan hệ Many-to-One: nhiều referral_history từ 1 purchase_history
+referral_history }o--o| purchase_history : "từ đơn hàng"
+
+' Quan hệ Many-to-One: nhiều leaderboard_reward thuộc về 1 user
+leaderboard_reward }o--|| users : "thuộc về"
+
+@enduml
+

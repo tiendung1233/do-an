@@ -1,0 +1,121 @@
+@startuml Use Case - Trò Chơi Vườn Cây
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Trò Chơi Vườn Cây (Tree Game)
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Tree Controller" as Controller
+participant "Tree Service" as Service
+database "Database" as DB
+
+== Xem vườn cây ==
+
+User -> UI: Truy cập trang vườn cây
+UI -> Controller: getMyTree(userId)
+Controller -> Service: Lấy thông tin vườn
+Service -> DB: Query tree (userId)
+DB --> Service: Thông tin cây (loại, level, health, water, harvestTime)
+Service --> UI: Thông tin vườn
+UI --> User: Hiển thị vườn cây (trạng thái, level, health)
+
+== Trồng cây ==
+
+User -> UI: Chọn loại cây và trồng
+UI -> Controller: plantTree(userId, treeType)
+Controller -> Service: Xử lý trồng cây
+Service -> DB: Kiểm tra đã có cây chưa
+
+alt Đã có cây
+    DB --> Service: Đã có cây
+    Service --> UI: Lỗi "Đã có cây trong vườn"
+    UI --> User: Thông báo lỗi
+    
+else Chưa có cây
+    Service -> DB: INSERT tree (userId, treeType, level=1, health=100, water=0, plantedAt)
+    DB --> Service: treeId
+    Service --> UI: Thành công
+    UI --> User: "Đã trồng cây thành công"
+end
+
+== Tưới cây ==
+
+User -> UI: Click "Tưới cây"
+UI -> Controller: waterTree(userId)
+Controller -> Service: Xử lý tưới
+Service -> DB: Query tree (userId)
+Service -> Service: Kiểm tra thời gian tưới (cooldown)
+
+alt Chưa đến lượt tưới
+    Service --> UI: Lỗi "Vui lòng đợi X phút để tưới tiếp"
+    UI --> User: Thông báo
+    
+else Có thể tưới
+    Service -> DB: UPDATE tree (water += 10, health = min(100, health + 5), lastWateredAt)
+    Service -> DB: Kiểm tra cây đã đủ nước để lên level chưa
+    
+    alt Đủ điều kiện lên level
+        Service -> DB: UPDATE tree (level += 1, water = 0)
+        Service --> UI: "Cây đã lên level X"
+    else Chưa đủ
+        Service --> UI: "Đã tưới cây (+5 health, +10 water)"
+    end
+    
+    UI --> User: Cập nhật trạng thái cây
+end
+
+== Thu hoạch ==
+
+User -> UI: Click "Thu hoạch"
+UI -> Controller: harvestTree(userId)
+Controller -> Service: Xử lý thu hoạch
+Service -> DB: Query tree (userId)
+Service -> Service: Kiểm tra điều kiện thu hoạch (level, health, thời gian)
+
+alt Chưa đủ điều kiện thu hoạch
+    Service --> UI: Lỗi "Cây chưa đủ điều kiện để thu hoạch"
+    UI --> User: Thông báo
+    
+else Đủ điều kiện
+    Service -> Service: Tính phần thưởng dựa trên level cây
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: UPDATE user (balance += rewardAmount hoặc points += rewardPoints)
+    Service -> DB: UPDATE tree (level = 1, health = 100, water = 0, harvestedAt)
+    Service -> DB: INSERT harvest_history (userId, level, reward)
+    Service -> DB: COMMIT
+    
+    Service --> UI: Phần thưởng (tiền hoặc điểm)
+    UI --> User: "Thu hoạch thành công! Nhận X VNĐ"
+end
+
+== Xem lịch sử thu hoạch ==
+
+User -> UI: Xem lịch sử thu hoạch
+UI -> Controller: getHarvestHistory(userId)
+Controller -> Service: Lấy lịch sử
+Service -> DB: Query harvest_history (userId, sắp xếp theo thời gian)
+DB --> Service: Danh sách thu hoạch
+Service --> UI: Lịch sử
+UI --> User: Hiển thị lịch sử (ngày, level, phần thưởng)
+
+== Ngoại lệ ==
+
+note over User, DB
+  - Mỗi user chỉ có 1 cây trong vườn
+  - Cây có level (1-10), health (0-100), water (0-100)
+  - Tưới cây có cooldown (ví dụ: 30 phút/lần)
+  - Thu hoạch khi cây đạt level nhất định và health đủ
+  - Sau khi thu hoạch, cây reset về level 1
+  - Phần thưởng tăng theo level cây
+  - Cây có thể chết nếu không tưới (health = 0)
+end note
+
+@enduml
+
+
+

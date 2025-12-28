@@ -1,0 +1,53 @@
+@startuml
+title Activity Diagram - Chuyển Đổi Link Thành Link Affiliate
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Nhập link sản phẩm muốn mua;
+
+|Controller|
+:Phân tích URL sản phẩm;
+
+|Controller|
+:Xác định nguồn (Tiki, Shopee, Lazada, etc.);
+
+|Database|
+:Tìm sản phẩm trong database;
+
+if (Sản phẩm đã có và link còn hợp lệ?) then (Có)
+  :Lấy link affiliate có sẵn;
+  |Controller|
+  :Gắn tracking code (userId);
+  :Hiển thị link affiliate;
+  |User|
+  :Click vào link affiliate;
+  :Chuyển hướng đến trang bán hàng;
+  stop
+else (Chưa có hoặc hết hạn)
+  |Affiliate API|
+  :Tạo link affiliate mới;
+  |Affiliate API|
+  :Trả về affiliate link;
+  |Database|
+  :Lưu sản phẩm + mapping link;
+  |Controller|
+  :Gắn tracking code;
+  :Hiển thị link affiliate;
+  |User|
+  :Click vào link affiliate;
+  :Chuyển hướng đến trang bán hàng;
+  stop
+endif
+
+@enduml
+

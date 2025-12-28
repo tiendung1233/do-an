@@ -1,0 +1,77 @@
+@startuml Sequence Diagram - Gửi Yêu Cầu Hoàn Tiền
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Biểu đồ chức năng gửi yêu cầu hoàn tiền
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Cashback Controller" as Controller
+participant "Cashback Service" as Service
+database "Database" as DB
+participant "Hệ thống Affiliate" as Affiliate
+
+== Luồng chính - Xem lịch sử và gửi yêu cầu ==
+
+User -> UI: Truy cập lịch sử mua hàng
+UI -> Controller: getPurchaseHistory(userId)
+Controller -> Service: Lấy danh sách đơn hàng
+Service -> DB: Query purchase_history
+DB --> Service: Danh sách đơn hàng
+Service --> UI: Dữ liệu
+UI --> User: Hiển thị (orderId, product, amount, date, status)
+
+User -> UI: Chọn đơn hàng, gửi yêu cầu hoàn tiền
+UI -> Controller: submitCashbackRequest(userId, orderId)
+Controller -> Service: Tạo yêu cầu
+
+alt Đơn hàng đã được duyệt
+    Service --> UI: "Đã được duyệt, cashback đã tính"
+else Đơn hàng chưa được duyệt
+    Service -> DB: Kiểm tra đã có yêu cầu
+    
+    alt Đã có yêu cầu
+        Service --> UI: "Đã gửi yêu cầu trước đó"
+    else Chưa có yêu cầu
+        Service -> DB: INSERT cashback_request, UPDATE purchase_history (status=pending)
+        Service --> UI: Thành công
+        UI --> User: "Yêu cầu hoàn tiền đã được gửi"
+    end
+end
+
+== Luồng tự động - Tracking từ Affiliate ==
+
+Affiliate -> Service: Webhook callback (orderId, userId, amount, status)
+Service -> DB: Kiểm tra đơn hàng tồn tại
+
+alt Đơn hàng chưa tồn tại
+    Service -> DB: INSERT purchase_history
+end
+
+alt Trạng thái = 'confirmed'
+    Service -> DB: UPDATE purchase_history (approved), UPDATE user (balance+=cashback), INSERT cashback_history
+    Service --> Affiliate: Xác nhận đã xử lý
+else Trạng thái = 'pending'
+    Service -> DB: UPDATE purchase_history (pending), INSERT cashback_request (auto)
+    Service --> Affiliate: Xác nhận đã nhận
+else Trạng thái = 'cancelled'
+    Service -> DB: UPDATE purchase_history (cancelled)
+    Service --> Affiliate: Xác nhận đã hủy
+end
+
+== Ngoại lệ ==
+
+note over User, Affiliate
+  - Đơn hàng không tồn tại: kiểm tra orderId, báo lỗi
+  - Đơn hàng không thuộc về người dùng: kiểm tra userId, báo lỗi
+  - Quá thời hạn yêu cầu: giới hạn 30 ngày, báo lỗi
+  - Webhook không hợp lệ: xác thực signature, log và bỏ qua
+  - Lỗi tính toán cashback: kiểm tra tỷ lệ, cảnh báo admin
+end note
+
+@enduml
+

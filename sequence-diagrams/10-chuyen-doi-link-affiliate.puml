@@ -1,0 +1,65 @@
+@startuml Sequence Diagram - Chuyển Đổi Link Thành Link Affiliate
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.22. Biểu đồ chức năng chuyển đổi link thành link affiliate sản phẩm
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Link Controller" as Controller
+participant "Link Service" as Service
+database "Database" as DB
+participant "URL Parser" as Parser
+participant "Affiliate API" as API
+
+== Luồng chính ==
+
+User -> UI: Nhập link sản phẩm muốn mua
+UI -> Controller: convertLink(originalUrl)
+Controller -> Service: Xử lý chuyển đổi
+Service -> Parser: Phân tích URL sản phẩm
+
+Parser -> Parser: Xác định nguồn (Tiki, Shopee, Lazada, etc.)
+Parser --> Service: URL info (domain, productId)
+
+Service -> DB: Tìm sản phẩm trong database theo URL hoặc productId
+
+alt Sản phẩm đã có và link còn hợp lệ
+    DB --> Service: Link affiliate có sẵn
+    Service -> Service: Gắn tracking code (userId)
+    Service --> UI: Trả link affiliate
+    UI --> User: Hiển thị link affiliate
+    
+else Sản phẩm chưa có hoặc link hết hạn
+    Service -> API: Tạo link affiliate mới (originalUrl, userId)
+    API --> Service: Affiliate link mới
+    Service -> DB: Lưu sản phẩm + mapping link
+    Service -> Service: Gắn tracking code
+    Service --> UI: Trả link affiliate
+    UI --> User: Hiển thị link affiliate
+    
+else Nguồn không hỗ trợ
+    Service --> UI: Lỗi "Nguồn không hỗ trợ"
+    UI --> User: Thông báo lỗi
+end
+
+User -> UI: Click vào link affiliate
+UI -> UI: Ghi log click (userId, productId, timestamp)
+UI --> User: Chuyển hướng đến trang bán hàng
+
+== Ngoại lệ ==
+
+note over User, API
+  - URL không hợp lệ: kiểm tra format, báo lỗi "URL không hợp lệ"
+  - API không phản hồi: retry 3 lần, báo "Không thể tạo link, vui lòng thử lại"
+  - Sản phẩm không tồn tại trên sàn: API trả lỗi, hiển thị "Không tìm thấy sản phẩm"
+  - Link affiliate đã hết hạn: tự động tạo link mới, cập nhật DB
+  - Người dùng chưa đăng nhập: yêu cầu đăng nhập trước
+end note
+
+@enduml
+

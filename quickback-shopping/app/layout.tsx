@@ -5,7 +5,7 @@ import ClientLayout from "@/layout/clientLayout";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "QuickBack Shopping",
+  title: "SmartCash Shopping",
   description: "Shopping with us",
 };
 

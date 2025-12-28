@@ -1,0 +1,57 @@
+@startuml Sequence Diagram - Tìm Kiếm Cửa Hàng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.14. Biểu đồ chức năng tìm kiếm cửa hàng
+
+actor "Khách hàng" as Customer
+participant "Giao diện" as UI
+participant "Shop Controller" as Controller
+participant "Shop Service" as Service
+database "Database" as DB
+
+== Luồng chính - Tìm kiếm cửa hàng ==
+
+Customer -> UI: Nhập từ khóa tìm kiếm cửa hàng
+UI -> Controller: searchShops(keyword, filters)
+Controller -> Service: Tìm kiếm cửa hàng
+
+Service -> DB: Query shops WHERE name LIKE keyword OR description LIKE keyword
+
+alt Có bộ lọc
+    Service -> DB: Thêm điều kiện lọc (tỷ lệ hoàn tiền, trạng thái)
+end
+
+DB --> Service: Danh sách cửa hàng phù hợp
+
+Service -> Service: Sắp xếp kết quả (theo độ phổ biến, tỷ lệ hoàn tiền)
+
+Service -> DB: Đếm tổng số kết quả (để phân trang)
+DB --> Service: Total count
+
+Service --> Controller: Danh sách cửa hàng + tổng số
+Controller --> UI: Dữ liệu cửa hàng
+UI --> Customer: Hiển thị danh sách cửa hàng (tên, logo, mô tả, tỷ lệ hoàn tiền)
+
+Customer -> UI: Click xem chi tiết cửa hàng
+UI -> Controller: getShopDetails(shopId)
+Controller -> Service: Lấy chi tiết cửa hàng
+Service -> DB: Query shop + danh sách sản phẩm của cửa hàng
+DB --> Service: Chi tiết cửa hàng + sản phẩm
+Service --> UI: Dữ liệu chi tiết
+UI --> Customer: Hiển thị chi tiết cửa hàng và sản phẩm
+
+== Ngoại lệ ==
+
+note over Customer, DB
+  - Không tìm thấy cửa hàng: hiển thị "Không tìm thấy cửa hàng nào"
+  - Từ khóa rỗng: hiển thị tất cả cửa hàng
+  - Lỗi database: báo lỗi "Có lỗi xảy ra, vui lòng thử lại"
+end note
+
+@enduml
+

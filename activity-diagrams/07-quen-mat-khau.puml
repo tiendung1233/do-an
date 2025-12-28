@@ -1,0 +1,75 @@
+@startuml
+title Activity Diagram - Quên Mật Khẩu
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Click "Quên mật khẩu";
+
+|Controller|
+:Hiển thị form nhập email;
+
+|User|
+:Nhập email và click "Gửi";
+
+|Database|
+:Kiểm tra email có tồn tại?;
+
+if (Email tồn tại?) then (Không)
+  |Controller|
+  :Hiển thị lỗi "Email không tồn tại";
+  stop
+else (Có)
+  |Controller|
+  :Tạo reset token (32 ký tự, hết hạn sau 1 giờ);
+  |Database|
+  :Lưu token vào password_reset;
+  |Email Service|
+  :Gửi email chứa link reset password;
+  |User|
+  :Nhận email;
+  :Click link trong email;
+  |Controller|
+  :Xác thực token;
+  |Database|
+  if (Token hợp lệ và chưa hết hạn?) then (Không)
+    |Controller|
+    :Hiển thị lỗi "Link không hợp lệ hoặc đã hết hạn";
+    stop
+  else (Có)
+    |Controller|
+    :Hiển thị form đặt lại mật khẩu;
+    |User|
+    :Nhập mật khẩu mới và xác nhận;
+    |Controller|
+    if (Mật khẩu hợp lệ?) then (Không)
+      :Hiển thị lỗi "Mật khẩu phải có ít nhất 8 ký tự";
+      |User|
+      :Nhập lại mật khẩu;
+    else (Có)
+      |Database|
+      :Hash mật khẩu mới (bcrypt);
+      :UPDATE user (password);
+      :DELETE password_reset (token);
+      :INSERT password_reset_history;
+      |Email Service|
+      :Gửi email xác nhận;
+      |Controller|
+      :Hiển thị "Đặt lại mật khẩu thành công";
+      :Redirect đến trang đăng nhập;
+      stop
+    endif
+  endif
+endif
+
+@enduml
+

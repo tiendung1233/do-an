@@ -1,0 +1,127 @@
+@startuml Use Case - Thống Kê Và Báo Cáo (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Thống Kê Và Báo Cáo - Admin
+
+actor "Admin" as Admin
+participant "Giao diện Admin" as AdminUI
+participant "Analytics Controller" as Controller
+participant "Analytics Service" as Service
+database "Database" as DB
+
+== Xem dashboard tổng quan ==
+
+Admin -> AdminUI: Truy cập trang dashboard
+AdminUI -> Controller: getDashboardStats(period)
+Controller -> Service: Tính toán thống kê
+Service -> DB: Aggregate các bảng
+
+Service -> DB: COUNT users (total, new today, new this month)
+Service -> DB: SUM purchase_history (totalRevenue, totalOrders, totalCashback)
+Service -> DB: COUNT withdraw_request (pending, approved, rejected)
+Service -> DB: SUM withdraw_history (totalWithdrawn)
+
+DB --> Service: Tất cả số liệu
+Service -> Service: Tính toán tỷ lệ, so sánh với kỳ trước
+Service --> AdminUI: Dashboard stats
+AdminUI --> Admin: Hiển thị biểu đồ và số liệu tổng quan
+
+== Xem thống kê doanh thu ==
+
+Admin -> AdminUI: Xem thống kê doanh thu
+AdminUI -> Controller: getRevenueStats(startDate, endDate, groupBy)
+Controller -> Service: Tính thống kê doanh thu
+Service -> DB: Aggregate purchase_history (group by date/shop/category)
+
+alt Theo thời gian
+    Service -> DB: GROUP BY date, SUM(price), SUM(cashbackAmount)
+    DB --> Service: Doanh thu theo ngày/tuần/tháng
+else Theo cửa hàng
+    Service -> DB: GROUP BY shopId, SUM(price), COUNT orders
+    DB --> Service: Doanh thu theo cửa hàng
+else Theo danh mục
+    Service -> DB: GROUP BY category, SUM(price)
+    DB --> Service: Doanh thu theo danh mục
+end
+
+Service --> AdminUI: Dữ liệu thống kê
+AdminUI --> Admin: Hiển thị biểu đồ doanh thu
+
+== Xem thống kê người dùng ==
+
+Admin -> AdminUI: Xem thống kê người dùng
+AdminUI -> Controller: getUserStats(period)
+Controller -> Service: Tính thống kê
+Service -> DB: Aggregate users
+
+Service -> DB: COUNT users by membershipTier
+Service -> DB: COUNT users by registrationDate (new users trend)
+Service -> DB: AVG totalSpent, AVG totalCashback per user
+Service -> DB: COUNT active users (đã mua hàng trong X ngày)
+
+DB --> Service: Thống kê người dùng
+Service --> AdminUI: Dữ liệu
+AdminUI --> Admin: Hiển thị biểu đồ (hạng thành viên, xu hướng đăng ký, hoạt động)
+
+== Xem thống kê đơn hàng ==
+
+Admin -> AdminUI: Xem thống kê đơn hàng
+AdminUI -> Controller: getOrderStats(period, status)
+Controller -> Service: Tính thống kê
+Service -> DB: Aggregate purchase_history
+
+Service -> DB: COUNT orders by status (pending, approved, cancelled)
+Service -> DB: AVG order value, MAX, MIN
+Service -> DB: COUNT orders by date (trend)
+Service -> DB: Top products (số lượng đơn hàng)
+
+DB --> Service: Thống kê đơn hàng
+Service --> AdminUI: Dữ liệu
+AdminUI --> Admin: Hiển thị biểu đồ và bảng thống kê
+
+== Xem thống kê cashback ==
+
+Admin -> AdminUI: Xem thống kê cashback
+AdminUI -> Controller: getCashbackStats(period)
+Controller -> Service: Tính thống kê
+Service -> DB: Aggregate purchase_history
+
+Service -> DB: SUM cashbackAmount (total, by period)
+Service -> DB: AVG cashbackRate, AVG cashbackAmount per order
+Service -> DB: SUM cashback by membershipTier (bonus từ hạng)
+Service -> DB: SUM cashback by voucher (bonus từ voucher)
+
+DB --> Service: Thống kê cashback
+Service --> AdminUI: Dữ liệu
+AdminUI --> Admin: Hiển thị biểu đồ cashback
+
+== Xuất báo cáo ==
+
+Admin -> AdminUI: Xuất báo cáo (PDF/Excel)
+AdminUI -> Controller: exportReport(type, period, format)
+Controller -> Service: Tạo báo cáo
+Service -> Service: Thu thập tất cả dữ liệu thống kê
+Service -> Service: Tạo file PDF hoặc Excel
+Service --> AdminUI: File báo cáo
+AdminUI --> Admin: Download báo cáo
+
+== Ngoại lệ ==
+
+note over Admin, DB
+  - Dashboard hiển thị số liệu real-time hoặc cập nhật định kỳ
+  - Thống kê có thể lọc theo: ngày, tuần, tháng, năm
+  - Có thể so sánh giữa các kỳ (ví dụ: tháng này vs tháng trước)
+  - Biểu đồ hỗ trợ: line chart, bar chart, pie chart
+  - Báo cáo có thể xuất ra PDF hoặc Excel
+  - Dữ liệu được cache để tối ưu hiệu suất
+end note
+
+@enduml
+
+
+

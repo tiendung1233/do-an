@@ -1,0 +1,72 @@
+@startuml Use Case - Duyệt Đơn Hàng (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Admin" as Admin
+
+rectangle "Hệ thống Duyệt Đơn Hàng" {
+  rectangle "Xem danh sách đơn hàng" as UC_ViewOrders
+  rectangle "Lọc đơn hàng" as UC_FilterOrders
+  rectangle "Xem chi tiết đơn hàng" as UC_ViewOrderDetail
+  rectangle "Duyệt đơn hàng" as UC_ApproveOrder
+  rectangle "Hủy đơn hàng" as UC_CancelOrder
+  rectangle "Tính cashback" as UC_CalculateCashback
+  rectangle "Nâng hạng thành viên" as UC_UpgradeMembership
+  rectangle "Tạo lượt quay vòng quay" as UC_CreateSpinWheelTurn
+  rectangle "Gửi email thông báo" as UC_SendOrderNotification
+}
+
+Admin --> UC_ViewOrders
+Admin --> UC_FilterOrders
+Admin --> UC_ViewOrderDetail
+Admin --> UC_ApproveOrder
+Admin --> UC_CancelOrder
+
+UC_ViewOrders --> UC_FilterOrders : <<extend>>
+UC_ViewOrders --> UC_ViewOrderDetail : <<extend>>
+
+UC_ApproveOrder --> UC_CalculateCashback : <<include>>
+UC_ApproveOrder --> UC_UpgradeMembership : <<extend>>
+UC_ApproveOrder --> UC_CreateSpinWheelTurn : <<include>>
+UC_ApproveOrder --> UC_SendOrderNotification : <<include>>
+
+UC_CancelOrder --> UC_SendOrderNotification : <<include>>
+
+note right of UC_ViewOrders
+  Hiển thị danh sách với:
+  - Order ID, user, sản phẩm
+  - Số tiền, ngày mua
+  - Trạng thái (pending/approved/cancelled)
+  - Cashback
+end note
+
+note right of UC_ApproveOrder
+  Khi duyệt đơn hàng:
+  - Tính cashback (base + bonus hạng + voucher)
+  - Cộng vào balance người dùng
+  - Cộng vào totalSpent
+  - Kiểm tra và nâng hạng nếu đủ
+  - Tạo lượt quay vòng quay
+  - Gửi email thông báo
+end note
+
+note right of UC_CalculateCashback
+  Tính cashback bao gồm:
+  - Cashback base (tỷ lệ sản phẩm)
+  - Bonus từ hạng thành viên
+  - Bonus từ voucher (nếu có)
+end note
+
+@enduml
+

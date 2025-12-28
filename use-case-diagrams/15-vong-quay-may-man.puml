@@ -1,0 +1,64 @@
+@startuml Use Case - Vòng Quay May Mắn
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Hệ thống" as System
+
+rectangle "Hệ thống Vòng Quay May Mắn" {
+  rectangle "Xem số lượt quay" as UC_ViewSpins
+  rectangle "Nhận lượt quay từ đơn hàng" as UC_ReceiveSpinFromOrder
+  rectangle "Quay vòng quay" as UC_SpinWheel
+  rectangle "Kiểm tra số lượt còn lại" as UC_CheckAvailableSpins
+  rectangle "Random chọn phần thưởng" as UC_RandomReward
+  rectangle "Nhận phần thưởng" as UC_ReceiveReward
+  rectangle "Xem lịch sử quay" as UC_ViewSpinHistory
+}
+
+User --> UC_ViewSpins
+User --> UC_SpinWheel
+User --> UC_ViewSpinHistory
+
+System --> UC_ReceiveSpinFromOrder
+System --> UC_RandomReward
+
+UC_ViewSpins --> UC_CheckAvailableSpins : <<include>>
+
+UC_SpinWheel --> UC_CheckAvailableSpins : <<include>>
+UC_SpinWheel --> UC_RandomReward : <<include>>
+UC_SpinWheel --> UC_ReceiveReward : <<extend>>
+
+note right of UC_ReceiveSpinFromOrder
+  Tự động nhận lượt quay
+  khi đơn hàng được duyệt
+  (1 đơn hàng = 1 lượt quay)
+end note
+
+note right of UC_RandomReward
+  Phần thưởng có thể là:
+  - Voucher cashback
+  - Tiền mặt
+  - Điểm tích lũy
+  - Không trúng
+  (Tỷ lệ cấu hình bởi admin)
+end note
+
+note right of UC_ReceiveReward
+  Phần thưởng được cộng
+  trực tiếp vào tài khoản
+  Lưu vào lịch sử quay
+end note
+
+@enduml
+

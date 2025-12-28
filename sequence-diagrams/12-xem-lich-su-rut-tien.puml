@@ -1,0 +1,57 @@
+@startuml Sequence Diagram - Xem Lịch Sử Rút Tiền
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.24. Biểu đồ chức năng xem lịch sử rút tiền
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Withdraw Controller" as Controller
+participant "Withdraw Service" as Service
+database "Database" as DB
+
+== Luồng chính - Xem lịch sử rút tiền ==
+
+User -> UI: Truy cập trang lịch sử rút tiền
+UI -> Controller: getWithdrawHistory(userId, filters)
+Controller -> Service: Lấy lịch sử rút tiền
+Service -> DB: Query withdraw_history WHERE userId = ? (với filters: status, date range)
+DB --> Service: Danh sách lịch sử rút tiền
+Service -> Service: Tính tổng số tiền đã rút (theo trạng thái)
+Service --> UI: Danh sách + thống kê
+UI --> User: Hiển thị lịch sử (ngày, số tiền, trạng thái, thông tin ngân hàng, ghi chú)
+
+== Luồng chính - Xem chi tiết giao dịch ==
+
+User -> UI: Click xem chi tiết giao dịch
+UI -> Controller: getWithdrawDetail(historyId)
+Controller -> Service: Lấy chi tiết
+Service -> DB: Query withdraw_history + withdraw_request
+DB --> Service: Chi tiết (thông tin yêu cầu, thời gian duyệt, người duyệt, transactionId)
+Service --> UI: Chi tiết giao dịch
+UI --> User: Hiển thị đầy đủ thông tin
+
+== Luồng chính - Lọc và tìm kiếm ==
+
+User -> UI: Lọc lịch sử (theo trạng thái, khoảng thời gian)
+UI -> Controller: filterWithdrawHistory(userId, filters)
+Controller -> Service: Lọc lịch sử
+Service -> DB: Query với filters
+DB --> Service: Danh sách đã lọc
+Service --> UI: Kết quả
+UI --> User: Hiển thị danh sách đã lọc
+
+== Ngoại lệ ==
+
+note over User, DB
+  - Không có lịch sử: hiển thị "Chưa có lịch sử rút tiền"
+  - Lỗi truy vấn: báo "Có lỗi xảy ra, vui lòng thử lại"
+  - Filters không hợp lệ: validate và báo lỗi
+end note
+
+@enduml
+

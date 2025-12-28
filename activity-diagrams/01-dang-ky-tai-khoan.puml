@@ -1,0 +1,55 @@
+@startuml
+title Activity Diagram - Đăng Ký Tài Khoản
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Đăng ký tài khoản;
+
+|Controller|
+:Mở form đăng ký;
+
+|User|
+:Nhập thông tin cá nhân đăng ký\n(email, password, name);
+
+|Controller|
+if (Thông tin hợp lệ?) then (Không)
+  :Hiển thị lỗi;
+  |User|
+  :Nhập lại thông tin;
+  |Controller|
+else (Có)
+  |Database|
+  :Kiểm tra email đã tồn tại?;
+  if (Đã tồn tại?) then (Có)
+    |Controller|
+    :Hiển thị lỗi "Email đã được sử dụng";
+    |User|
+    :Nhập lại email;
+    |Controller|
+  else (Không)
+    |Database|
+    :Hash password (bcrypt);
+    :Tạo verification token;
+    :Lưu tài khoản người dùng;
+    |Email Service|
+    :Gửi email xác thực;
+    |User|
+    :Nhận email xác thực;
+    |Controller|
+    :Hiển thị thông báo\n"Đăng ký thành công, vui lòng kiểm tra email";
+    stop
+  endif
+endif
+
+@enduml
+

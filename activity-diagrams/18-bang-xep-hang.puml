@@ -1,0 +1,58 @@
+@startuml
+title Activity Diagram - Bảng Xếp Hạng
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang bảng xếp hạng;
+
+|Controller|
+if (Tiêu chí xếp hạng?) then (Tổng chi tiêu)
+  |Database|
+  :Aggregate purchase_history\n(group by userId, sum price);
+else (Tổng cashback)
+  |Database|
+  :Aggregate purchase_history\n(group by userId, sum cashbackAmount);
+else (Số đơn hàng)
+  |Database|
+  :COUNT purchase_history\n(group by userId);
+endif
+
+|Database|
+:Sắp xếp theo tiêu chí, lấy top N;
+
+|Database|
+:Tìm vị trí của user hiện tại;
+
+|Controller|
+:Hiển thị bảng xếp hạng (top 10) và vị trí của user;
+
+|Hệ thống|
+:Cron job chạy cuối tháng;
+
+|Database|
+:Tính bảng xếp hạng tháng trước;
+
+|Database|
+:Xác định top 3;
+
+if (User trong top 3?) then (Có)
+  |Database|
+  :INSERT leaderboard_reward (userId, rank, rewardAmount);
+  :UPDATE user (balance += rewardAmount);
+  |Email Service|
+  :Gửi email chúc mừng;
+  stop
+endif
+
+@enduml
+

@@ -1,0 +1,119 @@
+@startuml Use Case Tổng Quát - Hệ Thống SmartCash Shopping
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Khách vãng lai" as Guest
+actor "Người dùng" as User
+actor "Admin" as Admin
+actor "Hệ thống Affiliate (AccessTrade/MediaMart)" as Affiliate
+actor "Hệ thống Thanh toán /Ngân hàng" as Payment
+actor "Hệ thống Email/OTP" as Mailer
+
+rectangle "Hệ thống SmartCash Shopping" {
+  ' Use Cases cho Khách vãng lai
+  rectangle "Đăng ký tài khoản" as UC_Register
+  rectangle "Đăng nhập" as UC_Login
+  rectangle "Xem sản phẩm & cửa hàng" as UC_ViewProduct
+  rectangle "Tìm kiếm sản phẩm và cửa hàng" as UC_Search
+  
+  ' Use Cases cho Người dùng
+  rectangle "Thêm giỏ hàng" as UC_AddCart
+  rectangle "Xem giỏ hàng" as UC_ViewCart
+  rectangle "Mua hàng qua link affiliate" as UC_Purchase
+  rectangle "Chuyển đổi link sản phẩm sang link affiliate" as UC_AffLink
+  rectangle "Xem lịch sử mua hàng" as UC_PurchaseHistory
+  rectangle "Gửi yêu cầu hoàn tiền" as UC_Cashback
+  rectangle "Yêu cầu rút tiền" as UC_WithdrawRequest
+  rectangle "Nhắn tin với admin" as UC_Chat
+  rectangle "Quên mật khẩu" as UC_Forgot
+  rectangle "Xem & chỉnh sửa hồ sơ" as UC_Profile
+  rectangle "Xác thực tài khoản qua email" as UC_Verify
+  
+  ' Use Cases cho Admin
+  rectangle "Quản lý người dùng" as UC_ManageUser
+  rectangle "Quản lý sản phẩm" as UC_ManageProduct
+  rectangle "Quản lý cửa hàng" as UC_ManageShop
+  rectangle "Duyệt yêu cầu rút tiền" as UC_WithdrawApproval
+  rectangle "Duyệt đơn hàng" as UC_ApproveOrder
+  rectangle "Chat hỗ trợ" as UC_SupportChat
+  rectangle "Xem thống kê và báo cáo" as UC_Statistics
+}
+
+' Quan hệ của Khách vãng lai
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_ViewProduct
+Guest --> UC_Search
+Guest --> UC_Forgot
+
+' Quan hệ của Người dùng
+User --> UC_Login
+User --> UC_ViewProduct
+User --> UC_Search
+User --> UC_AddCart
+User --> UC_ViewCart
+User --> UC_Purchase
+User --> UC_AffLink
+User --> UC_PurchaseHistory
+User --> UC_Cashback
+User --> UC_WithdrawRequest
+User --> UC_Chat
+User --> UC_Forgot
+User --> UC_Profile
+User --> UC_Verify
+
+' Quan hệ của Admin
+Admin --> UC_Login
+Admin --> UC_ManageUser
+Admin --> UC_ManageProduct
+Admin --> UC_ManageShop
+Admin --> UC_WithdrawApproval
+Admin --> UC_ApproveOrder
+Admin --> UC_SupportChat
+Admin --> UC_Statistics
+
+' Quan hệ với hệ thống bên ngoài
+UC_AffLink ..> Affiliate : <<extend>>
+UC_Cashback ..> Affiliate : <<extend>>
+UC_Purchase ..> Affiliate : <<extend>>
+UC_WithdrawApproval ..> Payment : <<extend>>
+UC_Forgot ..> Mailer : <<extend>>
+UC_Register ..> Mailer : <<extend>>
+UC_Verify ..> Mailer : <<extend>>
+
+' Quan hệ kế thừa và mở rộng
+UC_AddCart <.. UC_ViewCart : <<include>>
+UC_Purchase <.. UC_AffLink : <<include>>
+UC_Cashback <.. UC_PurchaseHistory : <<include>>
+UC_WithdrawRequest <.. UC_Profile : <<include>>
+
+note right of UC_Register
+  Người dùng đăng ký tài khoản mới
+  bằng email/password hoặc Google OAuth
+end note
+
+note right of UC_AffLink
+  Chuyển đổi link sản phẩm từ
+  các sàn TMĐT sang link affiliate
+  để tracking hoa hồng
+end note
+
+note right of UC_WithdrawApproval
+  Admin duyệt các yêu cầu rút tiền
+  của người dùng và thực hiện
+  chuyển khoản qua hệ thống thanh toán
+end note
+
+@enduml
+

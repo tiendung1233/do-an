@@ -1,0 +1,91 @@
+@startuml Use Case - Quản Lý Người Dùng (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam roundcorner 0
+
+title Use Case: Quản Lý Người Dùng - Admin
+
+left to right direction
+
+actor "Admin" as Admin
+
+rectangle "Hệ thống Quản lý Người dùng" {
+  rectangle "Xem danh sách người dùng" as UC_ViewUsers
+  rectangle "Tìm kiếm người dùng" as UC_SearchUser
+  rectangle "Xem chi tiết người dùng" as UC_ViewDetail
+  rectangle "Chỉnh sửa thông tin người dùng" as UC_EditUser
+  rectangle "Phân quyền người dùng" as UC_ManageRole
+  rectangle "Khóa/Mở khóa tài khoản" as UC_LockUnlock
+  rectangle "Xem thống kê người dùng" as UC_UserStats
+  
+  ' Chi tiết Xem danh sách
+  rectangle "Lọc theo hạng thành viên" as UC_FilterMembership
+  rectangle "Lọc theo trạng thái" as UC_FilterStatus
+  rectangle "Lọc theo ngày đăng ký" as UC_FilterDate
+  rectangle "Phân trang" as UC_Pagination
+  
+  ' Chi tiết Xem chi tiết
+  rectangle "Xem thông tin cá nhân" as UC_ViewPersonal
+  rectangle "Xem lịch sử mua hàng" as UC_ViewPurchaseHistory
+  rectangle "Xem lịch sử rút tiền" as UC_ViewWithdrawHistory
+  rectangle "Xem số tiền hoàn tiền" as UC_ViewCashback
+  rectangle "Xem hoạt động gần đây" as UC_ViewActivity
+  
+  ' Chi tiết Phân quyền
+  rectangle "Gán quyền Khách hàng" as UC_RoleCustomer
+  rectangle "Gán quyền Nhân viên" as UC_RoleStaff
+  rectangle "Gán quyền Admin" as UC_RoleAdmin
+}
+
+Admin --> UC_ViewUsers
+Admin --> UC_SearchUser
+Admin --> UC_ViewDetail
+Admin --> UC_EditUser
+Admin --> UC_ManageRole
+Admin --> UC_LockUnlock
+Admin --> UC_UserStats
+
+UC_ViewUsers --> UC_FilterMembership
+UC_ViewUsers --> UC_FilterStatus
+UC_ViewUsers --> UC_FilterDate
+UC_ViewUsers --> UC_Pagination
+
+UC_ViewDetail --> UC_ViewPersonal
+UC_ViewDetail --> UC_ViewPurchaseHistory
+UC_ViewDetail --> UC_ViewWithdrawHistory
+UC_ViewDetail --> UC_ViewCashback
+UC_ViewDetail --> UC_ViewActivity
+
+UC_ManageRole --> UC_RoleCustomer
+UC_ManageRole --> UC_RoleStaff
+UC_ManageRole --> UC_RoleAdmin
+
+note right of UC_ViewUsers
+  Admin có thể:
+  - Xem danh sách tất cả người dùng
+  - Lọc theo nhiều tiêu chí
+  - Sắp xếp theo các trường khác nhau
+  - Xuất danh sách ra file Excel
+end note
+
+note right of UC_EditUser
+  Admin có thể chỉnh sửa:
+  - Thông tin cá nhân
+  - Trạng thái tài khoản
+  - Số tiền hoàn tiền (đặc biệt)
+  - Ghi chú về người dùng
+end note
+
+note right of UC_LockUnlock
+  Admin có thể:
+  - Khóa tài khoản vi phạm
+  - Mở khóa tài khoản
+  - Xem lý do khóa
+  - Gửi thông báo cho người dùng
+end note
+
+@enduml
+
+
+

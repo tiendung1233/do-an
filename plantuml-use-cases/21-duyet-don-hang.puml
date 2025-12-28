@@ -1,0 +1,107 @@
+@startuml Use Case - Duyệt Đơn Hàng (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Duyệt Đơn Hàng - Admin
+
+actor "Admin" as Admin
+participant "Giao diện Admin" as AdminUI
+participant "Order Controller" as Controller
+participant "Order Service" as Service
+database "Database" as DB
+participant "Cashback Service" as Cashback
+actor "Người dùng" as User
+participant "Email Service" as Email
+
+== Xem danh sách đơn hàng ==
+
+Admin -> AdminUI: Truy cập trang quản lý đơn hàng
+AdminUI -> Controller: getOrders(status, filters)
+Controller -> Service: Lấy danh sách đơn hàng
+Service -> DB: Query purchase_history (với filters: status, date, shop, user)
+DB --> Service: Danh sách đơn hàng
+Service --> AdminUI: Danh sách
+AdminUI --> Admin: Hiển thị (orderId, user, product, amount, date, status, cashback)
+
+== Xem chi tiết đơn hàng ==
+
+Admin -> AdminUI: Click xem chi tiết đơn hàng
+AdminUI -> Controller: getOrderDetails(orderId)
+Controller -> Service: Lấy chi tiết
+Service -> DB: Query purchase_history + user + product
+DB --> Service: Chi tiết đơn hàng (thông tin user, sản phẩm, giá, link affiliate, voucher)
+Service --> AdminUI: Chi tiết
+AdminUI --> Admin: Hiển thị đầy đủ thông tin đơn hàng
+
+== Duyệt đơn hàng ==
+
+Admin -> AdminUI: Click "Duyệt đơn hàng"
+AdminUI -> Controller: approveOrder(orderId, adminId)
+Controller -> Service: Xử lý duyệt
+Service -> DB: Kiểm tra trạng thái đơn hàng
+
+alt Đơn hàng đã được duyệt
+    DB --> Service: Status = approved
+    Service --> AdminUI: Lỗi "Đơn hàng đã được duyệt"
+    AdminUI --> Admin: Thông báo
+    
+else Đơn hàng chưa được duyệt
+    Service -> Cashback: Tính toán cashback
+    Cashback -> DB: Lấy thông tin user (membershipTier, voucher)
+    Cashback -> Service: Tính cashback base + bonus từ hạng + voucher
+    Cashback --> Service: Tổng cashback
+    
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: UPDATE purchase_history (status=approved, cashbackAmount, approvedBy, approvedAt)
+    Service -> DB: UPDATE user (balance += cashbackAmount, totalSpent += orderAmount)
+    Service -> DB: UPDATE voucher (status=used) nếu có
+    Service -> DB: Kiểm tra và nâng hạng thành viên nếu đủ điều kiện
+    Service -> DB: Tạo lượt quay vòng quay may mắn
+    Service -> DB: COMMIT
+    
+    Service -> Email: Gửi email thông báo "Đơn hàng đã được duyệt"
+    Email --> User: Email thông báo + số tiền cashback
+    Service --> AdminUI: Thành công
+    AdminUI --> Admin: "Đã duyệt đơn hàng thành công"
+end
+
+== Từ chối/Hủy đơn hàng ==
+
+Admin -> AdminUI: Click "Hủy đơn hàng"
+AdminUI -> Controller: rejectOrder(orderId, adminId, reason)
+Controller -> Service: Xử lý hủy
+Service -> DB: UPDATE purchase_history (status=cancelled, cancelledBy, cancelledAt, reason)
+Service -> Email: Gửi email thông báo "Đơn hàng đã bị hủy"
+Email --> User: Email thông báo
+Service --> AdminUI: Đã hủy
+AdminUI --> Admin: "Đã hủy đơn hàng"
+
+== Lọc và tìm kiếm đơn hàng ==
+
+Admin -> AdminUI: Lọc đơn hàng (status, date range, shop, user)
+AdminUI -> Controller: filterOrders(filters)
+Controller -> Service: Lọc đơn hàng
+Service -> DB: Query với filters
+DB --> Service: Danh sách đã lọc
+Service --> AdminUI: Kết quả
+AdminUI --> Admin: Hiển thị danh sách đã lọc
+
+== Ngoại lệ ==
+
+note over Admin, User
+  - Admin có thể duyệt hoặc hủy đơn hàng
+  - Khi duyệt: tự động tính cashback, cộng vào balance, nâng hạng nếu đủ, tạo lượt quay
+  - Khi hủy: không tính cashback, gửi email thông báo
+  - Đơn hàng có thể lọc theo: trạng thái, ngày, cửa hàng, người dùng
+  - Admin có thể xem chi tiết đầy đủ: user, sản phẩm, voucher, cashback
+  - Lịch sử duyệt/hủy được lưu để tra cứu
+end note
+
+@enduml
+
+
+

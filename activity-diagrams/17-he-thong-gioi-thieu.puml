@@ -1,0 +1,66 @@
+@startuml
+title Activity Diagram - Hệ Thống Giới Thiệu Bạn Bè
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang giới thiệu;
+
+|Database|
+if (Chưa có mã giới thiệu?) then (Có)
+  :Tạo mã giới thiệu unique (8 ký tự);
+  :UPDATE user (referralCode);
+endif
+
+|Controller|
+:Hiển thị mã giới thiệu và link chia sẻ;
+
+|Người được giới thiệu|
+:Đăng ký tài khoản với mã giới thiệu;
+
+|Database|
+:Tìm người giới thiệu theo mã;
+
+if (Mã hợp lệ?) then (Không)
+  |Controller|
+  :Hiển thị lỗi "Mã giới thiệu không hợp lệ";
+  stop
+else (Có)
+  |Database|
+  :INSERT user (referredBy = referrerId);
+  :INSERT referral_reward (status=pending);
+  |Email Service|
+  :Gửi email chúc mừng cho cả 2 người;
+  |Controller|
+  :Hiển thị "Đăng ký thành công";
+  stop
+endif
+
+|Hệ thống|
+:Đơn hàng được duyệt (referredUserId);
+
+|Database|
+:Kiểm tra người mua có mã giới thiệu?;
+
+if (Có người giới thiệu?) then (Có)
+  |Database|
+  :Tính thưởng giới thiệu (theo cấu hình);
+  :UPDATE referral_reward (status=approved, rewardAmount);
+  :UPDATE user (balance += rewardAmount) WHERE userId = referrerId;
+  :INSERT referral_history;
+  |Email Service|
+  :Gửi email "Bạn nhận được X VNĐ từ giới thiệu";
+  stop
+endif
+
+@enduml
+

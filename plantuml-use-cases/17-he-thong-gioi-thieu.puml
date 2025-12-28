@@ -1,0 +1,94 @@
+@startuml Use Case - Hệ Thống Giới Thiệu Bạn Bè
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Hệ Thống Giới Thiệu Bạn Bè (Referral)
+
+actor "Người dùng" as User
+actor "Người được giới thiệu" as Referred
+participant "Giao diện" as UI
+participant "Controller" as Controller
+participant "Referral Service" as Service
+database "Database" as DB
+participant "Purchase History" as Purchase
+
+== Xem mã giới thiệu ==
+
+User -> UI: Truy cập trang giới thiệu
+UI -> Controller: getMyReferralCode(userId)
+Controller -> Service: Lấy mã giới thiệu
+Service -> DB: Query user (referralCode)
+
+alt Chưa có mã
+    Service -> Service: Tạo mã unique (8 ký tự)
+    Service -> DB: UPDATE user (referralCode)
+end
+
+Service --> UI: Mã giới thiệu
+UI --> User: Hiển thị mã và link chia sẻ
+
+== Đăng ký bằng mã giới thiệu ==
+
+Referred -> UI: Đăng ký với mã giới thiệu
+UI -> Controller: registerWithReferralCode(email, password, referralCode)
+Controller -> Service: Xử lý đăng ký
+Service -> DB: Tìm người giới thiệu theo mã
+
+alt Mã hợp lệ
+    Service -> DB: INSERT user (referredBy), INSERT referral_reward (status=pending)
+    Service -> Email: Gửi email chúc mừng cho cả 2 người
+    Email --> User: "Bạn đã giới thiệu thành công"
+    Email --> Referred: "Chào mừng đến với SmartCash"
+    Service --> UI: Đăng ký thành công
+else Mã không hợp lệ
+    Service --> UI: Lỗi "Mã giới thiệu không hợp lệ"
+end
+
+== Nhận thưởng tự động ==
+
+Purchase -> Service: Đơn hàng được duyệt (referredUserId)
+Service -> DB: Kiểm tra người mua có mã giới thiệu
+
+alt Có người giới thiệu
+    Service -> Service: Tính thưởng (theo cấu hình)
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: UPDATE referral_reward (status=approved, rewardAmount)
+    Service -> DB: UPDATE user (balance += rewardAmount) WHERE userId = referrerId
+    Service -> DB: INSERT referral_history
+    Service -> DB: COMMIT
+    Service -> Email: "Bạn nhận được X VNĐ từ giới thiệu"
+    Email --> User: Thông báo thưởng
+end
+
+== Xem danh sách và lịch sử ==
+
+User -> UI: Xem danh sách người được giới thiệu
+UI -> Controller: getMyReferrals(userId)
+Controller -> Service: Lấy danh sách
+Service -> DB: Query referral_reward (referrerId = userId)
+Service -> Service: Tính tổng thưởng, số người đã mua
+Service --> UI: Danh sách + thống kê
+UI --> User: Hiển thị (tên, email, ngày, trạng thái, thưởng)
+
+User -> UI: Xem lịch sử thưởng
+UI -> Controller: getReferralHistory(userId)
+Controller -> Service: Lấy lịch sử
+Service -> DB: Query referral_history (referrerId = userId)
+Service --> UI: Lịch sử
+UI --> User: Hiển thị (ngày, người được giới thiệu, đơn hàng, số tiền)
+
+== Ngoại lệ ==
+
+note over User, Purchase
+  - Mỗi user có 1 mã giới thiệu unique (8 ký tự)
+  - Người được giới thiệu phải đăng ký bằng mã để được tính
+  - Thưởng chỉ tra khi người được giới thiệu mua hàng và đơn được duyệt
+  - Số tiền thưởng cấu hình bởi admin (% hoặc số cố định)
+  - Một người chỉ được giới thiệu 1 lần, người giới thiệu có thể giới thiệu nhiều người
+end note
+
+@enduml

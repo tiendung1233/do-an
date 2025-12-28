@@ -1,0 +1,93 @@
+@startuml Sequence Diagram - Quên Mật Khẩu
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.17. Biểu đồ chức năng quên mật khẩu
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Auth Controller" as Controller
+participant "Auth Service" as Service
+database "Database" as DB
+participant "Email Service" as Email
+
+== Luồng chính - Yêu cầu đặt lại mật khẩu ==
+
+User -> UI: Click "Quên mật khẩu"
+UI --> User: Hiển thị form nhập email
+User -> UI: Nhập email và click "Gửi"
+UI -> Controller: requestResetPassword(email)
+Controller -> Service: Xử lý yêu cầu
+Service -> DB: Kiểm tra email tồn tại
+
+alt Email không tồn tại
+    DB --> Service: Không tìm thấy
+    Service --> UI: Lỗi "Email không tồn tại trong hệ thống"
+    UI --> User: Thông báo lỗi
+    
+else Email tồn tại
+    Service -> Service: Tạo reset token (32 ký tự, hết hạn sau 1 giờ)
+    Service -> DB: INSERT password_reset (userId, token, expiresAt)
+    Service -> Email: Gửi email chứa link reset /reset-password/{token}
+    Email --> User: Email reset password
+    Service --> UI: Thành công
+    UI --> User: "Vui lòng kiểm tra email để đặt lại mật khẩu"
+end
+
+== Luồng chính - Đặt lại mật khẩu ==
+
+User -> Email: Click link trong email
+Email --> UI: Redirect đến /reset-password/{token}
+UI -> Controller: verifyResetToken(token)
+Controller -> Service: Xác thực token
+Service -> DB: Query password_reset WHERE token=? AND expiresAt>NOW()
+
+alt Token không hợp lệ hoặc hết hạn
+    DB --> Service: Không tìm thấy
+    Service --> UI: Lỗi "Link không hợp lệ hoặc đã hết hạn"
+    UI --> User: "Vui lòng yêu cầu lại"
+    
+else Token hợp lệ
+    Service --> UI: Hiển thị form đặt lại mật khẩu
+    UI --> User: Form nhập mật khẩu mới
+    
+    User -> UI: Nhập mật khẩu mới và xác nhận
+    UI -> UI: Validate mật khẩu (độ dài >= 8, độ mạnh)
+    
+    alt Mật khẩu không hợp lệ
+        UI --> User: "Mật khẩu phải có ít nhất 8 ký tự"
+    else Mật khẩu hợp lệ
+        UI -> Controller: submitNewPassword(token, newPassword)
+        Controller -> Service: Reset password
+        
+        Service -> DB: BEGIN TRANSACTION
+        Service -> Service: Hash mật khẩu mới (bcrypt)
+        Service -> DB: UPDATE user (password = hashedPassword)
+        Service -> DB: DELETE password_reset (token)
+        Service -> DB: INSERT password_reset_history (userId, resetAt)
+        Service -> DB: COMMIT
+        
+        Service -> Email: Gửi email xác nhận "Đặt lại mật khẩu thành công"
+        Email --> User: Email xác nhận
+        Service --> UI: Thành công
+        UI --> User: "Đặt lại mật khẩu thành công, vui lòng đăng nhập lại"
+        UI -> UI: Redirect đến trang đăng nhập
+    end
+end
+
+== Ngoại lệ ==
+
+note over User, Email
+  - Email không gửi được: retry 3 lần, log lỗi, báo "Có lỗi xảy ra"
+  - Token đã được sử dụng: kiểm tra history, báo "Link đã được sử dụng"
+  - Nhiều yêu cầu reset: chỉ giữ token mới nhất, vô hiệu hóa token cũ
+  - Mật khẩu mới giống mật khẩu cũ: so sánh hash, báo "Mật khẩu mới phải khác mật khẩu cũ"
+  - Tài khoản bị khóa: không cho reset, báo "Tài khoản đã bị khóa"
+end note
+
+@enduml
+

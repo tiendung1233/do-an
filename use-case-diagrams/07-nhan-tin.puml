@@ -1,0 +1,57 @@
+@startuml Use Case - Nhắn Tin / Chat Hỗ Trợ
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Admin" as Admin
+
+rectangle "Hệ thống Chat Hỗ trợ" {
+  rectangle "Mở trang chat hỗ trợ" as UC_OpenChat
+  rectangle "Xem danh sách hội thoại" as UC_ViewConversations
+  rectangle "Xem tin nhắn cũ" as UC_ViewMessages
+  rectangle "Gửi tin nhắn" as UC_SendMessage
+  rectangle "Nhận tin nhắn" as UC_ReceiveMessage
+  rectangle "Xem danh sách tin nhắn chờ" as UC_ViewPendingMessages
+  rectangle "Trả lời tin nhắn" as UC_ReplyMessage
+}
+
+User --> UC_OpenChat
+User --> UC_ViewConversations
+User --> UC_ViewMessages
+User --> UC_SendMessage
+User --> UC_ReceiveMessage
+
+Admin --> UC_ViewPendingMessages
+Admin --> UC_ReplyMessage
+Admin --> UC_ReceiveMessage
+
+UC_OpenChat --> UC_ViewConversations : <<include>>
+UC_ViewConversations --> UC_ViewMessages : <<include>>
+UC_SendMessage --> UC_ReceiveMessage : <<extend>>
+
+note right of UC_SendMessage
+  Người dùng gửi tin nhắn
+  Hệ thống lưu vào database
+  và gửi thông báo real-time
+  cho admin qua WebSocket
+end note
+
+note right of UC_ReplyMessage
+  Admin trả lời tin nhắn
+  Hệ thống gửi thông báo
+  real-time cho người dùng
+end note
+
+@enduml
+

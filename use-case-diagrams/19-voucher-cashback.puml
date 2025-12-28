@@ -1,0 +1,67 @@
+@startuml Use Case - Voucher Cashback
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Admin" as Admin
+actor "Hệ thống" as System
+
+rectangle "Hệ thống Voucher" {
+  rectangle "Xem danh sách voucher" as UC_ViewVouchers
+  rectangle "Áp dụng voucher vào đơn hàng" as UC_ApplyVoucher
+  rectangle "Kiểm tra voucher hợp lệ" as UC_ValidateVoucher
+  rectangle "Tính cashback với voucher" as UC_CalculateCashbackWithVoucher
+  rectangle "Tạo voucher từ điểm danh" as UC_CreateVoucherFromCheckIn
+  rectangle "Tạo voucher từ nâng hạng" as UC_CreateVoucherFromMembership
+  rectangle "Tạo voucher từ vòng quay" as UC_CreateVoucherFromSpinWheel
+  rectangle "Admin tạo voucher" as UC_AdminCreateVoucher
+  rectangle "Quản lý voucher" as UC_ManageVouchers
+}
+
+User --> UC_ViewVouchers
+User --> UC_ApplyVoucher
+
+Admin --> UC_AdminCreateVoucher
+Admin --> UC_ManageVouchers
+
+System --> UC_CreateVoucherFromCheckIn
+System --> UC_CreateVoucherFromMembership
+System --> UC_CreateVoucherFromSpinWheel
+
+UC_ApplyVoucher --> UC_ValidateVoucher : <<include>>
+UC_ApplyVoucher --> UC_CalculateCashbackWithVoucher : <<include>>
+
+note right of UC_ViewVouchers
+  Hiển thị voucher với:
+  - Code, loại, giá trị
+  - Hạn sử dụng
+  - Trạng thái (available/used/expired)
+end note
+
+note right of UC_ValidateVoucher
+  Kiểm tra:
+  - Trạng thái voucher
+  - Hạn sử dụng
+  - Điều kiện đơn hàng tối thiểu
+end note
+
+note right of UC_CalculateCashbackWithVoucher
+  Tính cashback:
+  baseCashback * (1 + voucherPercentage)
+  Cập nhật vào đơn hàng
+  Đánh dấu voucher đã sử dụng
+end note
+
+@enduml
+

@@ -1,0 +1,65 @@
+@startuml
+title Activity Diagram - Quản Lý Sản Phẩm (Admin)
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|Admin|
+start
+:Truy cập trang quản lý sản phẩm;
+
+|Controller|
+:Hiển thị danh sách sản phẩm;
+
+|Admin|
+if (Hành động?) then (Thêm sản phẩm)
+  :Nhập thông tin sản phẩm\n(tên, mô tả, giá, hình ảnh);
+  :Thiết lập tỷ lệ hoàn tiền;
+  :Chọn cửa hàng;
+  |Affiliate API|
+  :Tạo link affiliate;
+  |Database|
+  :INSERT product;
+  |Controller|
+  :Hiển thị "Đã thêm sản phẩm";
+  stop
+else (Sửa sản phẩm)
+  :Cập nhật thông tin sản phẩm;
+  |Database|
+  :UPDATE product;
+  |Controller|
+  :Hiển thị "Đã cập nhật sản phẩm";
+  stop
+else (Xóa sản phẩm)
+  :Xác nhận xóa;
+  |Database|
+  :DELETE product;
+  |Controller|
+  :Hiển thị "Đã xóa sản phẩm";
+  stop
+else (Đồng bộ từ API)
+  :Chọn API (AccessTrade/MediaMart/Tiki);
+  |Affiliate API|
+  :GET danh sách sản phẩm;
+  |Database|
+  loop Cho mỗi sản phẩm
+    if (Sản phẩm chưa tồn tại?) then (Có)
+      :INSERT sản phẩm mới;
+    else (Đã có)
+      :UPDATE thông tin sản phẩm;
+    endif
+  end
+  |Controller|
+  :Hiển thị "Đã đồng bộ X sản phẩm";
+  stop
+endif
+
+@enduml
+

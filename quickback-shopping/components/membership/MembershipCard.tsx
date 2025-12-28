@@ -25,7 +25,7 @@ interface MembershipCardProps {
   telegramLink?: string;
 }
 
-export default function MembershipCard({ userId, telegramLink = "https://t.me/quickback_vn" }: MembershipCardProps) {
+export default function MembershipCard({ userId, telegramLink = "https://t.me/SmartCash_vn" }: MembershipCardProps) {
   const [membership, setMembership] = useState<MembershipData | null>(null);
   const [referralCode, setReferralCode] = useState<string>("");
   const [loading, setLoading] = useState(true);

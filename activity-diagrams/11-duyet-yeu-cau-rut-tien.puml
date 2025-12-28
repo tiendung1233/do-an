@@ -1,0 +1,74 @@
+@startuml
+title Activity Diagram - Duyệt Yêu Cầu Rút Tiền (Admin)
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|Admin|
+start
+:Truy cập trang quản lý rút tiền;
+
+|Controller|
+:Hiển thị danh sách yêu cầu chờ duyệt;
+
+|Admin|
+:Xem chi tiết yêu cầu;
+
+|Controller|
+:Hiển thị chi tiết (người dùng, số tiền, thông tin ngân hàng);
+
+|Admin|
+if (Quyết định?) then (Duyệt)
+  |Database|
+  :Kiểm tra số dư người dùng;
+  if (Số dư đủ?) then (Không)
+    |Controller|
+    :Hiển thị lỗi "Số dư không đủ";
+    stop
+  else (Có)
+    |Database|
+    :BEGIN TRANSACTION;
+    :UPDATE withdraw_request (status=approved);
+    :UPDATE user (balance -= amount);
+    :INSERT withdraw_history;
+    :COMMIT;
+    |Hệ thống Thanh toán|
+    :Gửi yêu cầu chuyển khoản;
+    if (Chuyển khoản thành công?) then (Có)
+      |Database|
+      :UPDATE withdraw_history (paymentStatus=completed);
+      |Email Service|
+      :Gửi email "Yêu cầu rút tiền đã được duyệt";
+      |Controller|
+      :Hiển thị "Đã duyệt thành công";
+      stop
+    else (Thất bại)
+      |Database|
+      :UPDATE withdraw_history (failed);
+      :ROLLBACK balance;
+      |Email Service|
+      :Gửi email "Chuyển khoản thất bại, đã hoàn tiền";
+      |Controller|
+      :Hiển thị lỗi "Chuyển khoản thất bại";
+      stop
+    endif
+  endif
+else (Từ chối)
+  |Database|
+  :UPDATE withdraw_request (status=rejected, reason);
+  |Email Service|
+  :Gửi email "Yêu cầu rút tiền đã bị từ chối";
+  |Controller|
+  :Hiển thị "Đã từ chối yêu cầu";
+  stop
+endif
+
+@enduml
+

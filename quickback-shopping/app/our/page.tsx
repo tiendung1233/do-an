@@ -64,7 +64,7 @@ export default function LandingPage() {
               <div className="mx-auto max-w-2xl gap-x-14 lg:mx-0 lg:flex lg:max-w-none lg:items-center">
                 <div className="relative w-full lg:max-w-xs lg:shrink-0">
                   <h1 className="text-pretty text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                    Quickback Shopping - Mua sắm hoàn tiền
+                    SmartCash Shopping - Mua sắm hoàn tiền
                   </h1>
                   <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:max-w-md sm:text-xl/8 lg:max-w-none">
                     Chúng tôi luôn cố gắng mang đến những người dùng những ưu
@@ -256,7 +256,7 @@ export default function LandingPage() {
         <div className="mx-auto mt-32 max-w-7xl px-6 sm:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-none">
             <h2 className="text-balance text-4xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              Cẩm nang QuickBack
+              Cẩm nang SmartCash
             </h2>
           </div>
           <div className="mx-auto mt-16 grid max-w-2xl auto-rows-fr grid-cols-1 gap-8 sm:mt-20 lg:mx-0 lg:max-w-none lg:grid-cols-3">

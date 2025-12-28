@@ -1,0 +1,108 @@
+@startuml Use Case - Voucher Cashback
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Voucher Cashback
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Voucher Controller" as Controller
+participant "Voucher Service" as Service
+database "Database" as DB
+participant "Purchase History" as Purchase
+actor "Admin" as Admin
+
+== Xem danh sách voucher ==
+
+User -> UI: Truy cập trang voucher của tôi
+UI -> Controller: getMyVouchers(userId, status)
+Controller -> Service: Lấy danh sách voucher
+Service -> DB: Query voucher (userId, status: available/used/expired)
+DB --> Service: Danh sách voucher
+Service -> Service: Kiểm tra voucher hết hạn
+Service -> DB: UPDATE voucher (status=expired) WHERE expiredAt < NOW()
+Service --> UI: Danh sách voucher
+UI --> User: Hiển thị (code, loại, giá trị, hạn sử dụng, trạng thái)
+
+== Áp dụng voucher vào đơn hàng ==
+
+User -> UI: Chọn voucher khi mua hàng
+UI -> Controller: applyVoucher(userId, voucherCode, orderId)
+Controller -> Service: Xử lý áp dụng
+Service -> DB: Query voucher (code, userId)
+Service -> Service: Kiểm tra voucher hợp lệ (status, expiredAt, minOrderAmount)
+
+alt Voucher không hợp lệ
+    Service --> UI: Lỗi "Voucher không hợp lệ hoặc đã hết hạn"
+    UI --> User: Thông báo lỗi
+    
+else Voucher hợp lệ
+    Service -> Purchase: Lấy thông tin đơn hàng
+    Purchase --> Service: Order details (amount)
+    Service -> Service: Tính cashback với voucher (baseCashback * (1 + voucherPercentage))
+    Service -> DB: UPDATE purchase_history (voucherCode, voucherCashback)
+    Service -> DB: UPDATE voucher (status=used, usedAt, usedOrderId)
+    Service --> UI: Thành công
+    UI --> User: "Đã áp dụng voucher, cashback tăng X%"
+end
+
+== Nhận voucher từ các nguồn ==
+
+alt Từ điểm danh
+    Service -> Service: Tạo voucher sau khi điểm danh
+    Service -> DB: INSERT voucher (userId, type=checkin, percentage, expiredAt)
+    
+else Từ nâng hạng thành viên
+    Service -> Service: Tạo voucher chúc mừng
+    Service -> DB: INSERT voucher (userId, type=membership, percentage, expiredAt)
+    
+else Từ vòng quay may mắn
+    Service -> Service: Tạo voucher từ phần thưởng
+    Service -> DB: INSERT voucher (userId, type=spinwheel, value, expiredAt)
+    
+else Admin tạo voucher
+    Admin -> UI: Tạo voucher cho user
+    UI -> Controller: createVoucher(userId, type, value, expiredAt)
+    Controller -> Service: Tạo voucher
+    Service -> DB: INSERT voucher
+    Service --> UI: Thành công
+    UI --> Admin: "Đã tạo voucher"
+end
+
+== Admin quản lý voucher ==
+
+Admin -> UI: Xem danh sách tất cả voucher
+UI -> Controller: getAllVouchers(filters)
+Controller -> Service: Lấy danh sách
+Service -> DB: Query voucher (với filters: userId, type, status)
+DB --> Service: Danh sách
+Service --> UI: Danh sách voucher
+UI --> Admin: Hiển thị (user, code, type, value, status, dates)
+
+Admin -> UI: Tạo voucher hàng loạt
+UI -> Controller: createBulkVouchers(userIds, type, value, expiredAt)
+Controller -> Service: Tạo nhiều voucher
+Service -> DB: INSERT nhiều voucher
+Service --> UI: Số lượng đã tạo
+UI --> Admin: "Đã tạo X voucher"
+
+== Ngoại lệ ==
+
+note over User, Admin
+  - Voucher có các loại: checkin, membership, spinwheel, admin
+  - Voucher có thể là phần trăm (%) hoặc số tiền cố định
+  - Voucher có thời hạn sử dụng
+  - Mỗi voucher chỉ dùng được 1 lần
+  - Voucher có thể có điều kiện (ví dụ: đơn hàng tối thiểu)
+  - Voucher tự động hết hạn sau thời gian quy định
+  - Admin có thể tạo voucher cho user cụ thể hoặc hàng loạt
+end note
+
+@enduml
+
+
+

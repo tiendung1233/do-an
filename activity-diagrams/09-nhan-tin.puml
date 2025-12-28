@@ -1,0 +1,51 @@
+@startuml
+title Activity Diagram - Nhắn Tin Giữa Người Dùng Và Admin
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Mở trang chat hỗ trợ;
+
+|Controller|
+:Tải danh sách hội thoại và tin nhắn cũ;
+
+|User|
+:Soạn và gửi tin nhắn;
+
+|Controller|
+:Lưu tin nhắn vào database;
+
+|WebSocket Server|
+:Gửi thông báo real-time cho admin;
+
+|Admin|
+:Nhận thông báo có tin nhắn mới;
+
+|Admin|
+:Xem tin nhắn;
+
+|Admin|
+:Nhập và gửi phản hồi;
+
+|Controller|
+:Lưu phản hồi vào database;
+
+|WebSocket Server|
+:Gửi thông báo real-time cho người dùng;
+
+|User|
+:Nhận phản hồi từ admin;
+
+stop
+
+@enduml
+

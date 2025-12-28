@@ -1,0 +1,85 @@
+@startuml Sequence Diagram - Duyệt Đơn Hàng (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Biểu đồ chức năng duyệt đơn hàng
+
+actor "Admin" as Admin
+participant "Giao diện Admin" as UI
+participant "Order Controller" as Controller
+participant "Order Service" as Service
+database "Database" as DB
+participant "Cashback Service" as Cashback
+participant "Membership Service" as Membership
+participant "SpinWheel Service" as SpinWheel
+actor "Người dùng" as User
+participant "Email Service" as Email
+
+== Luồng chính - Xem danh sách đơn hàng ==
+
+Admin -> UI: Truy cập trang quản lý đơn hàng
+UI -> Controller: getOrders(status, filters)
+Controller -> Service: Lấy danh sách đơn hàng
+Service -> DB: Query purchase_history (với filters: status, date, shop, user)
+DB --> Service: Danh sách đơn hàng
+Service --> UI: Danh sách
+UI --> Admin: Hiển thị (orderId, user, product, amount, date, status, cashback)
+
+== Luồng chính - Duyệt đơn hàng ==
+
+Admin -> UI: Click "Duyệt đơn hàng"
+UI -> Controller: approveOrder(orderId, adminId)
+Controller -> Service: Xử lý duyệt
+Service -> Cashback: Tính toán cashback
+Cashback -> DB: Lấy thông tin user (membershipTier, voucher)
+Cashback -> Service: Tính cashback base + bonus từ hạng + voucher
+Cashback --> Service: Tổng cashback
+
+Service -> DB: BEGIN TRANSACTION
+Service -> DB: UPDATE purchase_history (status=approved, cashbackAmount, approvedBy, approvedAt)
+Service -> DB: UPDATE user (balance += cashbackAmount, totalSpent += orderAmount)
+Service -> DB: UPDATE voucher (status=used) nếu có
+Service -> DB: COMMIT
+
+Service -> Membership: Kiểm tra và nâng hạng thành viên nếu đủ điều kiện
+Membership -> DB: Tính tổng tiền đã chi tiêu
+Membership -> Service: Nâng hạng nếu đạt ngưỡng
+Membership --> Service: Kết quả nâng hạng
+
+Service -> SpinWheel: Tạo lượt quay vòng quay may mắn
+SpinWheel -> DB: UPDATE spin_wheel (availableSpins += 1)
+SpinWheel --> Service: Đã tạo lượt quay
+
+Service -> Email: Gửi email thông báo "Đơn hàng đã được duyệt"
+Email --> User: Email thông báo + số tiền cashback
+Service --> UI: Thành công
+UI --> Admin: "Đã duyệt đơn hàng thành công"
+
+== Luồng chính - Từ chối/Hủy đơn hàng ==
+
+Admin -> UI: Click "Hủy đơn hàng"
+UI -> Controller: rejectOrder(orderId, adminId, reason)
+Controller -> Service: Xử lý hủy
+Service -> DB: UPDATE purchase_history (status=cancelled, cancelledBy, cancelledAt, reason)
+Service -> Email: Gửi email thông báo "Đơn hàng đã bị hủy"
+Email --> User: Email thông báo
+Service --> UI: Đã hủy
+UI --> Admin: "Đã hủy đơn hàng"
+
+== Ngoại lệ ==
+
+note over Admin, User
+  - Admin có thể duyệt hoặc hủy đơn hàng
+  - Khi duyệt: tự động tính cashback, cộng vào balance, nâng hạng nếu đủ, tạo lượt quay
+  - Khi hủy: không tính cashback, gửi email thông báo
+  - Đơn hàng có thể lọc theo: trạng thái, ngày, cửa hàng, người dùng
+  - Admin có thể xem chi tiết đầy đủ: user, sản phẩm, voucher, cashback
+  - Lịch sử duyệt/hủy được lưu để tra cứu
+end note
+
+@enduml
+

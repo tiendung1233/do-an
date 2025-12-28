@@ -1,0 +1,64 @@
+@startuml
+title Activity Diagram - Vòng Quay May Mắn
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang vòng quay;
+
+|Controller|
+:Kiểm tra đơn hàng mới chưa nhận lượt quay;
+
+|Database|
+if (Có đơn hàng mới?) then (Có)
+  :UPDATE spin_wheel (availableSpins += số đơn);
+  :Đánh dấu đơn hàng đã nhận lượt;
+endif
+
+|Controller|
+:Hiển thị số lượt quay và danh sách phần thưởng;
+
+|User|
+:Click "Quay";
+
+|Database|
+:Kiểm tra số lượt quay còn lại?;
+
+if (Không còn lượt?) then (Có)
+  |Controller|
+  :Hiển thị lỗi "Không còn lượt quay";
+  stop
+else (Còn)
+  |Controller|
+  :Random chọn phần thưởng\n(voucher/tiền/điểm/không trúng);
+  |Database|
+  :UPDATE spin_wheel (availableSpins -= 1);
+  :INSERT spin_history;
+  if (Trúng phần thưởng?) then (Có)
+    if (Loại phần thưởng?) then (Voucher)
+      :INSERT voucher;
+    else (Tiền)
+      :UPDATE user (balance += amount);
+    else (Điểm)
+      :UPDATE user (points += points);
+    endif
+    |Controller|
+    :Hiển thị kết quả và phần thưởng;
+  else (Không trúng)
+    |Controller|
+    :Hiển thị "Chúc bạn may mắn lần sau";
+  endif
+  stop
+endif
+
+@enduml
+

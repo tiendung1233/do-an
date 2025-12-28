@@ -1,0 +1,105 @@
+@startuml
+title Activity Diagram - Xem Và Chỉnh Sửa Hồ Sơ
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang hồ sơ;
+
+|Controller|
+:Lấy thông tin hồ sơ từ database;
+
+|Database|
+:Query user + bankInfo + membership;
+
+|Controller|
+:Hiển thị thông tin hồ sơ;
+
+|User|
+if (Hành động?) then (Xem)
+  :Xem thông tin;
+  stop
+else (Chỉnh sửa thông tin cơ bản)
+  :Cập nhật tên, địa chỉ;
+  |Database|
+  :UPDATE user;
+  |Controller|
+  :Hiển thị "Đã cập nhật";
+  stop
+else (Cập nhật email)
+  :Nhập email mới;
+  |Database|
+  :Kiểm tra email đã tồn tại?;
+  if (Đã tồn tại?) then (Có)
+    |Controller|
+    :Hiển thị lỗi;
+  else (Không)
+    |Email Service|
+    :Gửi email xác thực;
+    |Database|
+    :UPDATE user (email, emailVerified=false);
+    |Controller|
+    :Hiển thị "Đã cập nhật, cần xác thực";
+  endif
+  stop
+else (Cập nhật số điện thoại)
+  :Nhập số điện thoại mới;
+  |OTP Service|
+  :Gửi OTP qua SMS;
+  |User|
+  :Nhập mã OTP;
+  |OTP Service|
+  if (OTP hợp lệ?) then (Không)
+    |Controller|
+    :Hiển thị lỗi "Mã OTP không đúng";
+  else (Có)
+    |Database|
+    :UPDATE user (phone, phoneVerified=true);
+    |Controller|
+    :Hiển thị "Đã cập nhật số điện thoại";
+  endif
+  stop
+else (Upload ảnh đại diện)
+  :Chọn file ảnh;
+  |Controller|
+  if (File hợp lệ?) then (Không)
+    :Hiển thị lỗi "File không hợp lệ";
+  else (Có)
+    |File Upload|
+    :Upload và resize ảnh;
+    |Database|
+    :UPDATE user (avatar);
+    |Controller|
+    :Hiển thị ảnh đại diện mới;
+  endif
+  stop
+else (Quản lý ngân hàng)
+  if (Hành động?) then (Thêm)
+    :Nhập thông tin ngân hàng;
+    |Database|
+    :INSERT bank_info;
+  else (Sửa)
+    :Cập nhật thông tin;
+    |Database|
+    :UPDATE bank_info;
+  else (Xóa)
+    :Xác nhận xóa;
+    |Database|
+    :DELETE bank_info;
+  endif
+  |Controller|
+  :Hiển thị "Đã cập nhật thông tin ngân hàng";
+  stop
+endif
+
+@enduml
+

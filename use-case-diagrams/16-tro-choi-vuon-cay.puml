@@ -1,0 +1,65 @@
+@startuml Use Case - Trò Chơi Vườn Cây
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+
+rectangle "Hệ thống Trò Chơi Vườn Cây" {
+  rectangle "Xem vườn cây" as UC_ViewGarden
+  rectangle "Trồng cây" as UC_PlantTree
+  rectangle "Tưới cây" as UC_WaterTree
+  rectangle "Kiểm tra cooldown tưới" as UC_CheckCooldown
+  rectangle "Tăng level cây" as UC_LevelUpTree
+  rectangle "Thu hoạch cây" as UC_HarvestTree
+  rectangle "Kiểm tra điều kiện thu hoạch" as UC_CheckHarvestCondition
+  rectangle "Nhận phần thưởng" as UC_ReceiveHarvestReward
+  rectangle "Xem lịch sử thu hoạch" as UC_ViewHarvestHistory
+}
+
+User --> UC_ViewGarden
+User --> UC_PlantTree
+User --> UC_WaterTree
+User --> UC_HarvestTree
+User --> UC_ViewHarvestHistory
+
+UC_ViewGarden --> UC_PlantTree : <<extend>>
+
+UC_WaterTree --> UC_CheckCooldown : <<include>>
+UC_WaterTree --> UC_LevelUpTree : <<extend>>
+
+UC_HarvestTree --> UC_CheckHarvestCondition : <<include>>
+UC_HarvestTree --> UC_ReceiveHarvestReward : <<extend>>
+
+note right of UC_PlantTree
+  Mỗi user chỉ có 1 cây
+  Cây có level (1-10),
+  health (0-100), water (0-100)
+end note
+
+note right of UC_WaterTree
+  Tưới cây có cooldown
+  (ví dụ: 30 phút/lần)
+  Tăng water và health
+  Tự động lên level nếu đủ
+end note
+
+note right of UC_HarvestTree
+  Thu hoạch khi cây đạt
+  level nhất định và health đủ
+  Phần thưởng tăng theo level
+  Sau khi thu hoạch, cây reset về level 1
+end note
+
+@enduml
+

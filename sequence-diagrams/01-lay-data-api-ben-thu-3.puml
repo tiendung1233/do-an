@@ -1,0 +1,64 @@
+@startuml Sequence Diagram - Lấy Data Thông Qua API Bên Thứ 3
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.13. Biểu đồ lấy data thông qua API bên thứ 3
+
+actor "Admin" as Admin
+participant "Giao diện Admin" as UI
+participant "Product Controller" as Controller
+participant "Product Service" as Service
+database "Database" as DB
+participant "AccessTrade API" as AccessTrade
+participant "MediaMart API" as MediaMart
+
+== Luồng chính - Đồng bộ sản phẩm từ API ==
+
+Admin -> UI: Chọn đồng bộ sản phẩm từ API
+UI -> Controller: syncProductsFromAPI(apiType)
+Controller -> Service: Xử lý đồng bộ
+
+alt API là AccessTrade
+    Service -> AccessTrade: GET /products (API key, filters)
+    AccessTrade --> Service: Danh sách sản phẩm (JSON)
+    
+else API là MediaMart
+    Service -> MediaMart: GET /products (API key, filters)
+    MediaMart --> Service: Danh sách sản phẩm (JSON)
+end
+
+Service -> Service: Parse dữ liệu sản phẩm
+
+loop Cho mỗi sản phẩm
+    Service -> DB: Kiểm tra sản phẩm đã tồn tại (productId, shopId)
+    
+    alt Sản phẩm chưa tồn tại
+        Service -> AccessTrade: Tạo link affiliate (productUrl)
+        AccessTrade --> Service: Affiliate link
+        Service -> DB: INSERT sản phẩm mới (thông tin + affiliate link)
+        
+    else Sản phẩm đã tồn tại
+        Service -> DB: UPDATE thông tin sản phẩm (giá, mô tả, hình ảnh)
+    end
+end
+
+Service -> DB: Cập nhật lastSyncAt
+Service --> Controller: Đồng bộ thành công (số sản phẩm mới/cập nhật)
+Controller --> UI: Kết quả đồng bộ
+UI --> Admin: "Đã đồng bộ X sản phẩm mới, Y sản phẩm cập nhật"
+
+== Ngoại lệ ==
+
+note over Admin, MediaMart
+  - API không phản hồi: retry 3 lần, báo lỗi nếu vẫn thất bại
+  - Dữ liệu không hợp lệ: bỏ qua sản phẩm đó, log lỗi
+  - Lỗi tạo affiliate link: bỏ qua, tiếp tục với sản phẩm khác
+  - Lỗi database: rollback transaction, báo lỗi
+end note
+
+@enduml
+

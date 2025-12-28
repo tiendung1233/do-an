@@ -190,7 +190,7 @@ export default function Home() {
                 Lợi ích vượt trội
               </h2>
               <p className="text-secondary-600 dark:text-secondary-400 max-w-2xl mx-auto">
-                QuickBack Shopping mang đến trải nghiệm mua sắm thông minh với
+                SmartCash Shopping mang đến trải nghiệm mua sắm thông minh với
                 những ưu đãi hoàn tiền hấp dẫn nhất.
               </p>
             </div>

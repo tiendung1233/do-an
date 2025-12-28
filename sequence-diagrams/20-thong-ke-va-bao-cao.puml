@@ -1,0 +1,76 @@
+@startuml Sequence Diagram - Thống Kê Và Báo Cáo (Admin)
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Biểu đồ chức năng thống kê và báo cáo
+
+actor "Admin" as Admin
+participant "Giao diện Admin" as UI
+participant "Analytics Controller" as Controller
+participant "Analytics Service" as Service
+database "Database" as DB
+
+== Luồng chính - Xem dashboard tổng quan ==
+
+Admin -> UI: Truy cập trang dashboard
+UI -> Controller: getDashboardStats(period)
+Controller -> Service: Tính toán thống kê
+Service -> DB: Aggregate các bảng
+
+Service -> DB: COUNT users (total, new today, new this month)
+Service -> DB: SUM purchase_history (totalRevenue, totalOrders, totalCashback)
+Service -> DB: COUNT withdraw_request (pending, approved, rejected)
+Service -> DB: SUM withdraw_history (totalWithdrawn)
+
+DB --> Service: Tất cả số liệu
+Service -> Service: Tính toán tỷ lệ, so sánh với kỳ trước
+Service --> UI: Dashboard stats
+UI --> Admin: Hiển thị biểu đồ và số liệu tổng quan
+
+== Luồng chính - Xem thống kê chi tiết ==
+
+Admin -> UI: Xem thống kê (doanh thu/người dùng/đơn hàng/cashback)
+UI -> Controller: getStats(type, startDate, endDate, groupBy)
+Controller -> Service: Tính thống kê
+Service -> DB: Aggregate purchase_history/users theo tiêu chí
+
+alt Theo thời gian
+    Service -> DB: GROUP BY date, SUM(price), SUM(cashbackAmount)
+else Theo cửa hàng
+    Service -> DB: GROUP BY shopId, SUM(price), COUNT orders
+else Theo danh mục
+    Service -> DB: GROUP BY category, SUM(price)
+end
+
+DB --> Service: Dữ liệu thống kê
+Service -> Service: Tạo biểu đồ (line chart, bar chart, pie chart)
+Service --> UI: Dữ liệu + biểu đồ
+UI --> Admin: Hiển thị thống kê và biểu đồ
+
+== Luồng chính - Xuất báo cáo ==
+
+Admin -> UI: Xuất báo cáo (PDF/Excel)
+UI -> Controller: exportReport(type, period, format)
+Controller -> Service: Tạo báo cáo
+Service -> Service: Thu thập tất cả dữ liệu thống kê
+Service -> Service: Tạo file PDF hoặc Excel
+Service --> UI: File báo cáo
+UI --> Admin: Download báo cáo
+
+== Ngoại lệ ==
+
+note over Admin, DB
+  - Dashboard hiển thị số liệu real-time hoặc cập nhật định kỳ
+  - Thống kê có thể lọc theo: ngày, tuần, tháng, năm
+  - Có thể so sánh giữa các kỳ (ví dụ: tháng này vs tháng trước)
+  - Biểu đồ hỗ trợ: line chart, bar chart, pie chart
+  - Báo cáo có thể xuất ra PDF hoặc Excel
+  - Dữ liệu được cache để tối ưu hiệu suất
+end note
+
+@enduml
+

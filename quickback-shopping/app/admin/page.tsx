@@ -204,7 +204,7 @@ export default function Admin() {
                   <span className="text-white font-bold text-lg">Q</span>
                 </div>
                 <span className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
-                  QuickBack Admin
+                  SmartCash Admin
                 </span>
               </div>
 
@@ -298,7 +298,7 @@ export default function Admin() {
               <span className="text-white font-bold text-lg">Q</span>
             </div>
             <span className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
-              QuickBack Admin
+              SmartCash Admin
             </span>
           </div>
 

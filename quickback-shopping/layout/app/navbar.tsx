@@ -102,14 +102,14 @@ export default function NavBar({ isAuthenticated }: IProps) {
                   <div className="relative rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-1.5 shadow-primary-sm">
                     <img
                       src="/logo_img.png"
-                      alt="QuickBack"
+                      alt="SmartCash"
                       className="h-8 w-8 rounded-xl object-cover"
                     />
                   </div>
                 </div>
                 <div>
                   <p className="text-base font-bold text-secondary-900 dark:text-white">
-                    QuickBack
+                    SmartCash
                   </p>
                   <p className="text-2xs uppercase tracking-[0.2em] text-secondary-400">
                     shopping studio
@@ -269,7 +269,7 @@ export default function NavBar({ isAuthenticated }: IProps) {
                 <span className="hidden sm:inline">
                   Hoàn tiền không giới hạn & ưu đãi độc quyền mỗi tuần
                 </span>
-                <span className="sm:hidden">Ưu đãi hấp dẫn tại QuickBack</span>
+                <span className="sm:hidden">Ưu đãi hấp dẫn tại SmartCash</span>
               </p>
             </div>
             <Link
@@ -329,14 +329,14 @@ export default function NavBar({ isAuthenticated }: IProps) {
                       <div className="relative rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-1.5 shadow-primary-sm group-hover:shadow-primary transition-shadow">
                         <img
                           src="/logo_img.png"
-                          alt="QuickBack"
+                          alt="SmartCash"
                           className="h-9 w-9 rounded-xl object-cover"
                         />
                       </div>
                     </div>
                     <div className="hidden sm:block">
                       <p className="text-lg font-bold text-secondary-900 group-hover:text-primary-600 transition-colors dark:text-white dark:group-hover:text-primary-400">
-                        QuickBack
+                        SmartCash
                       </p>
                       <p className="text-2xs uppercase tracking-[0.2em] text-secondary-400 dark:text-secondary-500">
                         shopping studio

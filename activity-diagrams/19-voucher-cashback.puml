@@ -1,0 +1,71 @@
+@startuml
+title Activity Diagram - Voucher Cashback
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang voucher của tôi;
+
+|Controller|
+:Lấy danh sách voucher;
+
+|Database|
+:Query voucher (userId, status);
+
+|Database|
+:Kiểm tra voucher hết hạn;
+
+|Database|
+:UPDATE voucher (status=expired) WHERE expiredAt < NOW();
+
+|Controller|
+:Hiển thị danh sách voucher;
+
+|User|
+if (Hành động?) then (Áp dụng voucher)
+  :Chọn voucher khi mua hàng;
+  |Database|
+  :Kiểm tra voucher hợp lệ\n(status, expiredAt, minOrderAmount)?;
+  if (Voucher hợp lệ?) then (Không)
+    |Controller|
+    :Hiển thị lỗi "Voucher không hợp lệ";
+    stop
+  else (Có)
+    |Database|
+    :Tính cashback với voucher\n(baseCashback * (1 + voucherPercentage));
+    :UPDATE purchase_history (voucherCode, voucherCashback);
+    :UPDATE voucher (status=used);
+    |Controller|
+    :Hiển thị "Đã áp dụng voucher, cashback tăng X%";
+    stop
+  endif
+else (Xem)
+  stop
+endif
+
+|Hệ thống|
+if (Nguồn voucher?) then (Điểm danh)
+  :Tạo voucher sau khi điểm danh;
+  |Database|
+  :INSERT voucher (type=checkin, percentage);
+else (Nâng hạng)
+  :Tạo voucher chúc mừng;
+  |Database|
+  :INSERT voucher (type=membership, percentage);
+else (Vòng quay)
+  :Tạo voucher từ phần thưởng;
+  |Database|
+  :INSERT voucher (type=spinwheel, value);
+endif
+
+@enduml
+

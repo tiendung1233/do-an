@@ -1,0 +1,47 @@
+@startuml
+title Activity Diagram - Xem Lịch Sử Rút Tiền
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang lịch sử rút tiền;
+
+|Controller|
+:Lấy lịch sử rút tiền từ database;
+
+|Database|
+:Query withdraw_history WHERE userId = ?;
+
+|Database|
+:Tính tổng số tiền đã rút (theo trạng thái);
+
+|Controller|
+:Hiển thị lịch sử rút tiền\n(ngày, số tiền, trạng thái, thông tin ngân hàng);
+
+|User|
+if (Hành động?) then (Xem chi tiết)
+  :Click xem chi tiết giao dịch;
+  |Controller|
+  :Hiển thị chi tiết đầy đủ;
+  stop
+else (Lọc)
+  :Chọn bộ lọc (trạng thái, khoảng thời gian);
+  |Controller|
+  :Lọc lịch sử;
+  :Hiển thị danh sách đã lọc;
+  stop
+else (Xem)
+  stop
+endif
+
+@enduml
+

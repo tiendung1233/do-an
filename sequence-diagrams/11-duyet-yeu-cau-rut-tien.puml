@@ -1,0 +1,95 @@
+@startuml Sequence Diagram - Duyệt Yêu Cầu Rút Tiền
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.23. Biểu đồ chức năng duyệt yêu cầu rút tiền
+
+actor "Admin" as Admin
+participant "Giao diện Admin" as UI
+participant "Controller" as Controller
+participant "Withdraw Service" as Service
+database "Database" as DB
+participant "Hệ thống Thanh toán" as Payment
+actor "Người dùng" as User
+participant "Email Service" as Email
+
+== Xem danh sách và chi tiết ==
+
+Admin -> UI: Truy cập trang quản lý rút tiền
+UI -> Controller: Lấy danh sách yêu cầu chờ duyệt
+Controller -> Service: Query pending requests
+Service -> DB: Truy vấn yêu cầu
+DB --> Service: Danh sách
+Service --> UI: Trả danh sách
+UI --> Admin: Hiển thị (userId, amount, date, bankInfo)
+
+Admin -> UI: Xem chi tiết yêu cầu
+UI -> Controller: getRequestDetails(requestId)
+Controller -> Service: Lấy chi tiết
+Service -> DB: Query request + user info
+DB --> Service: Chi tiết (user, amount, bank, history, balance)
+Service --> UI: Dữ liệu
+UI --> Admin: Hiển thị chi tiết
+
+== Duyệt yêu cầu ==
+
+Admin -> UI: Click "Duyệt"
+UI -> Controller: approveRequest(requestId, adminId)
+Controller -> Service: Xử lý duyệt
+Service -> DB: Kiểm tra số dư
+
+alt Số dư không đủ
+    DB --> Service: Không đủ
+    Service --> UI: Lỗi "Số dư không đủ"
+    UI --> Admin: Thông báo lỗi
+    
+else Số dư đủ
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: UPDATE request (status=approved), UPDATE user (balance-=amount), INSERT history
+    Service -> DB: COMMIT
+    Service -> Payment: Gửi yêu cầu chuyển khoản
+    
+    alt Chuyển khoản thành công
+        Payment --> Service: Thành công
+        Service -> DB: UPDATE history (paymentStatus=completed)
+        Service -> Email: Gửi email "Đã duyệt"
+        Email --> User: Thông báo
+        Service --> UI: Thành công
+        UI --> Admin: "Đã duyệt thành công"
+        
+    else Chuyển khoản thất bại
+        Payment --> Service: Lỗi
+        Service -> DB: UPDATE history (failed), ROLLBACK balance
+        Service -> Email: Gửi email "Thất bại, đã hoàn tiền"
+        Email --> User: Thông báo
+        Service --> UI: Lỗi
+        UI --> Admin: "Chuyển khoản thất bại"
+    end
+end
+
+== Từ chối yêu cầu ==
+
+Admin -> UI: Click "Từ chối"
+UI -> Controller: rejectRequest(requestId, adminId, reason)
+Controller -> Service: Xử lý từ chối
+Service -> DB: UPDATE request (status=rejected, reason)
+Service -> Email: Gửi email "Đã từ chối"
+Email --> User: Thông báo
+Service --> UI: Đã từ chối
+UI --> Admin: "Đã từ chối yêu cầu"
+
+== Ngoại lệ ==
+
+note over Admin, User
+  - Thông tin ngân hàng không hợp lệ: kiểm tra format, cảnh báo
+  - Số tiền vượt giới hạn: kiểm tra giới hạn ngày/tháng, cảnh báo
+  - Tài khoản bị khóa: không cho phép duyệt, cảnh báo
+  - Lỗi kết nối thanh toán: retry 3 lần, đánh dấu "chờ xử lý"
+end note
+
+@enduml
+

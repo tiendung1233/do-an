@@ -1,0 +1,58 @@
+@startuml Use Case - Gửi Yêu Cầu Hoàn Tiền
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Hệ thống Affiliate" as Affiliate
+
+rectangle "Hệ thống Yêu cầu Hoàn Tiền" {
+  rectangle "Xem lịch sử mua hàng" as UC_ViewPurchaseHistory
+  rectangle "Chọn đơn hàng" as UC_SelectOrder
+  rectangle "Kiểm tra trạng thái đơn hàng" as UC_CheckOrderStatus
+  rectangle "Gửi yêu cầu hoàn tiền" as UC_SubmitCashbackRequest
+  rectangle "Nhận webhook từ Affiliate" as UC_ReceiveWebhook
+  rectangle "Tự động tạo yêu cầu" as UC_AutoCreateRequest
+  rectangle "Cập nhật trạng thái đơn hàng" as UC_UpdateOrderStatus
+}
+
+User --> UC_ViewPurchaseHistory
+User --> UC_SelectOrder
+User --> UC_SubmitCashbackRequest
+
+UC_ViewPurchaseHistory --> UC_SelectOrder : <<include>>
+UC_SelectOrder --> UC_CheckOrderStatus : <<include>>
+
+UC_CheckOrderStatus --> UC_SubmitCashbackRequest : <<extend>>
+
+UC_SubmitCashbackRequest --> UC_UpdateOrderStatus : <<include>>
+
+UC_ReceiveWebhook ..> Affiliate : <<extend>>
+UC_ReceiveWebhook --> UC_AutoCreateRequest : <<include>>
+UC_AutoCreateRequest --> UC_UpdateOrderStatus : <<include>>
+
+note right of UC_SubmitCashbackRequest
+  Người dùng gửi yêu cầu hoàn tiền
+  cho đơn hàng chưa được duyệt
+  Hệ thống tạo yêu cầu và chờ
+  admin duyệt
+end note
+
+note right of UC_ReceiveWebhook
+  Hệ thống nhận webhook từ Affiliate
+  khi đơn hàng được xác nhận
+  Tự động tạo yêu cầu hoàn tiền
+end note
+
+@enduml
+

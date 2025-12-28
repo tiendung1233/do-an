@@ -40,7 +40,7 @@ export function extractId(input: string): string {
 
 ### **1. Frontend - Tạo Deep Link với UTM_SOURCE**
 
-**File:** [`quickback-shopping/components/acesstrade/accesstradeWidget.tsx`](quickback-shopping/components/acesstrade/accesstradeWidget.tsx)
+**File:** [`SmartCash-shopping/components/acesstrade/accesstradeWidget.tsx`](SmartCash-shopping/components/acesstrade/accesstradeWidget.tsx)
 
 ```typescript
 // Lấy ID user từ cookie
@@ -57,7 +57,7 @@ deepLink += "&url=" + encodeURIComponent(text);
 // User click vào link này → được tracking với utm_source = user_id
 ```
 
-**Tương tự cho MediaMart:** [`quickback-shopping/components/acesstrade/mediaMartWidget.tsx`](quickback-shopping/components/acesstrade/mediaMartWidget.tsx)
+**Tương tự cho MediaMart:** [`SmartCash-shopping/components/acesstrade/mediaMartWidget.tsx`](SmartCash-shopping/components/acesstrade/mediaMartWidget.tsx)
 
 ```typescript
 let deepLink = `https://go.isclix.com/deep_link/6019537891464095047/6009072433920808367?...`;
@@ -398,8 +398,8 @@ GET https://api.accesstrade.vn/v1/transactions?
 
 ### **Frontend (Next.js)**
 
-- [`quickback-shopping/components/acesstrade/accesstradeWidget.tsx`](quickback-shopping/components/acesstrade/accesstradeWidget.tsx) - Shopee widget
-- [`quickback-shopping/components/acesstrade/mediaMartWidget.tsx`](quickback-shopping/components/acesstrade/mediaMartWidget.tsx) - MediaMart widget
+- [`SmartCash-shopping/components/acesstrade/accesstradeWidget.tsx`](SmartCash-shopping/components/acesstrade/accesstradeWidget.tsx) - Shopee widget
+- [`SmartCash-shopping/components/acesstrade/mediaMartWidget.tsx`](SmartCash-shopping/components/acesstrade/mediaMartWidget.tsx) - MediaMart widget
 
 ### **Backend (Node.js/Express)**
 

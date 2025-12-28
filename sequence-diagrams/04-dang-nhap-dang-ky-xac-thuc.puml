@@ -1,0 +1,102 @@
+@startuml Sequence Diagram - Đăng Nhập, Đăng Ký Và Xác Thực Tài Khoản
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.16. Biểu đồ chức năng đăng nhập, đăng ký và xác thực tài khoản
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Auth Controller" as Controller
+participant "Auth Service" as Service
+database "Database" as DB
+participant "Email Service" as Email
+participant "Google OAuth" as Google
+
+== Luồng chính - Đăng ký ==
+
+User -> UI: Nhập thông tin đăng ký (email, password, name)
+UI -> Controller: register(email, password, name)
+Controller -> Service: Xử lý đăng ký
+Service -> DB: Kiểm tra email tồn tại
+
+alt Email đã tồn tại
+    Service --> UI: Lỗi "Email đã được sử dụng"
+else Email chưa tồn tại
+    Service -> Service: Hash password, tạo verification token
+    Service -> DB: INSERT user (email, password, name, verificationToken, emailVerified=false)
+    Service -> Email: Gửi email xác thực
+    Email --> User: Email chứa link xác thực
+    Service --> UI: Đăng ký thành công
+    UI --> User: "Đăng ký thành công, vui lòng kiểm tra email"
+end
+
+== Luồng chính - Đăng nhập ==
+
+User -> UI: Nhập email và password
+UI -> Controller: login(email, password)
+Controller -> Service: Xác thực đăng nhập
+Service -> DB: Query user WHERE email = ?
+
+alt Email không tồn tại hoặc password sai
+    Service --> UI: Lỗi "Email hoặc mật khẩu không đúng"
+else Thông tin đúng
+    Service -> Service: So sánh password (bcrypt), tạo JWT token
+    Service --> UI: Token + user info
+    UI --> User: Đăng nhập thành công, chuyển đến trang chủ
+end
+
+== Luồng chính - Đăng nhập bằng Google ==
+
+User -> UI: Click "Đăng nhập bằng Google"
+UI -> Google: Redirect đến Google OAuth
+Google --> User: Yêu cầu xác thực
+User -> Google: Xác nhận quyền
+Google --> UI: OAuth callback (code)
+UI -> Controller: loginWithGoogle(code)
+Controller -> Service: Xử lý Google OAuth
+Service -> Google: Exchange code for token, GET user info
+Google --> Service: User info (email, name, picture)
+Service -> DB: Kiểm tra email tồn tại
+
+alt Email đã tồn tại
+    Service -> DB: UPDATE user (lastLoginAt)
+else Email chưa tồn tại
+    Service -> DB: INSERT user (email, name, image, emailVerified=true, googleId)
+end
+
+Service -> Service: Tạo JWT token
+Service --> UI: Token + user info
+UI --> User: Đăng nhập thành công
+
+== Luồng chính - Xác thực tài khoản ==
+
+User -> Email: Click link xác thực trong email
+Email --> UI: Redirect đến /verify-account/{token}
+UI -> Controller: verifyAccount(token)
+Controller -> Service: Xác thực token
+Service -> DB: Query user WHERE verificationToken = ?
+
+alt Token hợp lệ
+    Service -> DB: UPDATE user (emailVerified=true, verificationToken=null)
+    Service --> UI: Xác thực thành công
+    UI --> User: "Tài khoản đã được xác thực thành công"
+else Token không hợp lệ hoặc hết hạn
+    Service --> UI: Lỗi "Link xác thực không hợp lệ hoặc đã hết hạn"
+    UI --> User: Thông báo lỗi
+end
+
+== Ngoại lệ ==
+
+note over User, Google
+  - Email không hợp lệ: validate format, báo lỗi
+  - Password quá yếu: yêu cầu mật khẩu mạnh hơn
+  - Lỗi gửi email: retry 3 lần, log lỗi
+  - Google OAuth thất bại: báo "Không thể đăng nhập bằng Google"
+  - Token xác thực hết hạn: yêu cầu gửi lại email xác thực
+end note
+
+@enduml

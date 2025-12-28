@@ -1,0 +1,68 @@
+@startuml
+title Activity Diagram - Thống Kê Và Báo Cáo (Admin)
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|Admin|
+start
+:Truy cập trang dashboard;
+
+|Controller|
+:Tính toán thống kê tổng quan;
+
+|Database|
+:COUNT users, SUM revenue, COUNT orders, SUM cashback;
+
+|Controller|
+:Hiển thị dashboard với biểu đồ;
+
+|Admin|
+if (Xem thống kê chi tiết?) then (Doanh thu)
+  :Chọn khoảng thời gian;
+  |Database|
+  :Aggregate purchase_history theo thời gian/cửa hàng/danh mục;
+  |Controller|
+  :Tạo biểu đồ doanh thu;
+  :Hiển thị thống kê;
+else (Người dùng)
+  :Chọn khoảng thời gian;
+  |Database|
+  :Aggregate users theo hạng, ngày đăng ký;
+  |Controller|
+  :Tạo biểu đồ người dùng;
+  :Hiển thị thống kê;
+else (Đơn hàng)
+  :Chọn khoảng thời gian;
+  |Database|
+  :Aggregate purchase_history theo trạng thái, giá trị;
+  |Controller|
+  :Tạo biểu đồ đơn hàng;
+  :Hiển thị thống kê;
+else (Cashback)
+  :Chọn khoảng thời gian;
+  |Database|
+  :Aggregate purchase_history theo cashback;
+  |Controller|
+  :Tạo biểu đồ cashback;
+  :Hiển thị thống kê;
+else (Xuất báo cáo)
+  :Chọn loại báo cáo và format (PDF/Excel);
+  |Controller|
+  :Thu thập tất cả dữ liệu thống kê;
+  :Tạo file PDF hoặc Excel;
+  :Download báo cáo;
+  stop
+endif
+
+stop
+
+@enduml
+

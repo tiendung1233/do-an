@@ -1,0 +1,61 @@
+@startuml Use Case - Chuyển Đổi Link Affiliate
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Hệ thống Affiliate API" as AffiliateAPI
+
+rectangle "Hệ thống Chuyển đổi Link" {
+  rectangle "Nhập link sản phẩm" as UC_InputLink
+  rectangle "Phân tích URL sản phẩm" as UC_ParseURL
+  rectangle "Tìm sản phẩm trong database" as UC_SearchProduct
+  rectangle "Lấy link affiliate có sẵn" as UC_GetExistingLink
+  rectangle "Tạo link affiliate mới" as UC_CreateAffiliateLink
+  rectangle "Gắn tracking code" as UC_AddTracking
+  rectangle "Hiển thị link affiliate" as UC_DisplayLink
+  rectangle "Ghi log click" as UC_LogClick
+}
+
+User --> UC_InputLink
+User --> UC_DisplayLink
+User --> UC_LogClick
+
+UC_InputLink --> UC_ParseURL : <<include>>
+UC_ParseURL --> UC_SearchProduct : <<include>>
+
+UC_SearchProduct --> UC_GetExistingLink : <<extend>>
+UC_SearchProduct --> UC_CreateAffiliateLink : <<extend>>
+
+UC_GetExistingLink --> UC_AddTracking : <<include>>
+UC_CreateAffiliateLink --> UC_AddTracking : <<include>>
+
+UC_AddTracking --> UC_DisplayLink : <<include>>
+
+UC_CreateAffiliateLink ..> AffiliateAPI : <<extend>>
+
+note right of UC_ParseURL
+  Phân tích URL để xác định:
+  - Nguồn (Tiki, Shopee, Lazada, etc.)
+  - Product ID
+  - Domain
+end note
+
+note right of UC_CreateAffiliateLink
+  Nếu sản phẩm chưa có trong DB,
+  gọi API Affiliate để tạo link mới
+  và lưu thông tin sản phẩm
+end note
+
+@enduml
+

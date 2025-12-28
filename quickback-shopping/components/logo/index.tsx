@@ -17,7 +17,7 @@ export default function LogoComponent() {
           height={100}
         />
       </div>
-      <span> QuickBack Shopping</span>
+      <span> SmartCash Shopping</span>
     </Link>
   );
 }

@@ -1,0 +1,116 @@
+@startuml Use Case - Xem Và Chỉnh Sửa Hồ Sơ
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Xem Và Chỉnh Sửa Hồ Sơ Cá Nhân
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Controller" as Controller
+participant "Profile Service" as Service
+database "Database" as DB
+participant "File Upload" as FileService
+participant "Email/OTP Service" as AuthService
+
+== Xem và chỉnh sửa thông tin ==
+
+User -> UI: Truy cập trang hồ sơ
+UI -> Controller: getProfile(userId)
+Controller -> Service: Lấy thông tin
+Service -> DB: Query user + bankInfo + membership
+DB --> Service: Profile data
+Service --> UI: Dữ liệu
+UI --> User: Hiển thị hồ sơ
+
+User -> UI: Cập nhật thông tin (tên, địa chỉ)
+UI -> Controller: updateProfile(userId, data)
+Controller -> Service: Cập nhật
+Service -> DB: UPDATE user
+Service --> UI: Thành công
+UI --> User: "Đã cập nhật"
+
+== Cập nhật email/SĐT ==
+
+alt Cập nhật email
+    User -> UI: Cập nhật email
+    UI -> Controller: updateEmail(userId, newEmail)
+    Controller -> Service: Xử lý
+    Service -> DB: Kiểm tra email tồn tại
+    
+    alt Email đã tồn tại
+        Service --> UI: Lỗi "Email đã được sử dụng"
+    else Email chưa tồn tại
+        Service -> AuthService: Gửi email xác thực
+        AuthService --> User: Email xác thực
+        Service -> DB: UPDATE user (email, emailVerified=false)
+        Service --> UI: "Đã cập nhật, cần xác thực"
+    end
+    
+else Cập nhật số điện thoại
+    User -> UI: Cập nhật SĐT
+    UI -> Controller: updatePhone(userId, newPhone)
+    Controller -> Service: Xử lý
+    Service -> AuthService: Gửi OTP
+    AuthService --> User: SMS chứa mã OTP
+    
+    User -> UI: Nhập mã OTP
+    UI -> Controller: verifyOTP(userId, phone, otp)
+    Controller -> Service: Xác thực OTP
+    
+    alt OTP hợp lệ
+        Service -> DB: UPDATE user (phone, phoneVerified=true)
+        Service --> UI: "Đã cập nhật số điện thoại"
+    else OTP không hợp lệ
+        Service --> UI: Lỗi "Mã OTP không đúng"
+    end
+end
+
+== Upload ảnh đại diện ==
+
+User -> UI: Chọn file ảnh
+UI -> UI: Validate file (JPG/PNG, max 5MB)
+
+alt File hợp lệ
+    UI -> Controller: uploadAvatar(userId, file)
+    Controller -> FileService: Upload và resize
+    FileService --> Controller: URL ảnh mới
+    Controller -> Service: Update avatar
+    Service -> DB: UPDATE user (avatar)
+    Service --> UI: Thành công
+    UI --> User: Hiển thị ảnh mới
+else File không hợp lệ
+    UI --> User: "File không hợp lệ"
+end
+
+== Quản lý thông tin ngân hàng ==
+
+User -> UI: Quản lý ngân hàng (thêm/sửa/xóa)
+UI -> Controller: manageBankInfo(action, bankId, bankData)
+Controller -> Service: Xử lý
+
+alt Thêm
+    Service -> DB: INSERT INTO bank_info
+else Sửa
+    Service -> DB: UPDATE bank_info
+else Xóa
+    Service -> DB: DELETE FROM bank_info
+end
+
+Service --> UI: Thành công
+UI --> User: "Đã cập nhật thông tin ngân hàng"
+
+== Ngoại lệ ==
+
+note over User, AuthService
+  - Thông tin không hợp lệ: validate, hiển thị lỗi cụ thể
+  - Email/SĐT đã được sử dụng: kiểm tra trùng, báo lỗi
+  - OTP hết hạn: hiệu lực 5 phút, báo lỗi
+  - File upload thất bại: retry 3 lần, báo lỗi
+  - Lỗi database: báo "Có lỗi xảy ra, vui lòng thử lại"
+end note
+
+@enduml

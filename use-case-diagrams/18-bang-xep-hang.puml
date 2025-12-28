@@ -1,0 +1,68 @@
+@startuml Use Case - Bảng Xếp Hạng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Admin" as Admin
+actor "Hệ thống" as System
+
+rectangle "Hệ thống Bảng Xếp Hạng" {
+  rectangle "Xem bảng xếp hạng" as UC_ViewLeaderboard
+  rectangle "Tính bảng xếp hạng" as UC_CalculateLeaderboard
+  rectangle "Xem thứ hạng của mình" as UC_ViewMyRank
+  rectangle "Tự động tra thưởng top 3" as UC_AutoRewardTop3
+  rectangle "Cấu hình thưởng" as UC_ConfigureReward
+  rectangle "Xem lịch sử thưởng" as UC_ViewRewardHistory
+}
+
+User --> UC_ViewLeaderboard
+User --> UC_ViewMyRank
+
+Admin --> UC_ConfigureReward
+Admin --> UC_ViewRewardHistory
+
+System --> UC_CalculateLeaderboard
+System --> UC_AutoRewardTop3
+
+UC_ViewLeaderboard --> UC_CalculateLeaderboard : <<include>>
+UC_ViewMyRank --> UC_CalculateLeaderboard : <<include>>
+
+UC_AutoRewardTop3 --> UC_CalculateLeaderboard : <<include>>
+
+note right of UC_CalculateLeaderboard
+  Xếp hạng theo:
+  - Tổng chi tiêu
+  - Tổng cashback
+  - Số đơn hàng
+  
+  Thời kỳ: tuần, tháng, năm
+end note
+
+note right of UC_AutoRewardTop3
+  Cuối mỗi kỳ (tháng):
+  - Xác định top 3
+  - Tự động tra thưởng
+  - Cộng tiền vào tài khoản
+  - Gửi email chúc mừng
+end note
+
+note right of UC_ConfigureReward
+  Admin cấu hình:
+  - Thưởng cho #1, #2, #3
+  - Thời kỳ tra thưởng
+  - Tiêu chí xếp hạng
+end note
+
+@enduml
+

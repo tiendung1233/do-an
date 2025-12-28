@@ -1,0 +1,85 @@
+@startuml Sequence Diagram - Vòng Quay May Mắn
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Biểu đồ chức năng vòng quay may mắn
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Controller" as Controller
+participant "SpinWheel Service" as Service
+database "Database" as DB
+participant "Purchase History" as Purchase
+
+== Xem số lượt quay và quay ==
+
+User -> UI: Truy cập trang vòng quay
+UI -> Controller: getSpinWheelInfo(userId)
+Controller -> Service: Lấy thông tin + kiểm tra đơn hàng mới
+Service -> Purchase: Kiểm tra đơn hàng chưa nhận lượt
+
+alt Có đơn hàng mới
+    Service -> DB: UPDATE spin_wheel (availableSpins += số đơn), đánh dấu đơn hàng
+end
+
+Service -> DB: Query spin_wheel (availableSpins, totalSpins)
+DB --> Service: Thông tin
+Service --> UI: Số lượt quay, danh sách phần thưởng
+UI --> User: Hiển thị vòng quay
+
+User -> UI: Click "Quay"
+UI -> Controller: spinWheel(userId)
+Controller -> Service: Xử lý quay
+Service -> DB: Kiểm tra số lượt còn lại
+
+alt Không còn lượt
+    Service --> UI: Lỗi "Không còn lượt quay"
+else Còn lượt
+    Service -> Service: Random chọn phần thưởng (voucher/tiền/điểm/không trúng)
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: UPDATE spin_wheel (availableSpins -= 1), INSERT spin_history
+    
+    alt Trúng phần thưởng
+        alt Voucher
+            Service -> DB: INSERT voucher
+        else Tiền
+            Service -> DB: UPDATE user (balance += amount)
+        else Điểm
+            Service -> DB: UPDATE user (points += points)
+        end
+        Service -> DB: COMMIT
+        Service --> UI: Kết quả + phần thưởng
+    else Không trúng
+        Service -> DB: COMMIT
+        Service --> UI: "Chúc bạn may mắn lần sau"
+    end
+    
+    UI --> User: Hiển thị kết quả
+end
+
+== Nhận lượt quay tự động ==
+
+Purchase -> Service: Đơn hàng được duyệt
+Service -> Service: Kiểm tra đã nhận lượt chưa
+
+alt Chưa nhận
+    Service -> DB: UPDATE spin_wheel (availableSpins += 1), đánh dấu đơn hàng
+    Service -> Notification: "Bạn có 1 lượt quay mới"
+    Notification --> User: Thông báo
+end
+
+== Ngoại lệ ==
+
+note over User, Purchase
+  - Nhận lượt quay khi đơn hàng được duyệt (1 đơn = 1 lượt)
+  - Phần thưởng: voucher, tiền, điểm, hoặc không trúng (tỷ lệ cấu hình bởi admin)
+  - Lượt quay tích lũy, không có thời hạn
+  - Phần thưởng cộng trực tiếp vào tài khoản
+end note
+
+@enduml
+

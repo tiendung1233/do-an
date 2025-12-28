@@ -1,0 +1,70 @@
+@startuml Use Case - Hệ Thống Giới Thiệu Bạn Bè
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+actor "Người được giới thiệu" as Referred
+actor "Hệ thống" as System
+
+rectangle "Hệ thống Giới Thiệu" {
+  rectangle "Xem mã giới thiệu" as UC_ViewReferralCode
+  rectangle "Tạo mã giới thiệu" as UC_GenerateReferralCode
+  rectangle "Chia sẻ mã giới thiệu" as UC_ShareReferralCode
+  rectangle "Đăng ký bằng mã giới thiệu" as UC_RegisterWithCode
+  rectangle "Tạo referral reward" as UC_CreateReferralReward
+  rectangle "Nhận thưởng khi người được giới thiệu mua hàng" as UC_ReceiveReferralReward
+  rectangle "Xem danh sách người được giới thiệu" as UC_ViewReferrals
+  rectangle "Xem lịch sử thưởng giới thiệu" as UC_ViewReferralHistory
+}
+
+User --> UC_ViewReferralCode
+User --> UC_ShareReferralCode
+User --> UC_ViewReferrals
+User --> UC_ViewReferralHistory
+
+Referred --> UC_RegisterWithCode
+
+System --> UC_GenerateReferralCode
+System --> UC_CreateReferralReward
+System --> UC_ReceiveReferralReward
+
+UC_ViewReferralCode --> UC_GenerateReferralCode : <<extend>>
+UC_ViewReferralCode --> UC_ShareReferralCode : <<extend>>
+
+UC_RegisterWithCode --> UC_CreateReferralReward : <<include>>
+
+UC_ReceiveReferralReward --> UC_ViewReferralHistory : <<include>>
+
+note right of UC_GenerateReferralCode
+  Mỗi user có 1 mã giới thiệu
+  unique (8 ký tự)
+  Tự động tạo nếu chưa có
+end note
+
+note right of UC_RegisterWithCode
+  Người được giới thiệu đăng ký
+  bằng mã để được tính
+  Tạo referral reward record
+  (status = pending)
+end note
+
+note right of UC_ReceiveReferralReward
+  Tự động tra thưởng khi
+  người được giới thiệu mua hàng
+  và đơn được duyệt
+  Số tiền thưởng cấu hình bởi admin
+end note
+
+@enduml
+

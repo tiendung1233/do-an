@@ -1,0 +1,50 @@
+@startuml
+title Activity Diagram - Tìm Kiếm Sản Phẩm
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Tìm kiếm sản phẩm;
+
+|User|
+if (Phương thức tìm kiếm?) then (Từ khóa)
+  :Nhập từ khóa;
+else (Bộ lọc)
+  :Chọn bộ lọc\n(giá, cửa hàng, danh mục, đánh giá);
+else (Sắp xếp)
+  :Chọn cách sắp xếp\n(giá, độ bán chạy, mới nhất);
+endif
+
+|Controller|
+:Tìm kiếm sản phẩm trong database;
+
+|Database|
+:Query products với filters và sắp xếp;
+
+|Database|
+:Trả về danh sách sản phẩm;
+
+|Controller|
+:Hiển thị kết quả tìm kiếm;
+
+|User|
+if (Có kết quả?) then (Có)
+  :Xem danh sách sản phẩm;
+  :Click vào sản phẩm để xem chi tiết;
+  stop
+else (Không)
+  :Hiển thị "Không tìm thấy sản phẩm";
+  stop
+endif
+
+@enduml
+

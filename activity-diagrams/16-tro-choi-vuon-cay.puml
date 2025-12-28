@@ -1,0 +1,74 @@
+@startuml
+title Activity Diagram - Trò Chơi Vườn Cây
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Truy cập trang vườn cây;
+
+|Controller|
+:Hiển thị trạng thái vườn cây;
+
+|User|
+if (Hành động?) then (Trồng cây)
+  if (Đã có cây?) then (Có)
+    |Controller|
+    :Hiển thị lỗi "Đã có cây trong vườn";
+    stop
+  else (Chưa)
+    |Database|
+    :INSERT tree (level=1, health=100, water=0);
+    |Controller|
+    :Hiển thị "Đã trồng cây thành công";
+    stop
+  endif
+else (Tưới cây)
+  |Database|
+  :Kiểm tra cooldown tưới?;
+  if (Chưa đến lượt tưới?) then (Có)
+    |Controller|
+    :Hiển thị lỗi "Vui lòng đợi X phút";
+    stop
+  else (Có thể tưới)
+    |Database|
+    :UPDATE tree (water += 10, health += 5);
+    if (Đủ điều kiện lên level?) then (Có)
+      :UPDATE tree (level += 1, water = 0);
+      |Controller|
+      :Hiển thị "Cây đã lên level X";
+    else (Chưa)
+      |Controller|
+      :Hiển thị "Đã tưới cây";
+    endif
+    stop
+  endif
+else (Thu hoạch)
+  |Database|
+  :Kiểm tra điều kiện thu hoạch\n(level, health, thời gian)?;
+  if (Chưa đủ điều kiện?) then (Có)
+    |Controller|
+    :Hiển thị lỗi "Cây chưa đủ điều kiện";
+    stop
+  else (Đủ)
+    |Database|
+    :Tính phần thưởng theo level;
+    :UPDATE user (balance += rewardAmount);
+    :UPDATE tree (level=1, health=100, water=0);
+    :INSERT harvest_history;
+    |Controller|
+    :Hiển thị "Thu hoạch thành công! Nhận X VNĐ";
+    stop
+  endif
+endif
+
+@enduml
+

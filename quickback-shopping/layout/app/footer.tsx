@@ -105,14 +105,14 @@ export default function Footer() {
                   <div className="relative rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-2 shadow-primary-sm">
                     <img
                       src="/logo_img.png"
-                      alt="QuickBack"
+                      alt="SmartCash"
                       className="h-10 w-10 rounded-xl object-cover"
                     />
                   </div>
                 </div>
                 <div>
                   <p className="text-xl font-bold text-secondary-900 dark:text-white">
-                    QuickBack
+                    SmartCash
                   </p>
                   <p className="text-xs uppercase tracking-[0.2em] text-secondary-400">
                     shopping studio
@@ -234,7 +234,7 @@ export default function Footer() {
                   <svg className="h-5 w-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
-                  support@quickback.vn
+                  support@SmartCash.vn
                 </li>
                 <li className="flex items-start gap-2">
                   <svg className="h-5 w-5 text-primary-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -273,7 +273,7 @@ export default function Footer() {
 
             {/* Copyright */}
             <p className="text-sm text-secondary-500 dark:text-secondary-400 text-center">
-              &copy; {new Date().getFullYear()} QuickBack. All rights reserved.
+              &copy; {new Date().getFullYear()} SmartCash. All rights reserved.
             </p>
 
             {/* Payment Methods */}

@@ -1,0 +1,94 @@
+@startuml Use Case - Bảng Xếp Hạng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Bảng Xếp Hạng (Leaderboard)
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Leaderboard Controller" as Controller
+participant "Leaderboard Service" as Service
+database "Database" as DB
+actor "Admin" as Admin
+
+== Xem bảng xếp hạng ==
+
+User -> UI: Truy cập trang bảng xếp hạng
+UI -> Controller: getLeaderboard(period, type)
+Controller -> Service: Lấy bảng xếp hạng
+Service -> DB: Query users + aggregate (tổng tiền đã chi tiêu hoặc cashback)
+
+alt Xếp hạng theo tổng chi tiêu
+    Service -> DB: Aggregate purchase_history (group by userId, sum price)
+    DB --> Service: Danh sách user với totalSpent
+else Xếp hạng theo cashback
+    Service -> DB: Aggregate purchase_history (group by userId, sum cashbackAmount)
+    DB --> Service: Danh sách user với totalCashback
+end
+
+Service -> Service: Sắp xếp theo tiêu chí, lấy top N
+Service -> Service: Tìm vị trí của user hiện tại
+Service --> UI: Bảng xếp hạng + vị trí của user
+UI --> User: Hiển thị top 10 và vị trí của mình
+
+== Xem thứ hạng của mình ==
+
+User -> UI: Xem thứ hạng của tôi
+UI -> Controller: getMyRank(userId, period, type)
+Controller -> Service: Tính thứ hạng
+Service -> DB: Query tất cả users và sắp xếp
+Service -> Service: Tìm vị trí của user trong danh sách
+Service --> UI: Thứ hạng (ví dụ: #25/1000)
+UI --> User: Hiển thị thứ hạng
+
+== Nhận thưởng top 3 (tự động) ==
+
+Service -> Service: Cron job chạy cuối tháng
+Service -> DB: Tính bảng xếp hạng tháng trước
+Service -> DB: Xác định top 3
+
+alt User trong top 3
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: INSERT leaderboard_reward (userId, rank, period, rewardAmount)
+    Service -> DB: UPDATE user (balance += rewardAmount)
+    Service -> DB: COMMIT
+    Service -> Email: Gửi email chúc mừng
+    Email --> User: "Chúc mừng bạn đứng thứ X! Nhận thưởng Y VNĐ"
+end
+
+== Admin quản lý thưởng ==
+
+Admin -> UI: Xem danh sách thưởng leaderboard
+UI -> Controller: getLeaderboardRewards(period)
+Controller -> Service: Lấy danh sách
+Service -> DB: Query leaderboard_reward
+DB --> Service: Danh sách thưởng
+Service --> UI: Danh sách
+UI --> Admin: Hiển thị (user, rank, period, reward, status)
+
+Admin -> UI: Cấu hình thưởng top 3
+UI -> Controller: updateRewardConfig(rank1, rank2, rank3)
+Controller -> Service: Cập nhật cấu hình
+Service -> DB: UPDATE leaderboard_config
+Service --> UI: Thành công
+UI --> Admin: "Đã cập nhật cấu hình thưởng"
+
+== Ngoại lệ ==
+
+note over User, Admin
+  - Bảng xếp hạng có thể theo: tổng chi tiêu, tổng cashback, số đơn hàng
+  - Thời kỳ: hàng tuần, hàng tháng, hàng năm
+  - Top 3 nhận thưởng tự động cuối mỗi kỳ
+  - Thưởng được cấu hình bởi admin (ví dụ: #1=100k, #2=50k, #3=25k)
+  - User có thể xem thứ hạng của mình và top 10
+  - Lịch sử thưởng được lưu để tra cứu
+end note
+
+@enduml
+
+
+

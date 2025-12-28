@@ -1,0 +1,69 @@
+@startuml Sequence Diagram - Xem Thông Tin Sản Phẩm Và Click Mua Hàng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Hình 2.15. Biểu đồ chức năng xem thông tin sản phẩm và click mua hàng
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Product Controller" as Controller
+participant "Product Service" as Service
+database "Database" as DB
+participant "Affiliate Service" as Affiliate
+
+== Luồng chính - Xem thông tin sản phẩm ==
+
+User -> UI: Click vào sản phẩm
+UI -> Controller: getProductDetails(productId)
+Controller -> Service: Lấy chi tiết sản phẩm
+Service -> DB: Query product + shop + related products
+DB --> Service: Chi tiết sản phẩm (tên, mô tả, giá, hình ảnh, cửa hàng, tỷ lệ hoàn tiền)
+Service --> UI: Dữ liệu sản phẩm
+UI --> User: Hiển thị chi tiết sản phẩm
+
+== Luồng chính - Click mua hàng ==
+
+User -> UI: Click "Mua ngay" hoặc "Thêm vào giỏ hàng"
+UI -> Controller: getAffiliateLink(productId, userId)
+Controller -> Service: Lấy link affiliate
+Service -> DB: Query product (affiliateLink)
+
+alt Link affiliate có sẵn và còn hợp lệ
+    Service -> Service: Gắn tracking code (userId)
+    Service --> UI: Affiliate link với tracking
+    UI --> User: Chuyển hướng đến trang bán hàng
+    
+else Link affiliate chưa có hoặc hết hạn
+    Service -> Affiliate: Tạo link affiliate mới (productUrl, userId)
+    Affiliate --> Service: Affiliate link mới
+    Service -> DB: UPDATE product (affiliateLink = newLink)
+    Service -> Service: Gắn tracking code
+    Service --> UI: Affiliate link với tracking
+    UI --> User: Chuyển hướng đến trang bán hàng
+end
+
+UI -> UI: Ghi log click (userId, productId, timestamp)
+
+== Luồng tự động - Tracking đơn hàng ==
+
+note over User, Affiliate
+  Sau khi người dùng mua hàng trên trang bán hàng:
+  - Affiliate gửi webhook về hệ thống
+  - Hệ thống tự động tạo purchase_history
+  - Tính cashback và cập nhật balance
+end note
+
+== Ngoại lệ ==
+
+note over User, Affiliate
+  - Sản phẩm không tồn tại: hiển thị lỗi "Sản phẩm không tồn tại"
+  - Link affiliate không tạo được: báo lỗi "Không thể tạo link, vui lòng thử lại"
+  - Lỗi chuyển hướng: hiển thị link để copy thủ công
+end note
+
+@enduml
+

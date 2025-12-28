@@ -1,0 +1,65 @@
+@startuml Use Case - Chuyển Đổi Link Sản Phẩm Sang Link Affiliate
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Chuyển Đổi Link Sản Phẩm Sang Link Affiliate
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Controller" as Controller
+participant "Link Service" as Service
+database "Database" as DB
+participant "URL Parser" as Parser
+participant "Affiliate API" as API
+
+== Luồng chính ==
+
+User -> UI: Nhập link sản phẩm
+UI -> Controller: convertLink(originalUrl)
+Controller -> Service: Xử lý chuyển đổi
+Service -> Parser: Phân tích URL (xác định nguồn)
+Parser --> Service: URL info (domain, productId)
+
+Service -> DB: Tìm sản phẩm trong DB
+
+alt Sản phẩm đã có và link còn hợp lệ
+    DB --> Service: Link affiliate có sẵn
+    Service -> Service: Gắn tracking code (userId)
+    Service --> UI: Trả link affiliate
+    UI --> User: Hiển thị link
+    
+else Sản phẩm chưa có hoặc link hết hạn
+    Service -> API: Tạo link affiliate mới
+    API --> Service: Affiliate link mới
+    Service -> DB: Lưu sản phẩm + mapping link
+    Service -> Service: Gắn tracking code
+    Service --> UI: Trả link affiliate
+    UI --> User: Hiển thị link
+    
+else Nguồn không hỗ trợ
+    Service --> UI: Lỗi "Nguồn không hỗ trợ"
+    UI --> User: Thông báo lỗi
+end
+
+User -> UI: Click vào link affiliate
+UI -> UI: Ghi log click
+UI --> User: Chuyển hướng đến trang bán hàng
+
+== Ngoại lệ ==
+
+note over User, API
+  - URL không hợp lệ: kiểm tra format, báo lỗi
+  - API không phản hồi: retry 3 lần, báo lỗi
+  - Sản phẩm không tồn tại: API trả lỗi, hiển thị thông báo
+  - Link hết hạn: tự động tạo mới, cập nhật DB
+  - Chưa đăng nhập: yêu cầu đăng nhập trước
+end note
+
+@enduml
+
+
+

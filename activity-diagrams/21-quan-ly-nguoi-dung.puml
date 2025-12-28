@@ -1,0 +1,60 @@
+@startuml
+title Activity Diagram - Quản Lý Người Dùng (Admin)
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|Admin|
+start
+:Truy cập trang quản lý người dùng;
+
+|Controller|
+:Hiển thị danh sách người dùng;
+
+|Admin|
+if (Hành động?) then (Tìm kiếm/Lọc)
+  :Nhập từ khóa hoặc chọn bộ lọc;
+  |Database|
+  :Query users với filters;
+  |Controller|
+  :Hiển thị kết quả đã lọc;
+  stop
+else (Xem chi tiết)
+  :Click xem chi tiết người dùng;
+  |Database|
+  :Query user + purchase_history + withdraw_history;
+  |Controller|
+  :Hiển thị chi tiết đầy đủ;
+  stop
+else (Chỉnh sửa)
+  :Cập nhật thông tin người dùng;
+  |Database|
+  :UPDATE user;
+  |Controller|
+  :Hiển thị "Đã cập nhật thông tin";
+  stop
+else (Phân quyền)
+  :Chọn quyền mới (Khách hàng/Nhân viên/Admin);
+  |Database|
+  :UPDATE user (role);
+  |Controller|
+  :Hiển thị "Đã cập nhật quyền";
+  stop
+else (Khóa/Mở khóa)
+  :Chọn khóa hoặc mở khóa;
+  |Database|
+  :UPDATE user (status, lockReason);
+  |Controller|
+  :Hiển thị "Đã cập nhật trạng thái";
+  stop
+endif
+
+@enduml
+

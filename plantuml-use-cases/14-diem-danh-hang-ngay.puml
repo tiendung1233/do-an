@@ -1,0 +1,87 @@
+@startuml Use Case - Điểm Danh Hàng Ngày
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Điểm Danh Hàng Ngày (Check-in)
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "CheckIn Controller" as Controller
+participant "CheckIn Service" as Service
+database "Database" as DB
+participant "Voucher Service" as Voucher
+
+== Xem trạng thái điểm danh ==
+
+User -> UI: Truy cập trang điểm danh
+UI -> Controller: getCheckInStatus(userId)
+Controller -> Service: Lấy trạng thái check-in
+Service -> DB: Query daily_checkin (tuần hiện tại)
+DB --> Service: Check-in record
+
+alt Chưa có record cho tuần này
+    Service -> DB: Tạo record mới (weekStartDate, checkInDays=[], currentStreak=0)
+    DB --> Service: Record mới
+end
+
+Service -> Service: Tính toán trạng thái các ngày (1-7)
+Service -> Service: Xác định ngày hôm nay, đã điểm danh chưa
+Service --> UI: Trạng thái (7 ngày, phần trăm voucher, đã điểm danh, có thể điểm danh)
+UI --> User: Hiển thị lịch điểm danh tuần
+
+== Điểm danh ==
+
+User -> UI: Click "Điểm danh hôm nay"
+UI -> Controller: checkIn(userId)
+Controller -> Service: Xử lý điểm danh
+Service -> DB: Query check-in record (tuần hiện tại)
+Service -> Service: Kiểm tra đã điểm danh hôm nay chưa
+
+alt Đã điểm danh hôm nay
+    Service --> UI: Lỗi "Đã điểm danh hôm nay"
+    UI --> User: Thông báo lỗi
+    
+else Chưa điểm danh
+    Service -> Service: Xác định ngày trong tuần (1-7)
+    Service -> Service: Lấy phần trăm voucher tương ứng (1%=Thứ 2, 7%=Chủ nhật)
+    Service -> Voucher: Tạo voucher cashback
+    Voucher -> DB: INSERT voucher (userId, code, type=checkin, percentage)
+    DB --> Voucher: voucherId
+    Voucher --> Service: Voucher đã tạo
+    
+    Service -> DB: UPDATE daily_checkin (thêm ngày vào checkInDays, cập nhật lastCheckInDate, tăng streak)
+    Service -> DB: COMMIT
+    
+    Service --> UI: Thành công (voucher code, phần trăm)
+    UI --> User: "Điểm danh thành công! Nhận voucher X%"
+end
+
+== Xem lịch sử điểm danh ==
+
+User -> UI: Xem lịch sử điểm danh
+UI -> Controller: getCheckInHistory(userId)
+Controller -> Service: Lấy lịch sử
+Service -> DB: Query daily_checkin (tất cả các tuần)
+DB --> Service: Danh sách check-in records
+Service --> UI: Lịch sử (tuần, số ngày đã điểm danh, streak)
+UI --> User: Hiển thị lịch sử
+
+== Ngoại lệ ==
+
+note over User, Voucher
+  - Điểm danh theo tuần (Thứ 2 đến Chủ nhật)
+  - Phần trăm voucher: Thứ 2=1%, Thứ 3=2%, ..., Chủ nhật=7%
+  - Mỗi ngày chỉ được điểm danh 1 lần
+  - Voucher có thời hạn sử dụng
+  - Streak: số ngày liên tiếp đã điểm danh
+  - Tuần mới reset lại từ đầu
+end note
+
+@enduml
+
+
+

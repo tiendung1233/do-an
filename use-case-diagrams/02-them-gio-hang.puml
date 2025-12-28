@@ -1,0 +1,49 @@
+@startuml Use Case - Thêm Giỏ Hàng
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam actor {
+    BackgroundColor #E8F4F8
+    BorderColor #2E86AB
+}
+skinparam rectangle {
+    BackgroundColor #F0F8FF
+    BorderColor #2E86AB
+}
+
+left to right direction
+
+actor "Người dùng" as User
+
+rectangle "Hệ thống Giỏ hàng" {
+  rectangle "Xem chi tiết sản phẩm" as UC_ViewProduct
+  rectangle "Thêm sản phẩm vào giỏ hàng" as UC_AddCart
+  rectangle "Xem giỏ hàng" as UC_ViewCart
+  rectangle "Cập nhật số lượng sản phẩm" as UC_UpdateQuantity
+  rectangle "Xóa sản phẩm khỏi giỏ hàng" as UC_RemoveProduct
+  rectangle "Kiểm tra tồn kho" as UC_CheckStock
+}
+
+User --> UC_ViewProduct
+User --> UC_AddCart
+User --> UC_ViewCart
+User --> UC_UpdateQuantity
+User --> UC_RemoveProduct
+
+UC_AddCart --> UC_CheckStock : <<include>>
+UC_ViewCart --> UC_UpdateQuantity : <<extend>>
+UC_ViewCart --> UC_RemoveProduct : <<extend>>
+
+note right of UC_AddCart
+  Người dùng thêm sản phẩm vào giỏ hàng
+  Hệ thống kiểm tra đăng nhập, tồn kho
+  và cập nhật số lượng nếu sản phẩm đã có
+end note
+
+note right of UC_ViewCart
+  Người dùng có thể xem, cập nhật
+  hoặc xóa sản phẩm trong giỏ hàng
+end note
+
+@enduml
+

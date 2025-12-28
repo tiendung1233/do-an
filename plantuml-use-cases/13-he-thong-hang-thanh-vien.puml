@@ -1,0 +1,82 @@
+@startuml Use Case - Hệ Thống Hạng Thành Viên
+!theme plain
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 0
+skinparam maxmessagesize 60
+
+title Use Case: Hệ Thống Hạng Thành Viên (Membership)
+
+actor "Người dùng" as User
+participant "Giao diện" as UI
+participant "Membership Controller" as Controller
+participant "Membership Service" as Service
+database "Database" as DB
+participant "Purchase History" as Purchase
+
+== Xem thông tin hạng thành viên ==
+
+User -> UI: Truy cập trang hạng thành viên
+UI -> Controller: getMyMembership(userId)
+Controller -> Service: Lấy thông tin membership
+Service -> Purchase: Tính tổng tiền đã chi tiêu (từ đơn hàng đã duyệt)
+Purchase --> Service: totalSpent
+Service -> Service: Xác định hạng hiện tại (None/Bronze/Silver/Gold)
+Service -> Service: Tính hạng tiếp theo và số tiền cần để lên hạng
+Service -> DB: Query membership history
+DB --> Service: Lịch sử thay đổi hạng
+Service --> UI: Thông tin membership (hạng hiện tại, tổng tiền, hạng tiếp theo, lợi ích)
+UI --> User: Hiển thị hạng thành viên và lợi ích
+
+== Tự động nâng hạng ==
+
+Purchase -> Service: Đơn hàng được duyệt (webhook hoặc cron job)
+Service -> Purchase: Tính tổng tiền đã chi tiêu
+Purchase --> Service: totalSpent
+Service -> Service: Tính hạng mới dựa trên totalSpent
+
+alt Hạng mới cao hơn hạng hiện tại
+    Service -> DB: BEGIN TRANSACTION
+    Service -> DB: UPDATE user (membershipTier = newTier)
+    Service -> DB: INSERT membership_history (userId, oldTier, newTier, totalSpent)
+    
+    alt Hạng mới là Bronze/Silver/Gold
+        Service -> Service: Tạo voucher chúc mừng (theo hạng)
+        Service -> DB: INSERT voucher (userId, code, type=membership, percentage)
+    end
+    
+    Service -> DB: COMMIT
+    Service -> Email: Gửi email chúc mừng nâng hạng
+    Email --> User: Email thông báo
+    
+else Hạng không thay đổi
+    Service -> Service: Không có thay đổi
+end
+
+== Áp dụng bonus cashback từ hạng ==
+
+User -> UI: Mua hàng và nhận cashback
+UI -> Controller: calculateCashback(orderId, userId)
+Controller -> Service: Tính cashback
+Service -> DB: Lấy hạng thành viên của user
+DB --> Service: membershipTier
+Service -> Service: Tính cashback base + bonus từ hạng
+Service -> Service: cashbackAmount = baseAmount * (1 + membershipBonus)
+Service --> UI: Tổng cashback (bao gồm bonus)
+UI --> User: Hiển thị cashback với bonus
+
+== Ngoại lệ ==
+
+note over User, Purchase
+  - Hạng được tính dựa trên tổng tiền đã chi tiêu từ đơn hàng đã duyệt
+  - Hạng tự động nâng cấp khi đạt ngưỡng (None->Bronze->Silver->Gold)
+  - Bonus cashback: None=0%, Bronze=2%, Silver=5%, Gold=10%
+  - Khi nâng hạng, user nhận voucher chúc mừng
+  - Hạng không bị giảm xuống khi chi tiêu giảm
+end note
+
+@enduml
+
+
+

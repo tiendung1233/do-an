@@ -1,0 +1,43 @@
+@startuml
+title Activity Diagram - Xác Thực Tài Khoản
+
+skinparam linetype ortho
+skinparam backgroundColor #FFFFFF
+skinparam activity {
+  BackgroundColor White
+  BorderColor Black
+}
+skinparam swimlane {
+  BorderColor Black
+}
+
+|User|
+start
+:Nhận email xác thực;
+
+|User|
+:Click link xác thực trong email;
+
+|Controller|
+:Redirect đến /verify-account/{token};
+
+|Controller|
+:Xác thực token;
+
+|Database|
+:Query user WHERE verificationToken = ?;
+
+if (Token hợp lệ và chưa hết hạn?) then (Không)
+  |Controller|
+  :Hiển thị lỗi "Link không hợp lệ hoặc đã hết hạn";
+  stop
+else (Có)
+  |Database|
+  :UPDATE user (emailVerified=true, verificationToken=null);
+  |Controller|
+  :Hiển thị thông báo\n"Tài khoản đã được xác thực thành công";
+  stop
+endif
+
+@enduml
+
